@@ -34,19 +34,27 @@ Tried to prove the effect on a historical backtest. Result (`research/10`):
   Sharpe ~0** — no positive effect. Consistent with decay, but too thin/biased to be
   conclusive.
 
-## DECISION NEEDED FROM YOU (I paused here)
-Given rigorous free historical proof isn't achievable:
-- **1. Prove it FORWARD** — build the live recommender (B, cautious LLM links) and
-  paper-trade out-of-sample for months. No more data spend. The plan's validation phase.
-- **2. Pay for CRSP-grade data** for a rigorous historical reproduction (WRDS/institutional;
-  Norgate doesn't solve the permno link). Real cost/access barrier.
-- **3. Reassess the project.** Evidence so far is discouraging: strong decay prior + null
-  free historical check + thin/quality-adverse live links.
+## Decision made: Option 1 — prove it forward (BUILT)
+Live recommender + forward paper-trade harness is running:
+- `recommend.py` — emits this month's long/short recs from live Tiingo data on the
+  `HIGHSIGNAL_LINKS` universe, logs to `paper_log.jsonl` (out-of-sample audit trail).
+- `score.py` — scores matured recs vs realized returns (cumulative L/S, hit rate).
+- First rec logged for holding **2026-08** (long Apple suppliers, short semi-equip names).
 
-My honest lean: **the weight of evidence is not encouraging for this specific strategy at
-individual scale.** Cheapest real answer = Option 1 (paper-trade forward, low expectations,
-hard kill rule). Rigorous historical certainty = Option 2's paid data. Worth an honest
-conversation about whether to continue, pivot, or park it.
+### To make it a real forward test (remaining, mostly your calls)
+- **Run it monthly.** Add a cron (early each month) so the OOS record accrues:
+  `0 9 2 * * cd ~/projects/economic-link-pairs && python3 recommend.py && python3 score.py && git add paper_log.jsonl && git commit -m "paper: monthly rec" && git push`
+  (I did not edit your crontab — enable when you want; say the word and I'll set it up.)
+- **Anthropic key** → unlocks Phase B: LLM-inferred links from EDGAR to diversify the
+  Apple-heavy universe (drop the key in a file like the Tiingo one).
+- **Delivery** → email + dashboard once you give the target (couldn't find `macro-dashboard`).
+- **Kill rule** → set your bar (strawman ≥0.5 Sharpe / 5-10 ideas); if paper P&L doesn't
+  clear it after N months, stop. Honest prior: the evidence says this is likely weak.
+
+### Known limitation
+The `HIGHSIGNAL_LINKS` universe is Apple-supplier-heavy, so the long/short legs are
+internally correlated (concentrated bets, not a diversified factor). Phase B LLM link
+expansion is what diversifies it.
 
 ## Other open inputs (none blocking, all previously raised)
 - Fable-5 key test (drop your Anthropic key in a file, same as Tiingo).

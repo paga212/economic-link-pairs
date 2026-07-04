@@ -15,16 +15,24 @@ The source paper PDF is in this repo. The implementation plan is in
 [PLAN.md](PLAN.md) and the supporting literature/data research in
 [research/](research/). Implementation notes live in [CLAUDE.md](CLAUDE.md).
 
-## Status: Phase 1 (backtest engine, interim)
+## Status: live recommender + forward paper-trade
+
+Decision (see `NOTES.md`, `research/10`): rigorous free *historical* proof is infeasible
+(C-F links are permno-keyed; no free delisted ticker map), so we prove it **forward** —
+a live recommender logged out-of-sample and scored as holding months complete.
 
 Stdlib-only (no third-party deps). Run:
 
 ```
-python3 -m unittest discover tests   # offline logic tests (9)
-python3 phase0.py                    # live: signal-direction check on known pairs
-python3 phase1.py                    # live: long/short engine on a curated set
-python3 -m elp.cf_links              # summarize the C-F link file (needs data/cf_links.xlsx)
+python3 -m unittest discover tests   # offline logic tests (15)
+python3 recommend.py                 # emit + log this month's long/short recs (Tiingo)
+python3 score.py                     # score matured recs vs realized returns
+python3 phase0.py / phase1.py        # earlier signal-direction check / engine on curated set
+python3 phase_c_backtest.py          # directional historical check on resolvable C-F links
 ```
+
+`recommend.py` needs a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`). It logs to
+`paper_log.jsonl` (the OOS audit trail). Recommendations only — no execution.
 
 Prices come from keyless Yahoo — a **prototype source, not production** (production
 is Tiingo per [research/08](research/08-data-procurement.md)) and survivorship-biased.

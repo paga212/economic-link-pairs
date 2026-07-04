@@ -15,6 +15,7 @@ primary source before encoding it into a model.**
 - [05-synthesis-claims-map.md](05-synthesis-claims-map.md) — one-line claim per paper, assumption clusters, and a table of direct contradictions.
 - [06-gap-analysis.md](06-gap-analysis.md) — open research questions the literature hasn't closed, and what would close them.
 - [07-options-expression.md](07-options-expression.md) — deep-research report on expressing the signal via options + whether an options-native cross-firm edge exists.
+- [08-data-procurement.md](08-data-procurement.md) — decision-ready data shopping list (price/returns, options/IV, links, borrow) with verified-where-possible costs, phased to buy only what's needed.
 
 ## Synthesis — the five things that matter for the build
 

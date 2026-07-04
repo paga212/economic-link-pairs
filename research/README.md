@@ -13,6 +13,7 @@ primary source before encoding it into a model.**
 - [03-data-sources.md](03-data-sources.md) — where to get link data and price data as an individual quant.
 - [04-implementation-frictions.md](04-implementation-frictions.md) — transaction costs, borrow, backtesting pitfalls.
 - [05-synthesis-claims-map.md](05-synthesis-claims-map.md) — one-line claim per paper, assumption clusters, and a table of direct contradictions.
+- [06-gap-analysis.md](06-gap-analysis.md) — open research questions the literature hasn't closed, and what would close them.
 
 ## Synthesis — the five things that matter for the build
 

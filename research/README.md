@@ -12,6 +12,7 @@ primary source before encoding it into a model.**
 - [02-related-link-anomalies.md](02-related-link-anomalies.md) — a menu of other cross-firm link signals we could add.
 - [03-data-sources.md](03-data-sources.md) — where to get link data and price data as an individual quant.
 - [04-implementation-frictions.md](04-implementation-frictions.md) — transaction costs, borrow, backtesting pitfalls.
+- [05-synthesis-claims-map.md](05-synthesis-claims-map.md) — one-line claim per paper, assumption clusters, and a table of direct contradictions.
 
 ## Synthesis — the five things that matter for the build
 

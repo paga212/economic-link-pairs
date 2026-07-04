@@ -61,6 +61,20 @@ def long_short_returns(links: Links, returns: Returns,
     return out
 
 
+def signal_ranking(links: Links, returns: Returns, month: tuple[int, int]) -> list:
+    """[(supplier, customer, signal)] for a single formation month, sorted desc by signal
+    (signal = the supplier's principal customer's return in `month`)."""
+    cust_of: dict[str, str] = {}
+    for s, c in links:
+        cust_of.setdefault(s, c)
+    rows = []
+    for s, c in cust_of.items():
+        rc = returns.get(c, {}).get(month)
+        if rc is not None:
+            rows.append((s, c, rc))
+    return sorted(rows, key=lambda r: (-r[2], r[0]))
+
+
 def performance(series: dict) -> dict:
     """Annualized summary stats for a monthly return series."""
     xs = [series[k] for k in sorted(series)]

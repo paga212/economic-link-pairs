@@ -5,7 +5,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.backtest import long_short_returns, performance  # noqa: E402
+from elp.backtest import long_short_returns, performance, signal_ranking  # noqa: E402
 
 
 def _months(n, start=(2020, 1)):
@@ -70,6 +70,15 @@ class TestBacktest(unittest.TestCase):
         self.assertEqual(p["n"], 3)
         self.assertAlmostEqual(p["mean_monthly"], 0.01, places=9)
         self.assertAlmostEqual(p["hit_rate"], 2 / 3, places=9)
+
+    def test_signal_ranking_orders_by_customer_return(self):
+        returns = {"C1": {(2020, 1): 0.05}, "C2": {(2020, 1): -0.02},
+                   "C3": {(2020, 1): 0.01}, "S1": {}, "S2": {}, "S3": {}}
+        r = signal_ranking([("S1", "C1"), ("S2", "C2"), ("S3", "C3")], returns, (2020, 1))
+        self.assertEqual([s for s, _, _ in r], ["S1", "S3", "S2"])  # desc by customer return
+        # supplier whose customer has no return that month is dropped
+        r2 = signal_ranking([("S1", "C1"), ("S9", "CX")], returns, (2020, 1))
+        self.assertEqual([s for s, _, _ in r2], ["S1"])
 
     def test_needs_two_names(self):
         # single supplier -> no cross-section -> no months

@@ -30,3 +30,30 @@ CURATED_DIVERSE: list[tuple[str, str, str]] = [
     ("SPR", "BA", "Spirit AeroSystems — Boeing a dominant customer"),
     ("TGI", "BA", "Triumph Group — Boeing a major customer"),
 ]
+
+# Live paper-trade universe: hand-curated, widely-reported, still-listed high-signal
+# supplier->customer links with diverse customers (so the cross-section isn't degenerate)
+# and long Tiingo history. HAND-CURATED BEST-GUESSES, not disclosure-derived or
+# point-in-time — the Phase B LLM+EDGAR step will replace/augment these with real
+# disclosed links once the Anthropic key is available. (supplier, customer, note).
+HIGHSIGNAL_LINKS: list[tuple[str, str, str]] = [
+    ("SWKS", "AAPL", "Skyworks — Apple"),
+    ("CRUS", "AAPL", "Cirrus Logic — Apple"),
+    ("QRVO", "AAPL", "Qorvo — Apple"),
+    ("JBL", "AAPL", "Jabil — Apple"),
+    ("GLW", "AAPL", "Corning — Apple (cover glass)"),
+    ("COHR", "AAPL", "Coherent/II-VI — Apple (lasers/optics)"),
+    ("SMCI", "NVDA", "Super Micro — Nvidia (GPU servers)"),
+    ("UCTT", "AMAT", "Ultra Clean — Applied Materials"),
+    ("MKSI", "AMAT", "MKS Instruments — semiconductor equipment"),
+    ("ICHR", "LRCX", "Ichor — Lam Research"),
+    ("UCTT", "LRCX", "Ultra Clean — Lam Research"),
+    ("AXL", "GM", "American Axle — GM"),
+    ("LEA", "GM", "Lear — GM"),
+    ("DAN", "F", "Dana — Ford"),
+    ("ALV", "F", "Autoliv — Ford"),
+    ("TGI", "BA", "Triumph Group — Boeing"),
+    ("HXL", "BA", "Hexcel — Boeing (composites)"),
+    ("BALL", "KO", "Ball — Coca-Cola (cans)"),
+    ("BALL", "PEP", "Ball — PepsiCo (cans)"),
+]

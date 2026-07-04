@@ -35,21 +35,33 @@ def _token() -> str:
     return tok.strip().strip("'").strip('"').strip()
 
 
-def fetch_monthly(symbol: str, start: str = "1995-01-01") -> list[tuple[date, float]]:
-    """Monthly (first-of-month date, adjusted close) series, oldest first."""
-    url = _URL.format(sym=symbol.lower(), start=start)
+def _fetch(url: str, symbol: str) -> list:
     req = urllib.request.Request(url, headers={
         "Content-Type": "application/json",
         "Authorization": f"Token {_token()}",  # token in header, not URL
     })
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
-            rows = json.load(resp)
+            return json.load(resp)
     except urllib.error.HTTPError as e:
-        # never surface the token; re-raise with just the status
-        raise RuntimeError(f"Tiingo HTTP {e.code} for {symbol}") from None
+        raise RuntimeError(f"Tiingo HTTP {e.code} for {symbol}") from None  # never surface the token
+
+
+def fetch_monthly(symbol: str, start: str = "1995-01-01") -> list[tuple[date, float]]:
+    """Monthly (first-of-month date, adjusted close) series, oldest first."""
+    rows = _fetch(_URL.format(sym=symbol.lower(), start=start), symbol)
     out: list[tuple[date, float]] = []
     for row in rows:
         d = datetime.fromisoformat(row["date"].replace("Z", "")).date()
         out.append((date(d.year, d.month, 1), float(row["adjClose"])))
+    return out
+
+
+def fetch_daily(symbol: str, start: str = "2015-01-01") -> list[tuple[date, float]]:
+    """Daily (date, adjusted close) series, oldest first (for the per-trade engine)."""
+    url = (f"https://api.tiingo.com/tiingo/daily/{symbol.lower()}/prices?startDate={start}")
+    out: list[tuple[date, float]] = []
+    for row in _fetch(url, symbol):
+        d = datetime.fromisoformat(row["date"].replace("Z", "")).date()
+        out.append((d, float(row["adjClose"])))
     return out

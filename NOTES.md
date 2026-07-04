@@ -34,12 +34,22 @@ Tried to prove the effect on a historical backtest. Result (`research/10`):
   Sharpe ~0** — no positive effect. Consistent with decay, but too thin/biased to be
   conclusive.
 
-## Decision made: Option 1 — prove it forward (BUILT)
-Live recommender + forward paper-trade harness is running:
-- `recommend.py` — emits this month's long/short recs from live Tiingo data on the
-  `HIGHSIGNAL_LINKS` universe, logs to `paper_log.jsonl` (out-of-sample audit trail).
-- `score.py` — scores matured recs vs realized returns (cumulative L/S, hit rate).
-- First rec logged for holding **2026-08** (long Apple suppliers, short semi-equip names).
+## Decision made: Option 1 — prove it forward (BUILT, dynamic per-trade)
+Live daily tracker is running (superseded the earlier monthly recommender):
+- **Strategy:** signal-triggered directional trades (customer trailing-21d return ±5%),
+  dynamic exits — trailing stop (peak−5%, ratcheting) OR signal reversal (hysteresis),
+  no time cap. LONG = cash stock; SHORT = **bear-put-spread** (no borrow, defined risk).
+- `elp/trades.py` (engine) + `elp/options.py` (BS spread pricer, Grade-C proxied IV).
+- `track.py` — daily: open trades (live stops) + OOS closed trades net of costs →
+  `paper_state.json` (+ `paper_start.txt` = OOS boundary, **2026-07-04**).
+- `dashboard.py` → `site/index.html`, served always-on at http://100.103.143.120:8787/.
+- Cron: `0 22 * * 1-5` (weekday evenings) runs track → dashboard → serve → commit/push.
+
+**Net-of-cost finding (in-sample, hand-set):** gross +0.89%/trade → NET −0.10%
+with stock shorts, **+0.39% with bear-put-spread shorts** (kills borrow + caps the short
+tail) → −0.11% at 2× costs. The spread number is a **Grade-C optimistic upper bound**
+(flat IV, no skew, only 25bps stock-notional cost); real option bid-ask + put skew would
+erode it. Needs real options data (Phase 6) to confirm.
 
 ### To make it a real forward test (remaining, mostly your calls)
 - **Run it monthly.** Add a cron (early each month) so the OOS record accrues:

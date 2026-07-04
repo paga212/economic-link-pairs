@@ -17,6 +17,7 @@ data/
 .anthropic_token
 *.token
 
-# Run logs
+# Run logs + generated dashboard
 paper_run.log
 *.log
+dashboard.html

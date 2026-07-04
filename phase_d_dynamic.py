@@ -8,7 +8,7 @@ Run: python3 phase_d_dynamic.py
 """
 from elp.links import HIGHSIGNAL_LINKS
 from elp.tiingo import fetch_daily
-from elp.trades import simulate, trade_stats
+from elp.trades import BORROW_APR, SPREAD_BPS, simulate, trade_stats
 
 
 def main() -> None:
@@ -23,18 +23,20 @@ def main() -> None:
     links = [(s, c) for s, c in links if s in prices and c in prices]
 
     closed, opens = simulate(links, prices)
-    st = trade_stats(closed)
-    if not st.get("n"):
+    g = trade_stats(closed)
+    if not g.get("n"):
         print("no trades")
         return
+    net = trade_stats(closed, SPREAD_BPS, BORROW_APR)
+    net2 = trade_stats(closed, SPREAD_BPS * 2, BORROW_APR * 2)  # sensitivity: double costs
     worst = min(t["ret"] for t in closed)
     gapped = sum(1 for t in closed if t["ret"] < -0.08)  # daily stop gapped through the -5% level
-    print(f"trades {st['n']} | win {st['win_rate']*100:.0f}% | "
-          f"expectancy/trade {st['mean_ret']*100:+.2f}% (GROSS, no costs) "
-          f"| avg_win {st['avg_win']*100:+.2f}% | avg_loss {st['avg_loss']*100:+.2f}% "
-          f"| avg_hold {st['avg_days']:.0f}d | exits: {st['stops']} stop / {st['signals']} signal")
-    print(f"open now {len(opens)} | worst trade {worst*100:.1f}% | "
-          f"{gapped} trades gapped through the stop (<-8%)")
+    print(f"trades {g['n']} | win {g['win_rate']*100:.0f}% | avg_hold {g['avg_days']:.0f}d | "
+          f"exits: {g['stops']} stop / {g['signals']} signal | open now {len(opens)}")
+    print(f"expectancy/trade:  GROSS {g['mean_ret']*100:+.2f}%  |  "
+          f"NET @{SPREAD_BPS:.0f}bps+{BORROW_APR*100:.0f}%APR {net['mean_ret']*100:+.2f}% "
+          f"(win {net['win_rate']*100:.0f}%)  |  NET @2x costs {net2['mean_ret']*100:+.2f}%")
+    print(f"worst trade {worst*100:.1f}% | {gapped} trades gapped through the -5% stop (<-8%)")
     print("\nrecent closed trades:")
     for t in sorted(closed, key=lambda x: x["entry_date"])[-8:]:
         side = "L" if t["side"] > 0 else "S"

@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.trades import simulate  # noqa: E402
+from elp.trades import net_return, simulate  # noqa: E402
 
 
 def series(prices, start=date(2020, 1, 1)):
@@ -49,6 +49,17 @@ class TestTrades(unittest.TestCase):
         supp = [100] * 15
         closed, openn = simulate([("S", "C")], {"C": series(cust), "S": series(supp)}, lookback=self.LB)
         self.assertEqual(len(closed) + len(openn), 0)
+
+
+    def test_net_return_costs(self):
+        # long: only round-trip transaction cost (no borrow)
+        lng = {"side": 1, "ret": 0.10, "days": 30}
+        self.assertAlmostEqual(net_return(lng, spread_bps=25, borrow_apr=0.05),
+                               0.10 - 2 * 25 / 1e4, places=9)  # -50bps
+        # short: transaction cost + borrow prorated by days
+        sht = {"side": -1, "ret": 0.10, "days": 73}
+        self.assertAlmostEqual(net_return(sht, spread_bps=25, borrow_apr=0.05),
+                               0.10 - 2 * 25 / 1e4 - 0.05 * 73 / 365, places=9)  # -50bps -1%
 
 
 if __name__ == "__main__":

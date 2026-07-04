@@ -14,3 +14,19 @@ LINKS: list[tuple[str, str, str]] = [
     ("JBL", "AAPL", "Jabil — Apple its largest customer historically"),
     ("UCTT", "AMAT", "Ultra Clean Holdings — Applied Materials a principal customer"),
 ]
+
+# A more customer-DIVERSE curated set so the cross-sectional long/short is
+# non-degenerate (suppliers must have different customers to get different signals).
+# Illustrative, well-known relationships — NOT verified point-in-time links. For
+# engine validation only; any performance number off this set is not a valid alpha
+# (survivorship-biased still-listed names, tiny universe). (supplier, customer, note).
+CURATED_DIVERSE: list[tuple[str, str, str]] = [
+    ("SWKS", "AAPL", "Skyworks — Apple"),
+    ("CRUS", "AAPL", "Cirrus Logic — Apple"),
+    ("QRVO", "AAPL", "Qorvo — Apple"),
+    ("UCTT", "AMAT", "Ultra Clean — Applied Materials"),
+    ("AXL", "GM", "American Axle — GM a dominant customer"),
+    ("LEA", "GM", "Lear — auto OEMs incl. GM"),
+    ("SPR", "BA", "Spirit AeroSystems — Boeing a dominant customer"),
+    ("TGI", "BA", "Triumph Group — Boeing a major customer"),
+]

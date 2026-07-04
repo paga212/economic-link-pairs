@@ -11,7 +11,8 @@ Run: python3 phase1.py
 """
 from elp.backtest import long_short_returns, performance
 from elp.links import CURATED_DIVERSE
-from elp.prices import fetch_monthly, monthly_returns
+from elp.prices import monthly_returns
+from elp.tiingo import fetch_monthly  # production price source (all curated names are live)
 
 
 def main() -> None:

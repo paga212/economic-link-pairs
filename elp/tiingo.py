@@ -19,17 +19,20 @@ _URL = ("https://api.tiingo.com/tiingo/daily/{sym}/prices"
 
 
 def _token() -> str:
-    tok = os.environ.get("TIINGO_API_KEY")
-    if not tok:
+    raw = os.environ.get("TIINGO_API_KEY")
+    if not raw:
         for path in (_TOKEN_FILE, os.path.expanduser("~/.tiingo_token")):
             if os.path.exists(path):
-                tok = open(path).read().strip()
+                raw = open(path).read()
                 break
-    if not tok:
+    if not raw:
         raise RuntimeError(
             "No Tiingo token found. Set TIINGO_API_KEY or create .tiingo_token "
             "(see README / research/08).")
-    return tok
+    tok = raw.strip()
+    if "=" in tok:  # tolerate a pasted `export TIINGO_API_KEY='...'` line, not just the raw token
+        tok = tok.split("=", 1)[1]
+    return tok.strip().strip("'").strip('"').strip()
 
 
 def fetch_monthly(symbol: str, start: str = "1995-01-01") -> list[tuple[date, float]]:

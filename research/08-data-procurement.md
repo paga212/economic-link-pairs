@@ -33,6 +33,13 @@ where you'd actually trade. Worth opening early.
 - **Tiingo Power — $30/mo (verified on pricing page).** Conventional REST API for both backtest pull and daily run; delisted/renamed via `isActive` + stable `permaTicker`; 30+ years claimed. **Risk:** delisting/adjustment *quality* is undocumented — Phase 0 must spot-check a sample of known delisted names (bankruptcies, de-SPACs) before trusting it. This is the lazy-but-honest default: cheapest verified API, with a hard verification gate.
 - **Norgate Data Platinum — ~$52.50/mo equiv ($630/yr, third-party-sourced price).** The retail survivorship-bias-free *standard*, delisted names included by design (Platinum→1990, Diamond→1950), rigorous adjustment. **Not a REST API** — local DB + `norgatedata` Python package pulled on a cron. The fidelity upgrade if Tiingo's spot-check fails or we want max backtest integrity.
 - **EODHD — $19.99/mo + delisted add-on** (verify which tier gates the delisted endpoint; pre-2018 delistings are price-only). Cheapest but the delisted-tier gating is unconfirmed.
+- **Spot-check RUN 2026-07-04 (token validated):** raw-ticker delisted coverage is
+  mixed — **CELG** (Celgene, delisted 2019) returned full history through delisting
+  (good), but **MON** (Monsanto, delisted 2018) returned 2021-2022 data from a
+  *different company that reused the ticker* (recycling trap), and **LEHMQ** (Lehman)
+  was empty. **Conclusion:** Tiingo is usable but Phase 2 must key on Tiingo's stable
+  `permaTicker`, not raw tickers, and accept some gaps. Norgate stays the fidelity
+  fallback if permaTicker discipline is painful.
 - **Note on history depth:** we do **not** need to reproduce C-F's full 1980-2004 window. EDGAR links only exist from 2001, and the live edge is a recent-decades question. Overlap validation against the free C-F dataset (Tiingo reaches ~1996, Norgate Platinum ~1990) is sufficient to sanity-check the logic.
 
 ### 2. Customer-supplier links

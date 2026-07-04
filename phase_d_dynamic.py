@@ -42,9 +42,10 @@ def main() -> None:
         side = "L" if t["side"] > 0 else "S"
         print(f"  {t['entry_date']} {side} {t['supplier']:5} (cust {t['customer']:5}) "
               f"-> {t['exit_date']} {t['ret']*100:+.1f}% [{t['reason']}]")
-    print("\n[caveat] Per-trade GROSS expectancy on the hand-curated set: survivorship-biased,"
-          " in-sample-ish, frozen params, overlapping/correlated trades, NO costs, and daily"
-          " marking lets losses gap past the -5% stop. Directional read only, NOT a valid alpha.")
+    print("\n[caveat] Shorts = bear-put-spreads (Grade-C: proxied flat IV, no skew, only"
+          " 25bps stock-notional cost — so NET is an OPTIMISTIC upper bound; real option"
+          " bid-ask + put skew would erode it). Also survivorship-biased, in-sample-ish,"
+          " frozen params, overlapping trades, daily gap-through. Directional read, NOT alpha.")
 
 
 if __name__ == "__main__":

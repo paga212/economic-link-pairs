@@ -13,4 +13,10 @@ data/
 # Secrets — never commit API keys
 .env
 .tiingo_token
+.anthropic_key
+.anthropic_token
 *.token
+
+# Run logs
+paper_run.log
+*.log

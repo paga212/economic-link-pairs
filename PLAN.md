@@ -105,3 +105,125 @@ deps beyond what each job needs.
 2. **Cadence:** monthly formation + daily monitoring/alerts (§4).
 3. **Data vendor:** EODHD primary (delisted history → survivorship-bias fix),
    Tiingo fallback.
+
+## 11. Options expression & execution
+
+*(Deep-planning pass on Fable 5, 2026-07-04, folding `research/07-options-expression.md` into the architecture. Cash-first; options are a gated overlay.)*
+
+Status: **overlay, not core**. Research/07's verdict is binding here: leveraging a decayed equity signal through single-name options can *subtract* alpha (theta, IV crush, skew, wide single-name bid-ask; Goyal-Saretto find ~zero risk-model alpha on option-signal strategies even before costs). Options are added only after the cash strategy is validated (§11.8), only per-trade where a gate passes (§11.1), and only as recommendations — never executions (§11.9).
+
+### 11.1 Overlay decision logic (per recommendation, per leg)
+
+Each monthly recommendation is formed as a **cash pair first**. Then, per leg, a deterministic gate decides whether to *also* emit an options expression. Default outcome is **cash**; options must earn their way in.
+
+**Gate A — Listability/liquidity (hard, all must pass):**
+
+| Check | Threshold (config default) |
+|---|---|
+| Options listed on the leg's underlying | yes (ISE Options 4-style listing implies ≥7M public float, ≥2,000 holders, ≥2.4M shares traded prior 12 months — names near the 6.3M/1,600/1.8M delisting floor are treated as unlisted) |
+| Open interest, candidate strikes | ≥ floor (default 500 contracts across the two legs; config knob) |
+| Quoted bid-ask on the vertical | ≤ max fraction of mid debit (default 10%; config knob) |
+| Quotes present/fresh on both legs | yes |
+
+**Gate B — Conviction (hard):** leg is in the Master Agent's top conviction tier (top-decile signal, catalyst confirmed by News/Catalyst Agent, no confounding supplier-specific news).
+
+**Gate C — Catalyst timing (hard, per Madsen 2017):** the supplier's next earnings date falls **inside** the intended hold window. The edge concentrates before the supplier's own earnings and dissipates after; long premium with no catalyst in-window is paying theta for drift that may not arrive. If the supplier just reported, the leg stays cash.
+
+**Structure selection when all gates pass:**
+
+| Situation | Structure | Notes |
+|---|---|---|
+| Default (long or short leg) | **Defined-risk debit vertical** (bull call spread / bear put spread) | Short wing blunts theta/vega and IV crush; max loss = debit. The default, full stop. |
+| Exceptional: top conviction + catalyst inside window + cheap IV (IV percentile below config floor vs own 1y history) | Naked long call/put | Emitted only with an explicit `EXCEPTION: undefined-theta` flag and separate risk budget (§11.4). Never the default. |
+| Short leg where stock is hard-to-borrow **and** options liquid | Synthetic short / risk-reversal (short call + long put) — **flag-only alternative** | Put-call parity re-embeds the borrow fee in rich puts (Muravyev-Pearson-Pollet), so this is not a free bypass; short call adds early-assignment risk near ex-div. Recommendation states the embedded carry. Default for a hard-to-borrow short remains: derate or drop. |
+| Any gate fails | **Cash** (or drop) | Stated in the recommendation with the failing gate named. |
+
+No short premium is ever recommended except as the defined-risk wing of a vertical or the call side of a flagged synthetic.
+
+### 11.2 Structure/contract mechanics (deterministic, rules-based)
+
+All of this is a pure Python function of (spot, chain snapshot, signal date, earnings calendar) — no LLM in the loop.
+
+- **Expiry:** first standard monthly expiry with ≥ 45 calendar days to expiry at formation (config: 45–60 DTE band). The ~1-month hold then exits with ~15–30 DTE remaining — avoids terminal theta acceleration, gamma/pin risk, and holding to expiry.
+- **Long strike:** nearest listed strike to spot (ATM).
+- **Short strike / width:** nearest listed strike to spot × (1 ± expected move), where expected move = trailing 21-day realized vol scaled to the hold horizon (config multiplier, default 1.0). Deterministic tie-break: rounder/higher-OI strike.
+- **Debit sanity:** reject the structure if net debit > 50% of width (config knob) — past that point the risk/reward of the vertical no longer beats cash. Falls back to cash with reason logged.
+- **Exit rules (evaluated by the daily monitor, in priority order):** (1) signal invalidation or monthly rebalance → recommend close; (2) supplier earnings reached → recommend close **by T-1 before the supplier's earnings print** unless the exception flag was set (Madsen: edge dissipates after; post-print you hold IV-crushed time value with no thesis); (3) spread value ≥ 75% of max value (config) → recommend early profit-take.
+- **Rolls:** there is no rolling as a concept. Each monthly formation is close-old / open-new; if the same pair re-selects, that is two tickets and the backtest charges the spread twice. Keeps the engine and the economics honest.
+
+### 11.3 The hybrid-universe reality (say it out loud, per recommendation)
+
+The structural tension from research/07: **the options usually live on the large-cap S&P 500 customer (the signal source); the alpha-bearing supplier is often small and not optionable.** Trading the customer's options is trading the *less-alpha* leg — the customer's move is the *input*, largely already realized when we form the signal.
+
+Handling, per recommendation:
+
+- The options gate is evaluated **on the supplier leg only** by default. If the supplier is optionable and passes §11.1, an options expression of the supplier leg is emitted alongside cash.
+- If only the customer is optionable, the recommendation **stays cash** — we do not synthesize a customer-side options position and call it an expression of the pair. (Customer-side options enter only via the separate research track, §11.6.)
+- Every recommendation carries an explicit `expression:` field — `cash`, `cash+options(supplier)`, or `cash-only (supplier not optionable — alpha leg unlisted)` — so the human always sees which leg the leverage would actually sit on and why most pairs will be cash. Expect the majority of pairs to be cash; that is the design working, not failing.
+
+### 11.4 Risk layer
+
+The book previously carried delta and borrow. With the overlay it carries greeks; the Risk agent and daily monitor expand accordingly.
+
+| Exposure | Rule |
+|---|---|
+| Net premium at risk (all debit structures) | Hard cap as % of notional book (config; sized so a total loss of all open debits costs less than one month of the cash book's risk budget). Per-position debit ≤ per-name cap. |
+| Undefined-theta exceptions (naked long premium) | Separate, smaller sub-budget; count-capped (config, default ≤ 2 open at a time). |
+| Net theta | Reported daily as **theta burn ÷ calibrated expected monthly alpha**. If that ratio exceeds a config threshold across the book, the monitor flags "theta exceeds edge" and new options recommendations pause. This is the single most honest number in the overlay: the live edge is possibly near zero, and theta is certain. |
+| Net vega | Reported; verticals keep it small by construction. Flag if any single name dominates. |
+| Net delta | The options book's aggregate delta must stay consistent with the cash signal's intended direction/size — options add leverage per name, not a different book. |
+| Gamma / pin | Avoided structurally by the ≥15 DTE exit rule. |
+| Assignment (short wings, synthetics) | Daily check: any short call ITM with ex-div inside 5 business days, or short leg deep ITM → early-assignment warning in the digest, with the resulting stock position spelled out (this system only warns; the human holds the position). |
+| Sizing philosophy | Size for a **fragile, possibly-zero edge**: the option allocation replaces part of the cash position's risk, never stacks on top of it. Leverage changes the payoff shape, not the risk budget. |
+
+### 11.5 Backtest engine scope expansion
+
+The backtester must reprice the option structures, not just lever delta — otherwise the overlay's economics are fiction. Minimal-but-honest design (ponytail full: Black-Scholes + pandas, no new heavy deps):
+
+- **Pricer:** Black-Scholes with discrete-dividend adjustment; a single small pure function. American early-exercise premium ignored and disclosed (defensible for near-ATM verticals exited pre-expiry; noted as a known approximation).
+- **Daily repricing** of each open structure off an IV input, with P&L attribution split delta / theta / vega (finite-difference off the same pricer) so theta bleed is visible in backtest output.
+- **IV sourcing, graded:**
+  - **Grade A** — actual historical EOD option quotes (EODHD sells a US options add-on; coverage, history depth, and price must be verified before relying on it — unconfirmed). Real bid-ask, real per-strike IV, real skew.
+  - **Grade B** — vendor ATM IV only: per-strike prices from BS off ATM IV; skew *not* modeled, disclosed.
+  - **Grade C** — no options data: IV proxied by trailing 21-day realized vol × a config spread factor, plus a crude earnings-crush rule (IV step-down of a config fraction on the earnings date). No skew, synthetic crush, disclosed loudly.
+- **Costs:** per-leg bid-ask charged as a config haircut (% of premium per leg per side; conservative default, sensitivity-tested across a range rather than asserted as one true number) plus per-contract commission. Grade A uses actual quoted spreads instead.
+- **Degrade gracefully and say so:** every backtest report is stamped with its IV grade, and any Grade B/C run prints: *"Options P&L is model-priced from proxied IV — skew and true single-name bid-ask are approximated; treat leveraged-book results as an upper bound."* No silent downgrades.
+- **Verification:** overlay backtest must be bit-identical across reruns (same standard as the cash engine), and the theta/vega attribution must sum to total option P&L within tolerance.
+
+### 11.6 Options-native cross-firm signal — separate research track (Track R)
+
+**Not a Phase-1..6 dependency.** The question: does the *customer's* option surface (IV spread, skew, ΔIV) predict the *supplier's* next-month return beyond the customer's stock return? No published source tests this channel (research/07 open question 2); Fung-Loveland shows only intra-industry M&A IV spillover.
+
+- **Caveat first:** most single-name IV-spread/skew predictability is a stock-borrow-fee proxy (≥ two-thirds of it, per Muravyev-Pearson-Pollet). One mitigating nuance: our signal would sit on *large-cap, easy-borrow customers*, the segment where the borrow-proxy contamination is smallest — which is also exactly the segment where the *clean* residual signal may be weakest (research/07 open question 3). Genuinely unknown; treat as a coin-flip research bet.
+- **Minimal test:** monthly panel on the existing link table. X = customer's month-end call-put IV spread and monthly ΔIV (S&P 500 chains only — cheap, liquid, data actually obtainable); Y = supplier next-month return. Decile sorts plus a regression controlling for the customer's prior-month *stock* return (the incumbent signal) and supplier size. Pass/fail = incremental predictive power beyond the stock-return signal, not standalone significance.
+- **Data:** requires historical customer option chains (Grade A/B source from §11.5) — so Track R naturally sequences after the backtest IV plumbing exists.
+- **If it fails, it fails** — the result is logged and the overlay is unaffected, since §11.1 never depended on it.
+
+### 11.7 Agent-fleet & model-routing deltas
+
+| Agent | Change | Model |
+|---|---|---|
+| **Options-Structuring Agent** (new) | Judgment wrapper around the deterministic structure selector: sanity-checks the chain snapshot, earnings/ex-div calendar, flags stale quotes and assignment traps, writes the per-structure rationale + caveats. All strikes/expiries/greeks come from the Python module — the agent never computes a number. | Opus 4.8 |
+| **Risk/Borrow Agent** (expanded) | Adds greeks-book review (§11.4 table), theta-vs-edge flag, assignment warnings. | Opus 4.8 |
+| **Chain-Screen scans** (new, bulk) | Daily optionability/liquidity screen of supplier universe (listed? OI? spread?) feeding Gate A — mostly deterministic; Haiku only for messy corner cases. | Haiku 4.5 |
+| **Master/Orchestrator** (expanded) | Integrates the `expression:` field, ranks cash vs cash+options, owns the go/no-go narrative. Track R synthesis when run. | Fable 5 |
+| Deterministic (no LLM) | BS pricer, chain filter, structure selector (§11.2), greeks aggregator, options backtest module. | — |
+
+### 11.8 Phase-plan revision (cash-first is non-negotiable)
+
+Phases 0–5 of §6 are **unchanged and options-free**. The overlay is appended:
+
+- **Phase 6 — Options overlay (build only after Phase 5 shows positive net-of-cost paper alpha).** Chain screen + Gate A/B/C + structure selector + Options-Structuring/Risk agent deltas + backtest options module (§11.5, at whatever IV grade the data budget supports). Recommendations gain the options expression alongside cash, flagged paper-only. *Verify:* deterministic selector reproduces the same structure from the same chain snapshot across reruns; hand-check a handful of emitted verticals against live chains; backtest attribution sums.
+- **Phase 7 — Options paper validation.** Track the option expressions' recommended-vs-realized P&L (marked off real EOD quotes) for several weeks alongside the cash book; report the theta-burn-vs-edge ratio realized, not assumed. Only after this does the overlay graduate from "flagged experiment" to a standing part of the digest.
+- **Track R (parallel, non-blocking, anytime after Phase 6's IV plumbing exists):** §11.6 study. Its outcome can add a signal input later; nothing in Phases 0–7 waits on it.
+
+Phase-5 gate to even *start* Phase 6 (config, stated here as the default): cash paper book shows positive net-of-cost P&L over the validation window with the signal behaving as designed (right sign, decile monotonicity). If cash fails, there is nothing to lever — the overlay is cancelled, not "tried anyway."
+
+### 11.9 Guardrails (go/no-go, restated as rules)
+
+1. **Overlay, not rescue.** If the cash edge isn't demonstrably there (Phase-5 gate), no options work proceeds. Leverage on a zero edge is negative-sum after theta and spread — this is the base case to disprove, not a formality.
+2. **Cash is the default expression.** Options require Gates A+B+C per leg; any failure → cash, reason logged in the recommendation.
+3. **Defined risk is the default structure.** Debit verticals only; naked long premium is a flagged, budget-capped exception; no net short premium ever; synthetics only as flagged borrow-constrained alternatives with the embedded carry stated.
+4. **Theta-vs-edge kill switch.** When book theta burn exceeds the calibrated expected alpha by the config multiple, new options recommendations pause automatically until the ratio recovers.
+5. **Honest output.** Every options P&L figure carries its IV grade; Grade B/C results are labeled model-priced upper bounds. No recommendation ever cites the 2008 headline alpha as the forward estimate.
+6. **Hot zone unchanged.** The system emits option-structure *recommendations* (underlying, strikes, expiry, net debit, max loss, exit rules) that a human could enter. It never places, modifies, or cancels any order — options or otherwise — never connects to a broker, and never moves money. Assignment and exercise decisions are the human's; the system only warns.

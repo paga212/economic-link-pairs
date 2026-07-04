@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Data (CRSP/Compustat pulls, caches) — keep out of git
+data/
+*.parquet
+*.csv

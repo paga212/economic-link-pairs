@@ -16,6 +16,18 @@ from statistics import mean
 
 ENTER, EXIT, TRAIL, LOOKBACK = 0.05, 0.00, 0.05, 21
 
+# Cost knobs (conservative, frozen — NOT tuned on data). We have no name-level borrow
+# data, so BORROW_APR is a deliberately-high flat proxy for shorting small caps.
+SPREAD_BPS = 25.0    # per side (spread/2 + commission); charged on entry AND exit
+BORROW_APR = 0.05    # annualized borrow cost, shorts only, prorated by holding days
+
+
+def net_return(t: dict, spread_bps: float = SPREAD_BPS, borrow_apr: float = BORROW_APR) -> float:
+    """Trade return net of round-trip transaction cost and (shorts only) borrow cost."""
+    tc = 2.0 * spread_bps / 1e4                       # entry + exit
+    borrow = (borrow_apr * t["days"] / 365.0) if t["side"] < 0 else 0.0
+    return t["ret"] - tc - borrow
+
 
 def _maps(prices: dict) -> dict:
     out = {}
@@ -80,11 +92,12 @@ def simulate(links, prices, enter=ENTER, exit_=EXIT, trail=TRAIL, lookback=LOOKB
     return closed, list(open_tr.values())
 
 
-def trade_stats(closed: list[dict]) -> dict:
+def trade_stats(closed: list[dict], spread_bps: float = 0.0, borrow_apr: float = 0.0) -> dict:
+    """Trade-level stats. Default (0,0) = gross; pass costs for net (SPREAD_BPS/BORROW_APR)."""
     n = len(closed)
     if not n:
         return {"n": 0}
-    rets = [t["ret"] for t in closed]
+    rets = [net_return(t, spread_bps, borrow_apr) for t in closed]
     wins = [r for r in rets if r > 0]
     losses = [r for r in rets if r <= 0]
     return {

@@ -38,13 +38,25 @@ def norm(name: str) -> str:
 
 
 def load_ticker_map() -> tuple[dict, dict]:
-    """(by_cik: {int: {'ticker','title'}}, by_normname: {norm(title): ticker})."""
+    """(by_cik: {int: {'ticker','title'}}, by_name: {norm(title): ticker}).
+
+    by_name is also indexed by the space-stripped norm so name variants like
+    "Wal-Mart" (norm 'wal mart') match "Walmart" (norm 'walmart'). Use resolve().
+    """
     data = json.loads(_get("https://www.sec.gov/files/company_tickers.json"))
     by_cik, by_name = {}, {}
     for row in data.values():
         by_cik[int(row["cik_str"])] = {"ticker": row["ticker"], "title": row["title"]}
-        by_name.setdefault(norm(row["title"]), row["ticker"])
+        n = norm(row["title"])
+        by_name.setdefault(n, row["ticker"])
+        by_name.setdefault(n.replace(" ", ""), row["ticker"])
     return by_cik, by_name
+
+
+def resolve(name: str, by_name: dict) -> str | None:
+    """Resolve a customer name to a ticker: exact norm, then space-insensitive."""
+    n = norm(name)
+    return by_name.get(n) or by_name.get(n.replace(" ", ""))
 
 
 def latest_10k(cik: int) -> tuple[str, str, str] | None:
@@ -75,6 +87,9 @@ _PATTERNS = [
                rf"(?:approximately\s+)?{_PCT}\s+{_TAIL}"),
     re.compile(rf"(?:approximately\s+)?{_PCT}\s+{_TAIL}\s+(?:were|was|are|is)?\s*"
                rf"(?:derived from|attributable to|to|from)\s+({_NAME})"),
+    re.compile(rf"(?:sales|revenues?)\s+(?:to|from)\s+({_NAME})\s+"
+               rf"(?:of\s+|represented\s+|accounted for\s+|were\s+|was\s+|totaled\s+|comprised\s+)"
+               rf"(?:approximately\s+)?{_PCT}"),
 ]
 _BADNAME = re.compile(
     r"^(The|This|These|Those|Our|Its|Net|Total|Sales|Revenue|Approximately|One|Two|"

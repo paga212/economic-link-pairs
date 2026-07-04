@@ -38,7 +38,7 @@ def main() -> None:
         if not disc:
             print("  no customer disclosure extracted")
         for d in disc:
-            cust = by_name.get(norm(d["customer"]))
+            cust = resolve(d["customer"], by_name)
             if cust:
                 hits += 1
             print(f"  {d['pct']:>4.0f}%  {d['customer']!r:32} -> {cust or '(unresolved)'}")

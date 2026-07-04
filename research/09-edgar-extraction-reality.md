@@ -60,3 +60,30 @@ opt-in, auditable add-on — not the backbone.
 
 **Open question for the user:** how much inference risk (Option B) is acceptable in the
 live link set, given the signal is already fragile and a wrong link injects pure noise?
+
+## Empirical yield (measured 2026-07-04, after fixing a doc-fetch bug)
+
+Built `phase2a_build.py` to measure how large the named-only universe actually is.
+First runs showed 0 yield, but diagnosis found the crawler was fetching XBRL fragments
+(`R18.xml`) instead of the 10-K prose, and dropping delisted suppliers. After fixing it
+to fetch each **currently-listed** filer's real 10-K and adding space-insensitive name
+matching (so "Wal-Mart" resolves to Walmart/WMT):
+
+- **23 listed-supplier 10-Ks scanned → 5 had an extractable disclosure → 1 usable named
+  link** (ADSK→SNX, Autodesk→TD Synnex). **Yield ≈ 4%** (links per listed filer).
+- Extraction + resolution now demonstrably work (Wal-Mart→WMT, Target→TGT, ADSK→SNX all
+  resolved correctly). The low yield is genuine sparsity, not a bug.
+
+**Adverse selection (the important part):** the customers that get *named* skew to
+**retailers/distributors** — Walmart, Target, TD Synnex — whose own stock is a *weak*
+lead-lag signal for the supplier. The high-signal economic links the strategy wants
+(Apple ↔ its chip suppliers) are precisely the ones filed as *unnamed* ("one customer
+accounted for >10%"). So the named-only universe is **both thin (~4% yield) and biased
+toward low-information links.**
+
+**Bearing on the decision:** named-only alone is probably too thin and too
+quality-adverse to be a good live recommender. The realistic choices narrow to:
+(B) accept a cautious, flagged LLM-inference slice to recover the unnamed high-signal
+links, or (C) reconsider scope — prove the effect on a historical backtest first and
+treat a live free-data recommender as unproven. Either way, the empirical yield says the
+naive free-EDGAR live-link path does not, by itself, deliver a strong idea universe.

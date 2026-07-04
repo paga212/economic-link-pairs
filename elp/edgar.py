@@ -115,6 +115,29 @@ def extract_disclosures(text: str) -> list[dict]:
     return out
 
 
+_CONC = ("accounted for", "of net sales", "of net revenue", "of total revenue",
+         "largest customer", "major customer", "one customer", "significant customer")
+
+
+def concentration_snippets(text: str, window: int = 400, maxn: int = 4) -> list[str]:
+    """Merged text passages around customer-concentration language (keeps LLM input small)."""
+    low = text.lower()
+    hits = []
+    for p in _CONC:
+        i = low.find(p)
+        while i != -1 and len(hits) < 40:
+            hits.append((max(0, i - window), min(len(text), i + window)))
+            i = low.find(p, i + 1)
+    hits.sort()
+    merged: list[list[int]] = []
+    for a, b in hits:
+        if merged and a <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    return [text[a:b] for a, b in merged[:maxn]]
+
+
 def full_text_search(query: str, forms: str = "10-K", frm: int = 0) -> list[dict]:
     """Discovery: filings whose full text contains `query` (exact phrase)."""
     q = urllib.parse.quote(f'"{query}"')

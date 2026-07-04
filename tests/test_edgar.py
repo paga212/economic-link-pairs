@@ -5,7 +5,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.edgar import extract_disclosures, norm  # noqa: E402
+from elp.edgar import concentration_snippets, extract_disclosures, norm  # noqa: E402
 
 
 class TestEdgar(unittest.TestCase):
@@ -34,6 +34,17 @@ class TestEdgar(unittest.TestCase):
             "Apple accounted for 85% of net sales. Apple accounted for 85% of net sales.")
         apple = [x for x in d if x["customer"].startswith("Apple") and x["pct"] == 85.0]
         self.assertEqual(len(apple), 1)
+
+
+    def test_concentration_snippets(self):
+        txt = ("Intro. " * 50 + "Apple Inc. accounted for 40% of net sales in fiscal 2023. "
+               + "Filler. " * 50 + "Our largest customer represented 15% of revenue. " + "End. " * 50)
+        snips = concentration_snippets(txt, window=60, maxn=4)
+        self.assertTrue(snips and any("accounted for 40%" in s for s in snips))
+        self.assertTrue(all(len(s) < 400 for s in snips))  # windows stay small
+
+    def test_no_snippets_when_no_concentration_language(self):
+        self.assertEqual(concentration_snippets("nothing relevant here " * 20), [])
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ primary source before encoding it into a model.**
 - [06-gap-analysis.md](06-gap-analysis.md) — open research questions the literature hasn't closed, and what would close them.
 - [07-options-expression.md](07-options-expression.md) — deep-research report on expressing the signal via options + whether an options-native cross-firm edge exists.
 - [08-data-procurement.md](08-data-procurement.md) — decision-ready data shopping list (price/returns, options/IV, links, borrow) with verified-where-possible costs, phased to buy only what's needed.
+- [09-edgar-extraction-reality.md](09-edgar-extraction-reality.md) — Phase 2a finding: modern 10-K customer disclosures are often unnamed/unquantified, so free-EDGAR link extraction has structurally limited recall; options + decision needed.
 
 ## Synthesis — the five things that matter for the build
 

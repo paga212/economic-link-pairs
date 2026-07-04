@@ -96,13 +96,12 @@ deps beyond what each job needs.
 - **Short leg can be uneconomic:** borrow fees/availability modeled explicitly; hard-to-borrow names derated or dropped.
 - **Cheap data fidelity:** survivorship bias handled via EODHD delisted history; still lower-fidelity than CRSP — validated in Phase 1.
 
-## 10. Open items for your call
+## 10. Resolved decisions (approved 2026-07-04)
 
-1. **Universe nuance (main one):** the tradable *supplier* is usually a smaller
-   firm whose *customer* is large. Literal "S&P 500 only" would trade the large
-   customers and miss most suppliers (and most of the alpha). Recommended:
-   **customers = S&P 500** (clean, liquid signal source), **tradable suppliers =
-   any liquid US common that names an S&P 500 firm as a major customer.** Data
-   cost is unaffected (EODHD covers all US equities). OK to proceed this way?
-2. **Cadence:** monthly formation + daily monitoring (§4) — good?
-3. **Data vendor:** EODHD as primary (delisted coverage), Tiingo fallback — good?
+1. **Universe:** customers = S&P 500 (clean, liquid signal source); tradable
+   suppliers = any liquid US common that names an S&P 500 firm as a major
+   customer. (Trading the suppliers is where the alpha lives; EODHD covers all
+   US equities so data cost is unaffected.)
+2. **Cadence:** monthly formation + daily monitoring/alerts (§4).
+3. **Data vendor:** EODHD primary (delisted history → survivorship-bias fix),
+   Tiingo fallback.

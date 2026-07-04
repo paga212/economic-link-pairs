@@ -14,6 +14,7 @@ primary source before encoding it into a model.**
 - [04-implementation-frictions.md](04-implementation-frictions.md) — transaction costs, borrow, backtesting pitfalls.
 - [05-synthesis-claims-map.md](05-synthesis-claims-map.md) — one-line claim per paper, assumption clusters, and a table of direct contradictions.
 - [06-gap-analysis.md](06-gap-analysis.md) — open research questions the literature hasn't closed, and what would close them.
+- [07-options-expression.md](07-options-expression.md) — deep-research report on expressing the signal via options + whether an options-native cross-firm edge exists.
 
 ## Synthesis — the five things that matter for the build
 

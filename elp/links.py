@@ -37,12 +37,11 @@ CURATED_DIVERSE: list[tuple[str, str, str]] = [
 # point-in-time — the Phase B LLM+EDGAR step will replace/augment these with real
 # disclosed links once the Anthropic key is available. (supplier, customer, note).
 HIGHSIGNAL_LINKS: list[tuple[str, str, str]] = [
+    # Apple deliberately capped at a few names so the cross-section isn't Apple-driven;
+    # the engine is customer-agnostic and Phase B (LLM links) diversifies this broadly.
     ("SWKS", "AAPL", "Skyworks — Apple"),
     ("CRUS", "AAPL", "Cirrus Logic — Apple"),
-    ("QRVO", "AAPL", "Qorvo — Apple"),
-    ("JBL", "AAPL", "Jabil — Apple"),
     ("GLW", "AAPL", "Corning — Apple (cover glass)"),
-    ("COHR", "AAPL", "Coherent/II-VI — Apple (lasers/optics)"),
     ("SMCI", "NVDA", "Super Micro — Nvidia (GPU servers)"),
     ("UCTT", "AMAT", "Ultra Clean — Applied Materials"),
     ("MKSI", "AMAT", "MKS Instruments — semiconductor equipment"),

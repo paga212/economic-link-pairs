@@ -22,3 +22,4 @@ data/
 paper_run.log
 *.log
 dashboard.html
+site/

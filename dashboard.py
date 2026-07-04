@@ -8,9 +8,11 @@ Run: python3 dashboard.py
 from datetime import datetime, timezone
 from html import escape
 
+import os
+
 from elp.paper import fetch_returns, load_entries, score
 
-OUT = "dashboard.html"
+OUT = "site/index.html"  # served dir contains ONLY the dashboard (never the repo/secrets)
 
 
 def _pairs(names):
@@ -70,6 +72,7 @@ gross of costs for now.</div>
 <h2>Out-of-sample results</h2>{matured}
 <footer>economic-link-pairs · Cohen &amp; Frazzini (2008) customer-supplier lead-lag</footer>
 </body></html>"""
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w").write(doc)
     print(f"wrote {OUT} ({len(rows)} matured, {'latest '+str(latest['holding']) if latest else 'no'} rec)")
 

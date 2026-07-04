@@ -7,6 +7,7 @@ cd /home/pierre/projects/economic-link-pairs || exit 1
 python3 recommend.py >> paper_run.log 2>&1
 python3 score.py     >> paper_run.log 2>&1
 python3 dashboard.py >> paper_run.log 2>&1
+bash serve.sh
 
 git add paper_log.jsonl
 if ! git diff --cached --quiet; then

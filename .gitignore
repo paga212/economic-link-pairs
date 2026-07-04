@@ -9,3 +9,8 @@ venv/
 data/
 *.parquet
 *.csv
+
+# Secrets — never commit API keys
+.env
+.tiingo_token
+*.token

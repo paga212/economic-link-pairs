@@ -25,15 +25,28 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
    (Walmart, Target, Synnex = weak lead-lag signal); the high-signal tech links
    (Apple ↔ chip suppliers) are unnamed. So the named-only universe is thin AND biased.
 
-## DECISION NEEDED FROM YOU (I paused here)
-How to source live customer-supplier links, given named-only free-EDGAR is too thin:
-- **A. Named-only** (current default) — safe, no key, but too thin/biased to be a good recommender.
-- **B. + cautious flagged LLM inference** of unnamed customers (recovers high-signal links; injects some noise; needs your Anthropic API key).
-- **C. Reassess scope** — prove the effect on a historical backtest first; treat the live free-data recommender as unproven.
+## Phase C attempted (you chose "C then B") — hit a free-data wall
+Tried to prove the effect on a historical backtest. Result (`research/10`):
+- Rigorous free historical proof is **infeasible**: C-F links are permno-keyed and there
+  is no free historical/delisted ticker map, so only **~28 of 26,339 links resolve** to
+  current tickers (all survivors).
+- Directional check on the 23 resolvable links (1998-2008): long/short **-2.5%/yr gross,
+  Sharpe ~0** — no positive effect. Consistent with decay, but too thin/biased to be
+  conclusive.
 
-My lean: **C then B** — first prove there's any live edge at all (it may be decayed to
-zero), and only then invest in the harder live-link extraction with cautious inference.
-Building a thin, biased live recommender before knowing the edge exists is premature.
+## DECISION NEEDED FROM YOU (I paused here)
+Given rigorous free historical proof isn't achievable:
+- **1. Prove it FORWARD** — build the live recommender (B, cautious LLM links) and
+  paper-trade out-of-sample for months. No more data spend. The plan's validation phase.
+- **2. Pay for CRSP-grade data** for a rigorous historical reproduction (WRDS/institutional;
+  Norgate doesn't solve the permno link). Real cost/access barrier.
+- **3. Reassess the project.** Evidence so far is discouraging: strong decay prior + null
+  free historical check + thin/quality-adverse live links.
+
+My honest lean: **the weight of evidence is not encouraging for this specific strategy at
+individual scale.** Cheapest real answer = Option 1 (paper-trade forward, low expectations,
+hard kill rule). Rigorous historical certainty = Option 2's paid data. Worth an honest
+conversation about whether to continue, pivot, or park it.
 
 ## Other open inputs (none blocking, all previously raised)
 - Fable-5 key test (drop your Anthropic key in a file, same as Tiingo).

@@ -17,6 +17,7 @@ primary source before encoding it into a model.**
 - [07-options-expression.md](07-options-expression.md) — deep-research report on expressing the signal via options + whether an options-native cross-firm edge exists.
 - [08-data-procurement.md](08-data-procurement.md) — decision-ready data shopping list (price/returns, options/IV, links, borrow) with verified-where-possible costs, phased to buy only what's needed.
 - [09-edgar-extraction-reality.md](09-edgar-extraction-reality.md) — Phase 2a finding: modern 10-K customer disclosures are often unnamed/unquantified, so free-EDGAR link extraction has structurally limited recall; options + decision needed.
+- [10-historical-feasibility.md](10-historical-feasibility.md) — Phase C finding: rigorous free historical proof is infeasible (only ~28 C-F links resolve for free); directional check shows no positive effect; prove-forward vs pay-for-data vs reassess.
 
 ## Synthesis — the five things that matter for the build
 

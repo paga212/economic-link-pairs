@@ -127,3 +127,22 @@ def send(html: str, text: str, dryrun: bool) -> None:
         s.login(TO, _password())
         s.send_message(msg)
     print(f"sent to {TO}: {msg['Subject']}")
+
+
+def main() -> None:
+    try:
+        state = json.load(open(STATE_FILE))
+    except FileNotFoundError:
+        print(f"no {STATE_FILE} — run track.py first; skipping email")
+        return
+    digest = json.load(open(DIGEST_FILE)) if os.path.exists(DIGEST_FILE) else None
+    html, text = render(state, digest)
+    dryrun = os.environ.get("EMAIL_DRYRUN") == "1"
+    try:
+        send(html, text, dryrun)
+    except RuntimeError as e:            # missing password on a live run -> refuse, don't crash
+        print(f"[email] not sent: {e}")
+
+
+if __name__ == "__main__":
+    main()

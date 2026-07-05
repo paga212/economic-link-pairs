@@ -49,5 +49,50 @@ class TestRender(unittest.TestCase):
         self.assertIn("Book looks fine.", html_yes)
 
 
+import email_report  # noqa: E402
+
+
+class TestSend(unittest.TestCase):
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self._tmp = os.path.join(os.path.dirname(__file__), "_emailtmp")
+        os.makedirs(self._tmp, exist_ok=True)
+        os.chdir(self._tmp)
+
+    def tearDown(self):
+        import shutil
+        os.chdir(self._cwd)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_dryrun_writes_eml_and_never_connects(self):
+        # Poison smtplib so any socket attempt fails loudly; dry-run must not touch it.
+        orig = email_report.smtplib.SMTP
+        email_report.smtplib.SMTP = lambda *a, **k: (_ for _ in ()).throw(AssertionError("connected!"))
+        try:
+            email_report.send("<b>hi</b>", "hi", dryrun=True)
+        finally:
+            email_report.smtplib.SMTP = orig
+        self.assertTrue(os.path.exists(email_report.EML_FILE))
+        body = open(email_report.EML_FILE).read()
+        self.assertIn(email_report.TO, body)
+        self.assertIn("hi", body)
+
+    def test_password_prefers_env_then_errors(self):
+        os.environ["GMAIL_APP_PASSWORD"] = "abcd efgh ijkl mnop"
+        try:
+            self.assertEqual(email_report._password(), "abcd efgh ijkl mnop")
+        finally:
+            del os.environ["GMAIL_APP_PASSWORD"]
+        # no env, no file in this tmp cwd, and force HOME miss -> RuntimeError
+        home = os.environ.get("HOME")
+        os.environ["HOME"] = self._tmp
+        try:
+            with self.assertRaises(RuntimeError):
+                email_report._password()
+        finally:
+            if home is not None:
+                os.environ["HOME"] = home
+
+
 if __name__ == "__main__":
     unittest.main()

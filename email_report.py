@@ -86,3 +86,44 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
             + f"Open ideas ({len(opens)}):\n" + "\n".join(f"- {ln}" for ln in tlines)
             + f"\n\nOut-of-sample results: {oos_t}\n\nLive dashboard: {DASHBOARD_URL}\n")
     return html, text
+
+
+def _password() -> str:
+    """Gmail App Password from GMAIL_APP_PASSWORD or a gitignored .gmail_app_password file."""
+    raw = os.environ.get("GMAIL_APP_PASSWORD")
+    if not raw:
+        for p in (_PW_FILE, os.path.expanduser("~/.gmail_app_password")):
+            if os.path.exists(p):
+                raw = open(p).read()
+                break
+    if not raw:
+        raise RuntimeError(
+            "No Gmail App Password. Set GMAIL_APP_PASSWORD or create .gmail_app_password "
+            "(Google Account → Security → 2-Step Verification → App passwords).")
+    k = raw.strip()
+    if "=" in k:                      # tolerate a pasted `export KEY='...'` line
+        k = k.split("=", 1)[1]
+    return k.strip().strip("'").strip('"').strip()
+
+
+def _message(html: str, text: str) -> EmailMessage:
+    msg = EmailMessage()
+    msg["From"], msg["To"] = TO, TO
+    msg["Subject"] = f"Economic Link Pairs — Paper-Trade Weekly ({datetime.now(timezone.utc).date().isoformat()})"
+    msg.set_content(text)
+    msg.add_alternative(html, subtype="html")
+    return msg
+
+
+def send(html: str, text: str, dryrun: bool) -> None:
+    """Send the report from/to TO. dryrun -> write EML_FILE and print, never open a socket."""
+    msg = _message(html, text)
+    if dryrun:
+        open(EML_FILE, "w").write(msg.as_string())
+        print(f"[dryrun] wrote {EML_FILE} (no send). Subject: {msg['Subject']}")
+        return
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as s:
+        s.starttls(context=ssl.create_default_context())
+        s.login(TO, _password())
+        s.send_message(msg)
+    print(f"sent to {TO}: {msg['Subject']}")

@@ -58,6 +58,7 @@ def main() -> None:
         ret, _ = idea_return(idea, marks, last_date)
         open_rows.append({
             "supplier": idea["supplier"], "customer": idea["customer"], "side": idea["side"],
+            "kind": "LONG" if idea["side"] > 0 else "SHORT",
             "expression": idea["expression"], "risk_cap": idea["risk_cap"],
             "entry": idea["entry_date"].isoformat(), "days": (last_date - idea["entry_date"]).days,
             "ret": ret, "stop": idea["peak"] - TRAIL,

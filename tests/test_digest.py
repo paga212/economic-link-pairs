@@ -44,6 +44,15 @@ class TestPrompt(unittest.TestCase):
         p = _prompt({"open": [], "stats": {}}, {})
         self.assertIn("none open", p)
 
+    def test_prompt_handles_idea_shaped_rows_without_kind(self):
+        # Regression: idea-shaped open rows (post two-legged refactor) may lack "kind" but
+        # always carry "side" -- _prompt must derive kind rather than KeyError.
+        state = {"open": [{"supplier": "TTWO", "customer": "AAPL", "side": -1,
+                           "expression": "stock-hedge", "days": 8, "ret": -0.02}], "stats": {}}
+        p = _prompt(state, {})            # must NOT raise KeyError
+        self.assertIn("TTWO", p)
+        self.assertIn("SHORT", p)          # derived from side
+
     def test_note_matches_traded_customer_not_another(self):
         # Regression: a supplier with two customers; the trade is on one of them. The note beside
         # it must be THAT customer's note, not the other's (the (supplier,customer) keying fix).

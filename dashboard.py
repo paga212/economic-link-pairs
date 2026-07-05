@@ -56,7 +56,7 @@ def build() -> None:
     if dg:
         ranked = "".join(
             f"<li><b>{escape(r['supplier'])}</b> &larr; {escape(r['customer'])} "
-            f"<span class=sub>({escape(r['kind'])}, "
+            f"<span class=sub>({escape(r.get('kind', 'LONG' if r.get('side', 0) > 0 else 'SHORT'))}, "
             f"<span class={rcls(r['ret'])}>{r['ret']*100:+.1f}%</span>)</span> — "
             f"{escape(r.get('rationale', '—'))}</li>"
             for r in dg.get("ranked_open", []))

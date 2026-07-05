@@ -12,6 +12,31 @@ from html import escape
 OUT, STATE, DIGEST = "site/index.html", "paper_state.json", "digest.json"
 
 
+def _leg_str(leg):
+    d = "long" if leg["direction"] > 0 else "short"
+    if leg["instrument"] == "spread":
+        return (f"{d} put-spread {leg['k_long']:.0f}/{leg['k_short']:.0f}p "
+                f"debit {leg['debit']:.2f} {leg['dte']}DTE")
+    return f"{d} {leg['ticker']} @ {leg['entry_px']:.2f}"
+
+
+def idea_row(o):
+    """One idea as an HTML row: plain-English net direction + both legs + expression tag."""
+    from html import escape
+    direction = "LONG" if o["side"] > 0 else "SHORT"
+    cap = "$10k hard" if o.get("risk_cap") == "hard" else "~$10k stop (gap risk)"
+    rcls = "pos" if o["ret"] > 0 else "neg"
+    return (
+        f"<tr><td><b>{direction} {escape(o['supplier'])}</b><br>"
+        f"<span class=sub>vs {escape(o['customer'])}</span></td>"
+        f"<td>{escape(o['expression'])}</td>"
+        f"<td class=sub>primary: {escape(_leg_str(o['primary']))}<br>"
+        f"neutralizer: {escape(_leg_str(o['neutralizer']))}</td>"
+        f"<td>{escape(o['entry'])}</td><td>{o['days']}d</td>"
+        f"<td class={rcls}>{o['ret']*100:+.1f}%</td>"
+        f"<td class=sub>{cap}</td></tr>")
+
+
 def build() -> None:
     try:
         s = json.load(open(STATE))
@@ -31,7 +56,7 @@ def build() -> None:
     if dg:
         ranked = "".join(
             f"<li><b>{escape(r['supplier'])}</b> &larr; {escape(r['customer'])} "
-            f"<span class=sub>({escape(r['kind'])}, "
+            f"<span class=sub>({escape(r.get('kind', 'LONG' if r.get('side', 0) > 0 else 'SHORT'))}, "
             f"<span class={rcls(r['ret'])}>{r['ret']*100:+.1f}%</span>)</span> — "
             f"{escape(r.get('rationale', '—'))}</li>"
             for r in dg.get("ranked_open", []))
@@ -43,22 +68,8 @@ def build() -> None:
             + (f"<p class=sub>Watch:</p><ul>{watch}</ul>" if watch else "")
             + f"<p class=muted>{escape(dg.get('caveat', ''))}</p>")
 
-    def struct(o):
-        """One-line trade structure: stock entry price, or spread strikes/premium/DTE."""
-        if o.get("instrument") == "spread" and "k_long" in o:
-            return (f"bear put spread · long {o['k_long']:.2f}p / short {o['k_short']:.2f}p · "
-                    f"net debit {o['debit']:.2f} · spot@entry {o['spot0']:.2f} · "
-                    f"{o['dte']} DTE · IV~{o['iv']*100:.0f}% (proxy)")
-        if "entry_px" in o:
-            return f"long stock · entry {o['entry_px']:.2f} · equal-weight (1 unit)"
-        return "—"
-
-    open_rows = "".join(
-        f"<tr><td>{escape(o['kind'])}</td><td>{escape(o['supplier'])}</td>"
-        f"<td>{escape(o['customer'])}</td><td>{escape(o['entry'])}</td><td>{o['days']}d</td>"
-        f"<td class={rcls(o['ret'])}>{o['ret']*100:+.1f}%</td><td>{o['stop']*100:+.1f}%</td></tr>"
-        f"<tr class=detail><td colspan=7 class=muted>{escape(struct(o))}</td></tr>"
-        for o in s["open"]) or "<tr><td colspan=7 class=muted>no open trades</td></tr>"
+    open_rows = "".join(idea_row(o) for o in s["open"]) or \
+        "<tr><td colspan=7 class=muted>no open ideas</td></tr>"
 
     st = s.get("stats", {})
     if st.get("n"):
@@ -98,7 +109,7 @@ management (trailing stop + signal exit); shorts as bear-put-spreads (Grade-C, o
 The evidence prior is weak — judged against a pre-set 12-month kill rule.</div>
 {digest_html}
 <h2>Open trades</h2>
-<table><tr><th>Kind</th><th>Supplier</th><th>Customer</th><th>Since</th><th>Held</th><th>Unreal.</th><th>Stop</th></tr>{open_rows}</table>
+<table><tr><th>Idea</th><th>Expression</th><th>Legs</th><th>Since</th><th>Held</th><th>Net</th><th>Risk cap</th></tr>{open_rows}</table>
 <h2>Out-of-sample results (net)</h2>{oos}
 <footer>economic-link-pairs · Cohen &amp; Frazzini (2008) customer-supplier lead-lag</footer>
 </body></html>"""

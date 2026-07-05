@@ -25,3 +25,9 @@ def bear_put_spread(S: float, K1: float, K2: float, T: float, iv: float, r: floa
     """Long higher-strike put K1, short lower-strike put K2 (K2 < K1) — profits as S falls.
     Value is bounded in [0, K1-K2]."""
     return bs_put(S, K1, T, iv, r) - bs_put(S, K2, T, iv, r)
+
+
+def snap_strike(px: float) -> float:
+    """Nearest listed strike on a realistic grid: $0.50 under $25, $1 under $200, $5 above."""
+    step = 0.5 if px < 25 else (1.0 if px < 200 else 5.0)
+    return round(px / step) * step

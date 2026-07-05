@@ -87,5 +87,74 @@ class TestTrades(unittest.TestCase):
                                0.10 - 2 * 25 / 1e4 - 0.05 * 73 / 365, places=9)  # -50bps -1%
 
 
+class TestIdeaReturn(unittest.TestCase):
+    def _idea(self, neut_notional):
+        from elp.express import RISK_BUDGET, STOP
+        n = RISK_BUDGET / STOP
+        return {"entry_date": date(2020, 1, 1),
+                "primary": {"ticker": "S", "direction": 1, "instrument": "stock",
+                            "notional": n, "entry_px": 100.0},
+                "neutralizer": {"ticker": "H", "direction": -1, "instrument": "stock",
+                                "notional": neut_notional, "entry_px": 50.0}}
+
+    def test_dollar_neutral_pair_nets_the_two_legs(self):
+        from elp.express import RISK_BUDGET, STOP
+        from elp.trades import idea_return
+        idea = self._idea(RISK_BUDGET / STOP)          # equal notionals
+        # long S +10%, short H where H +4% -> short loses 4%; net = +10% - 4% = +6%
+        ret, expired = idea_return(idea, {"S": 110.0, "H": 52.0}, date(2020, 1, 20))
+        self.assertAlmostEqual(ret, 0.06, places=6)
+        self.assertFalse(expired)
+
+    def test_beta_weighted_hedge(self):
+        from elp.express import RISK_BUDGET, STOP
+        from elp.trades import idea_return
+        n = RISK_BUDGET / STOP
+        idea = self._idea(0.5 * n)                     # beta 0.5 hedge
+        # long S +10%; short H +10% weighted 0.5 -> -5%; net +5%
+        ret, _ = idea_return(idea, {"S": 110.0, "H": 55.0}, date(2020, 1, 20))
+        self.assertAlmostEqual(ret, 0.05, places=6)
+
+
+class TestSimulateIdeas(unittest.TestCase):
+    def _bars(self, prices, start=date(2020, 1, 1)):
+        return [(start + timedelta(days=i), float(p), 1_000_000.0) for i, p in enumerate(prices)]
+
+    def test_long_idea_opens_two_legs_and_stops_on_net(self):
+        from elp.trades import simulate_ideas
+        # customer C jumps +10% -> long supplier S; no signaling counterpart -> SPY hedge.
+        cust = [100] * 10 + [110] * 8
+        supp = [100] * 10 + [100, 106, 112, 120, 116, 109, 107, 107]
+        spy = [400] * 18
+        bars = {"C": self._bars(cust), "S": self._bars(supp), "SPY": self._bars(spy)}
+        closed, opens = simulate_ideas([("S", "C")], bars, lookback=5)
+        idea = (closed + opens)[0]
+        self.assertEqual(idea["primary"]["ticker"], "S")
+        self.assertEqual(idea["expression"], "stock-hedge")
+        self.assertEqual(idea["neutralizer"]["ticker"], "SPY")
+
+    def test_pairs_two_opposite_signaling_suppliers(self):
+        from elp.trades import simulate_ideas
+        cust_up = [100] * 10 + [112] * 8       # S1 long
+        cust_dn = [100] * 10 + [88] * 8        # S2 short
+        flat = [50] * 18
+        bars = {"CU": self._bars(cust_up), "CD": self._bars(cust_dn),
+                "S1": self._bars(flat), "S2": self._bars(flat), "SPY": self._bars([400] * 18)}
+        closed, opens = simulate_ideas([("S1", "CU"), ("S2", "CD")], bars, lookback=5)
+        ideas = closed + opens
+        pair = next(i for i in ideas if i["expression"] == "stock-pair")
+        self.assertIn(pair["neutralizer"]["ticker"], {"S1", "S2"})
+
+    def test_skips_untradeable_primary_supplier(self):
+        from elp.trades import simulate_ideas
+        # $0.07 penny supplier with a SHORT signal (customer -20%) must be skipped, not crash.
+        cust = [100] * 10 + [80] * 8
+        supp = [0.07] * 18
+        spy = [400] * 18
+        bars = {"C": self._bars(cust), "S": self._bars(supp), "SPY": self._bars(spy)}
+        closed, opens = simulate_ideas([("S", "C")], bars, lookback=5)
+        self.assertEqual(closed + opens, [])   # untradeable primary -> no idea, no crash
+
+
 if __name__ == "__main__":
     unittest.main()

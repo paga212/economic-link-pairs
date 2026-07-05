@@ -28,5 +28,14 @@ class TestOptions(unittest.TestCase):
         self.assertLess(bear_put_spread(200, 100, 90, 0.25, 0.4), 0.5)
 
 
+class TestSnapStrike(unittest.TestCase):
+    def test_grid_increments(self):
+        from elp.options import snap_strike
+        self.assertEqual(snap_strike(129.06), 129.0)   # $1 grid in the $25-200 band
+        self.assertEqual(snap_strike(143.40), 143.0)
+        self.assertEqual(snap_strike(23.30), 23.5)     # $0.50 grid under $25
+        self.assertEqual(snap_strike(421.54), 420.0)   # $5 grid at/above $200
+
+
 if __name__ == "__main__":
     unittest.main()

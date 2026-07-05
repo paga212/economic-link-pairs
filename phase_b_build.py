@@ -78,7 +78,11 @@ def main(max_filers: int = 150) -> None:
 
     uniq = {(x["supplier"], x["customer"]): x for x in links}
     out = sorted(uniq.values(), key=lambda z: z["supplier"])
+    from elp.linkcheck import validate_links
+    out, rejected = validate_links(out, ticker_map=(by_cik, by_name))
     json.dump(out, open(OUT, "w"), indent=1)
+    json.dump(rejected, open("rejected_links.json", "w"), indent=1)
+    print(f"validated: kept {len(out)}, quarantined {len(rejected)} -> rejected_links.json")
     named = [x for x in out if x.get("named") and (x.get("confidence") or 0) >= 0.6]
     print(f"\nscanned {scanned} listed filers | resolved links {len(out)} "
           f"| named+confident {len(named)} | distinct customers {len({x['customer'] for x in named})} "

@@ -2,7 +2,7 @@
 
 **Status:** design approved 2026-07-05 (brainstormed with Pierre). Awaiting spec review → implementation plan.
 **Builds on:** the `expression-engine` branch (uses `elp/liquidity.py::is_tradeable`/`dollar_adv` and `elp/tiingo.py::fetch_daily_bars`, both added there). Assume that branch is merged (or this branch rebases onto it) first.
-**Reuses:** `elp/edgar.py::norm` (name normalization), stdlib `difflib`, `urllib`.
+**Reuses:** `elp/edgar.py` — `norm` (name normalization), **`load_ticker_map()` (already loads SEC `company_tickers.json` with the required User-Agent)**, and `resolve`. Plus stdlib `difflib`. No new SEC loader is needed.
 
 ## 1. Context and goal
 
@@ -17,7 +17,7 @@ Two distinct failure modes: **wrong ticker resolution** (bad signal) and **bad p
 
 ## 2. The checks (`validate_links`)
 
-A function `validate_links(links, bars_fn=fetch_daily_bars, sec_map=load_sec_map) -> (good, rejected)` runs each `(supplier, customer, customer_raw)` link through three cheap checks and quarantines failures with a reason. Dependencies are injectable so unit tests run offline.
+A function `validate_links(links, bars_fn=fetch_daily_bars, ticker_map=None) -> (good, rejected)` runs each link dict (`{supplier, customer, customer_raw, …}`, the `universe_links.json` shape) through three cheap checks and quarantines failures with a reason. `ticker_map` is `(by_cik, by_name)` from `edgar.load_ticker_map()` (loaded once by the caller; `None` → load it). Both `bars_fn` and `ticker_map` are injectable so unit tests pass stubs and run offline.
 
 1. **Supplier price-sanity** (catches MZTI-class): fetch supplier bars; reject if the series is missing, fails `is_tradeable` (price ≥ $5, ADV ≥ $5M — existing), or has an absurd adjacent-bar jump (any day-over-day ratio > `GAP_MAX` ≈ 5×, which flags the $0.07↔$115 glitch). Reason: `illiquid` or `bad_bars`. The supplier is the leg we trade, so its data must be clean.
 2. **Customer price-sanity**: same liquidity + gap check on the customer ticker (the signal source must be a real, liquid name). Reason: `illiquid` / `bad_bars`.
@@ -25,17 +25,22 @@ A function `validate_links(links, bars_fn=fetch_daily_bars, sec_map=load_sec_map
 
 A link is **kept only if it passes all three checks**; the first failing check's reason is recorded and the link is quarantined. We do NOT repair bad bars or re-resolve wrong tickers automatically — failing links are simply quarantined (YAGNI). The supplier ticker is not name-checked (it comes from the filing's own EDGAR metadata, which is reliable; only the extracted *customer* name→ticker hop is error-prone).
 
-## 3. Name↔ticker mechanics
+## 3. Name↔ticker mechanics (reuse the existing SEC infra)
 
-- **Reference:** SEC `company_tickers.json` (`ticker → {cik, title}`), fetched once with a descriptive `User-Agent` (SEC requirement) and cached to a gitignored local file (`sec_tickers.json`); refetched if missing. `load_sec_map()` returns `{ticker: title}` plus the title list for reverse lookup.
-- **Forward check:** `similar(norm(customer_raw), norm(sec_map[stored_ticker]))` via `difflib.SequenceMatcher`; reject `name_mismatch` if below `NAME_SIM_MIN` ≈ 0.6.
-- **Ambiguity guard:** re-resolve `customer_raw` against all SEC titles (`difflib.get_close_matches`); if it does not map to a single confident ticker (e.g. bare "Alpha" matches many), reject `ambiguous`. This is why `NRP→ATGL` dies: "Alpha" is not confidently resolvable and `ATGL`'s real title won't match it.
-- Net on current data: `ADSK→SNX` ("TD Synnex Corporation" ≈ SNX title) passes; `NRP→ATGL` fails name/ambiguity; `MZTI→WMT` fails the supplier gap-check.
+The SEC reference already exists: `edgar.load_ticker_map()` returns `(by_cik, by_name)` from `company_tickers.json`, and `edgar.norm` normalizes names (drops Inc./Corp./Group/Technology/… suffixes, punctuation, case). **Reuse these — do not build a second SEC loader.** Derive `ticker_to_title = {v["ticker"]: v["title"] for v in by_cik.values()}`.
+
+The customer name↔ticker check has three parts; the link is rejected on the **first** that fails:
+
+1. **Existence** — the stored customer ticker must be a real SEC ticker (present in `ticker_to_title`); else `unknown_ticker`.
+2. **Ambiguity (the load-bearing check that catches NRP→ATGL)** — `customer_raw` must be specific enough to identify one company. Reject `ambiguous` if the count of SEC titles whose normalized token-set contains **all** tokens of `norm(customer_raw)` exceeds `AMBIG_MAX` (≈ 3). A truncated "Alpha" is a leading token of many companies (Alphabet, Alpha Pro Tech, Alpha Metallurgical, …) → ambiguous; "Walmart"/"TD Synnex" each match one → fine. **Why this and not similarity:** the LLM truncated "Alpha Metallurgical Resources" to "Alpha", and `resolve("Alpha")` landed on `ATGL` (a different "Alpha …" company). "Alpha" and `ATGL`'s suffix-stripped title *both* normalize to "alpha", so a forward similarity check would score ~1.0 and pass — only the ambiguity count catches it.
+3. **Consistency** — `difflib.SequenceMatcher` ratio of `norm(customer_raw)` vs `norm(ticker_to_title[ticker])` must be ≥ `NAME_SIM_MIN` (≈ 0.6); else `name_mismatch`. Catches a resolved ticker whose real company name is unrelated to the extracted name (the case where the wrong ticker's title does NOT coincidentally normalize to the raw name).
+
+Net on current data: `ADSK→SNX` ("TD Synnex Corporation" ≈ SNX title, unambiguous) passes; `NRP→ATGL` fails **ambiguity**; `MZTI→WMT` fails the **supplier gap-check** (customer WMT/"Walmart" is correct).
 
 ## 4. Handling + where it runs
 
 - **Quarantine, never silent-drop.** `rejected` = `[{supplier, customer, customer_raw, reason}]`. Good links → `universe_links.json`; rejected → **`rejected_links.json`** (audit trail); print `kept N, rejected M: <reasons>`.
-- **New module `elp/linkcheck.py`** holds `validate_links`, `load_sec_map`, and the checks. Reuses `is_tradeable`/`dollar_adv`, `fetch_daily_bars`, `edgar.norm`, `difflib`. No new deps.
+- **New module `elp/linkcheck.py`** holds `validate_links` and the three checks. Reuses `is_tradeable`/`dollar_adv` (liquidity), `fetch_daily_bars` (bars), `edgar.load_ticker_map`/`edgar.norm` (SEC map + normalization), and stdlib `difflib`. No new SEC loader, no new deps.
 - **Standalone entry `linkcheck.py`** (mirrors `track.py`): load current `universe_links.json` → `validate_links` → write cleaned file + `rejected_links.json` → print summary. Runs the one-time cleanup and any re-check.
 - **Durable guard:** `phase_b_build.py` calls `validate_links` after extraction, before writing `universe_links.json`, so every rebuild is auto-validated; rejects go to `rejected_links.json`.
 - **`load_universe` is unchanged** — reads the already-validated `universe_links.json`; `track.py` pays no per-run validation cost.
@@ -46,11 +51,11 @@ A link is **kept only if it passes all three checks**; the first failing check's
 
 ## 6. Config (frozen, documented)
 
-`GAP_MAX ≈ 5.0` (max adjacent-bar ratio), `NAME_SIM_MIN ≈ 0.6` (difflib ratio floor), plus the liquidity floors reused from `elp/liquidity.py`. `SEC_USER_AGENT` = a descriptive string with a contact (SEC requires it). All module constants; do not tune on live outcomes.
+`GAP_MAX ≈ 5.0` (max adjacent-bar ratio), `NAME_SIM_MIN ≈ 0.6` (difflib ratio floor), `AMBIG_MAX ≈ 3` (max SEC titles a `customer_raw` may match before it's "ambiguous"), plus the liquidity floors reused from `elp/liquidity.py`. The SEC User-Agent is already set in `edgar.py` (`UA`). All module constants; do not tune on live outcomes.
 
 ## 7. Testing (offline)
 
-`validate_links` with a stub `bars_fn` and stub `sec_map` (no network):
+`validate_links` with a stub `bars_fn` and stub `ticker_map` (no network):
 - good link (name matches, clean liquid bars) → **kept**;
 - customer ticker whose SEC title ≠ `customer_raw` → `name_mismatch`;
 - generic/ambiguous `customer_raw` → `ambiguous`;

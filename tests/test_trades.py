@@ -116,5 +116,35 @@ class TestIdeaReturn(unittest.TestCase):
         self.assertAlmostEqual(ret, 0.05, places=6)
 
 
+class TestSimulateIdeas(unittest.TestCase):
+    def _bars(self, prices, start=date(2020, 1, 1)):
+        return [(start + timedelta(days=i), float(p), 1_000_000.0) for i, p in enumerate(prices)]
+
+    def test_long_idea_opens_two_legs_and_stops_on_net(self):
+        from elp.trades import simulate_ideas
+        # customer C jumps +10% -> long supplier S; no signaling counterpart -> SPY hedge.
+        cust = [100] * 10 + [110] * 8
+        supp = [100] * 10 + [100, 106, 112, 120, 116, 109, 107, 107]
+        spy = [400] * 18
+        bars = {"C": self._bars(cust), "S": self._bars(supp), "SPY": self._bars(spy)}
+        closed, opens = simulate_ideas([("S", "C")], bars, lookback=5)
+        idea = (closed + opens)[0]
+        self.assertEqual(idea["primary"]["ticker"], "S")
+        self.assertEqual(idea["expression"], "stock-hedge")
+        self.assertEqual(idea["neutralizer"]["ticker"], "SPY")
+
+    def test_pairs_two_opposite_signaling_suppliers(self):
+        from elp.trades import simulate_ideas
+        cust_up = [100] * 10 + [112] * 8       # S1 long
+        cust_dn = [100] * 10 + [88] * 8        # S2 short
+        flat = [50] * 18
+        bars = {"CU": self._bars(cust_up), "CD": self._bars(cust_dn),
+                "S1": self._bars(flat), "S2": self._bars(flat), "SPY": self._bars([400] * 18)}
+        closed, opens = simulate_ideas([("S1", "CU"), ("S2", "CD")], bars, lookback=5)
+        ideas = closed + opens
+        pair = next(i for i in ideas if i["expression"] == "stock-pair")
+        self.assertIn(pair["neutralizer"]["ticker"], {"S1", "S2"})
+
+
 if __name__ == "__main__":
     unittest.main()

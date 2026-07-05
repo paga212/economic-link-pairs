@@ -168,6 +168,75 @@ def simulate(links, prices, enter=ENTER, exit_=EXIT, trail=TRAIL, lookback=LOOKB
     return closed, list(open_tr.values())
 
 
+def _bars_maps(bars: dict) -> dict:
+    """Like _maps but from (date, px, vol) bars; keeps a price-only map for marking."""
+    return _maps({t: [(d, px) for d, px, _ in series] for t, series in bars.items()})
+
+
+def simulate_ideas(links, bars, enter=ENTER, exit_=EXIT, trail=TRAIL, lookback=LOOKBACK):
+    """Event-driven two-legged ideas. Returns (closed_ideas, open_ideas). CASH expressions."""
+    from elp.express import HEDGE_ETF, build_idea      # local import avoids a cycle
+    maps = _bars_maps(bars)
+    cust_of: dict[str, str] = {}
+    for s, c in links:
+        cust_of.setdefault(s, c)
+    tr = {c: _trailing(maps[c], lookback) for c in set(cust_of.values()) if c in maps}
+
+    all_dates = sorted({d for s in cust_of for d in maps.get(s, {}).get("dates", [])})
+    open_ideas: dict[str, dict] = {}      # keyed by primary supplier
+    used: set = set()
+    closed: list = []
+
+    for d in all_dates:
+        marks = {t: maps[t]["px"][d] for t in maps if d in maps[t]["px"]}
+        # 1) manage open ideas on net return
+        for s in list(open_ideas):
+            idea = open_ideas[s]
+            if idea["primary"]["ticker"] not in marks or idea["neutralizer"]["ticker"] not in marks:
+                continue
+            ret, expired = idea_return(idea, marks, d)
+            idea["peak"] = max(idea["peak"], ret)
+            csig = tr.get(idea["customer"], {}).get(d)
+            reason = None
+            if ret <= idea["peak"] - trail:
+                reason = "trail_stop"
+            elif csig is not None and ((idea["side"] > 0 and csig < exit_) or
+                                       (idea["side"] < 0 and csig > -exit_)):
+                reason = "signal"
+            elif expired:
+                reason = "expiry"
+            if reason:
+                idea.update(exit_date=d, ret=ret, reason=reason, days=(d - idea["entry_date"]).days)
+                closed.append(idea)
+                used.discard(idea["primary"]["ticker"])
+                used.discard(idea["neutralizer"]["ticker"])
+                del open_ideas[s]
+        # 2) today's signaling pool (for counterpart pairing)
+        signaling = {}
+        for s, c in cust_of.items():
+            csig = tr.get(c, {}).get(d)
+            if csig is not None and abs(csig) >= enter:
+                signaling[s] = csig
+        # 3) open new ideas
+        for s, c in cust_of.items():
+            if s in open_ideas or s in used or s not in maps or d not in maps[s]["px"]:
+                continue
+            csig = tr.get(c, {}).get(d)
+            if csig is None:
+                continue
+            side = 1 if csig >= enter else (-1 if csig <= -enter else 0)
+            if not side:
+                continue
+            i = maps[s]["idx"][d]
+            view = {"supplier": s, "customer": c, "side": side,
+                    "entry_px": maps[s]["px"][d], "iv": _vol(maps[s], i)}
+            idea = build_idea(view, d, bars, signaling, used)
+            used.add(idea["primary"]["ticker"])
+            used.add(idea["neutralizer"]["ticker"])
+            open_ideas[s] = idea
+    return closed, list(open_ideas.values())
+
+
 def trade_stats(closed: list[dict], spread_bps: float = 0.0, borrow_apr: float = 0.0) -> dict:
     """Trade-level stats. Default (0,0) = gross; pass costs for net (SPREAD_BPS/BORROW_APR)."""
     n = len(closed)

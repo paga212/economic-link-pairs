@@ -29,19 +29,20 @@ def _price_ok(bars) -> tuple[bool, str]:
 
 
 def _name_ok(ticker, raw, ticker_to_title, title_token_sets) -> tuple[bool, str]:
-    """(ok, reason) for the customer name<->ticker mapping. Rejects unknown tickers, generic
-    names that match many companies (ambiguous), and titles unrelated to the extracted name."""
-    if ticker not in ticker_to_title:
-        return False, "unknown_ticker"
+    """(ok, reason) for the customer name<->ticker mapping. Rejects generic names that match
+    many companies (ambiguous) and, when the ticker is in the SEC map, titles unrelated to the
+    extracted name (name_mismatch). A ticker absent from the domestic SEC map (foreign ADRs,
+    some multi-class tickers) is NOT rejected on that basis alone — ambiguity still applies."""
     raw_tokens = set(norm(raw).split())
     if not raw_tokens:
         return False, "ambiguous"
     matches = sum(1 for toks in title_token_sets if raw_tokens <= toks)
     if matches > AMBIG_MAX:
         return False, "ambiguous"
-    sim = SequenceMatcher(None, norm(raw), norm(ticker_to_title[ticker])).ratio()
-    if sim < NAME_SIM_MIN:
-        return False, "name_mismatch"
+    if ticker in ticker_to_title:
+        sim = SequenceMatcher(None, norm(raw), norm(ticker_to_title[ticker])).ratio()
+        if sim < NAME_SIM_MIN:
+            return False, "name_mismatch"
     return True, ""
 
 

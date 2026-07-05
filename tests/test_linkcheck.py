@@ -48,8 +48,12 @@ class TestNameOk(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(reason, "ambiguous")
 
-    def test_unknown_ticker(self):
-        self.assertEqual(_name_ok("ZZZZ", "Whatever", self.T2T, self.TOKS)[1], "unknown_ticker")
+    def test_unknown_ticker_specific_name_kept(self):
+        # foreign ADR / multi-class ticker absent from the SEC map, but a specific name -> kept
+        self.assertEqual(_name_ok("SONY", "Sony Group Corporation", self.T2T, self.TOKS), (True, ""))
+
+    def test_unknown_ticker_ambiguous_still_rejected(self):
+        self.assertEqual(_name_ok("ZZZZ", "Alpha", self.T2T, self.TOKS), (False, "ambiguous"))
 
     def test_name_mismatch(self):
         # ticker exists and raw is specific, but its real title is unrelated

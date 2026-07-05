@@ -15,6 +15,15 @@ MODEL = "claude-haiku-4-5"
 _URL = "https://api.anthropic.com/v1/messages"
 
 
+class AnthropicError(RuntimeError):
+    """API failure that carries the HTTP status (None for network errors), so callers can
+    distinguish a 4xx model-availability/retention rejection from a transient 5xx/network drop."""
+
+    def __init__(self, msg: str, code: int | None = None):
+        super().__init__(msg)
+        self.code = code
+
+
 def _key() -> str:
     raw = os.environ.get("ANTHROPIC_API_KEY")
     if not raw:
@@ -41,16 +50,36 @@ def complete(prompt: str, model: str = MODEL, max_tokens: int = 1024, system: st
         with urllib.request.urlopen(req, timeout=60) as r:
             resp = json.load(r)
     except urllib.error.HTTPError as e:
-        raise RuntimeError(f"Anthropic HTTP {e.code}") from None  # never surface the key
+        raise AnthropicError(f"Anthropic HTTP {e.code}", code=e.code) from None  # never surface the key
+    except urllib.error.URLError as e:
+        raise AnthropicError(f"Anthropic network error: {e.reason}") from None
     return "".join(b.get("text", "") for b in resp.get("content", []) if b.get("type") == "text")
 
 
-def extract_json(prompt: str, **kw):
-    """Call complete() and parse the first JSON array/object in the reply (None on failure)."""
-    m = re.search(r"(\[.*\]|\{.*\})", complete(prompt, **kw), re.S)
+def complete_fallback(prompt: str, primary: str = "claude-fable-5",
+                      fallback: str = "claude-opus-4-8", **kw) -> tuple[str, str]:
+    """Try `primary`; on a 4xx (model not enabled / retention / bad request) degrade to
+    `fallback`. Returns (reply_text, model_actually_used). Transient 5xx/network errors
+    propagate (they'd fail on the fallback too, and must not masquerade as a model swap)."""
+    try:
+        return complete(prompt, model=primary, **kw), primary
+    except AnthropicError as e:
+        if e.code is not None and 400 <= e.code < 500:
+            return complete(prompt, model=fallback, **kw), fallback
+        raise
+
+
+def parse_json(text: str):
+    """Parse the first JSON array/object embedded in `text` (None on failure)."""
+    m = re.search(r"(\[.*\]|\{.*\})", text, re.S)
     if not m:
         return None
     try:
         return json.loads(m.group(1))
     except json.JSONDecodeError:
         return None
+
+
+def extract_json(prompt: str, **kw):
+    """Call complete() and parse the first JSON array/object in the reply (None on failure)."""
+    return parse_json(complete(prompt, **kw))

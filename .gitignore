@@ -18,8 +18,9 @@ data/
 *.token
 *.key
 
-# Run logs + generated dashboard
+# Run logs + generated dashboard/digest
 paper_run.log
 *.log
 dashboard.html
+digest.json
 site/

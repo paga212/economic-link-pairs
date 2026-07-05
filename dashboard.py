@@ -9,7 +9,7 @@ import json
 import os
 from html import escape
 
-OUT, STATE = "site/index.html", "paper_state.json"
+OUT, STATE, DIGEST = "site/index.html", "paper_state.json", "digest.json"
 
 
 def build() -> None:
@@ -20,6 +20,28 @@ def build() -> None:
 
     def rcls(x):
         return "pos" if x > 0 else "neg"
+
+    # Optional Master digest (Fable-5 / Opus). Additive: absent -> section omitted, tables
+    # unchanged. Every number here comes from paper_state.json, never the model.
+    digest_html = ""
+    try:
+        dg = json.load(open(DIGEST))
+    except (FileNotFoundError, ValueError):
+        dg = None
+    if dg:
+        ranked = "".join(
+            f"<li><b>{escape(r['supplier'])}</b> &larr; {escape(r['customer'])} "
+            f"<span class=sub>({escape(r['kind'])}, "
+            f"<span class={rcls(r['ret'])}>{r['ret']*100:+.1f}%</span>)</span> — "
+            f"{escape(r.get('rationale', '—'))}</li>"
+            for r in dg.get("ranked_open", []))
+        watch = "".join(f"<li>{escape(w)}</li>" for w in dg.get("watch", []))
+        digest_html = (
+            f"<h2>Daily read <span class=sub>({escape(str(dg.get('model_used', '—')))})</span></h2>"
+            f"<p>{escape(dg.get('summary', ''))}</p>"
+            + (f"<ol class=ranked>{ranked}</ol>" if ranked else "")
+            + (f"<p class=sub>Watch:</p><ul>{watch}</ul>" if watch else "")
+            + f"<p class=muted>{escape(dg.get('caveat', ''))}</p>")
 
     open_rows = "".join(
         f"<tr><td>{escape(o['kind'])}</td><td>{escape(o['supplier'])}</td>"
@@ -62,6 +84,7 @@ def build() -> None:
 <div class=banner><b>Forward out-of-sample paper-trade,</b> net of costs. Dynamic per-trade
 management (trailing stop + signal exit); shorts as bear-put-spreads (Grade-C, optimistic).
 The evidence prior is weak — judged against a pre-set 12-month kill rule.</div>
+{digest_html}
 <h2>Open trades</h2>
 <table><tr><th>Kind</th><th>Supplier</th><th>Customer</th><th>Since</th><th>Held</th><th>Unreal.</th><th>Stop</th></tr>{open_rows}</table>
 <h2>Out-of-sample results (net)</h2>{oos}

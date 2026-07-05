@@ -36,15 +36,6 @@
   "date": "2026-02-13"
  },
  {
-  "supplier": "FRPH",
-  "customer": "VMC",
-  "pct": 26,
-  "named": true,
-  "confidence": 0.95,
-  "customer_raw": "Vulcan Materials Company",
-  "date": "2026-04-15"
- },
- {
   "supplier": "GILD",
   "customer": "CAH",
   "pct": 29,
@@ -117,15 +108,6 @@
   "date": "2025-08-21"
  },
  {
-  "supplier": "NRP",
-  "customer": "ATGL",
-  "pct": 26,
-  "named": true,
-  "confidence": 0.95,
-  "customer_raw": "Alpha",
-  "date": "2026-02-27"
- },
- {
   "supplier": "PG",
   "customer": "WMT",
   "pct": 16,
@@ -133,15 +115,6 @@
   "confidence": 0.99,
   "customer_raw": "Walmart Inc.",
   "date": "2025-08-04"
- },
- {
-  "supplier": "SGMO",
-  "customer": "PFE",
-  "pct": 28,
-  "named": true,
-  "confidence": 0.95,
-  "customer_raw": "Pfizer Inc.",
-  "date": "2026-03-30"
  },
  {
   "supplier": "TTWO",

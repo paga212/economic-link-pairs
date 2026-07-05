@@ -43,3 +43,37 @@ def _name_ok(ticker, raw, ticker_to_title, title_token_sets) -> tuple[bool, str]
     if sim < NAME_SIM_MIN:
         return False, "name_mismatch"
     return True, ""
+
+
+def validate_links(links, bars_fn=fetch_daily_bars, ticker_map=None) -> tuple[list, list]:
+    """Partition links into (good, rejected). Each rejected link carries a 'reason'. Checks:
+    supplier price-sanity, customer price-sanity, then customer name<->ticker (first failure wins)."""
+    if ticker_map is None:
+        ticker_map = load_ticker_map()
+    by_cik, _ = ticker_map
+    ticker_to_title = {v["ticker"]: v["title"] for v in by_cik.values()}
+    title_token_sets = [set(norm(t).split()) for t in ticker_to_title.values()]
+
+    cache: dict = {}
+    def _bars(t):
+        if t not in cache:
+            try:
+                cache[t] = bars_fn(t)
+            except Exception:
+                cache[t] = []
+        return cache[t]
+
+    good, rejected = [], []
+    for lk in links:
+        ok, reason = _price_ok(_bars(lk["supplier"]))
+        if not ok:
+            rejected.append({**lk, "reason": f"supplier_{reason}"}); continue
+        ok, reason = _price_ok(_bars(lk["customer"]))
+        if not ok:
+            rejected.append({**lk, "reason": f"customer_{reason}"}); continue
+        ok, reason = _name_ok(lk["customer"], lk.get("customer_raw", ""),
+                              ticker_to_title, title_token_sets)
+        if not ok:
+            rejected.append({**lk, "reason": reason}); continue
+        good.append(lk)
+    return good, rejected

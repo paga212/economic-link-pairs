@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.linkcheck import _price_ok, _name_ok  # noqa: E402
+from elp.linkcheck import _price_ok, _name_ok, validate_links  # noqa: E402
 from elp.edgar import norm  # noqa: E402
 
 
@@ -55,6 +55,34 @@ class TestNameOk(unittest.TestCase):
         # ticker exists and raw is specific, but its real title is unrelated
         ok, reason = _name_ok("SNX", "Nvidia Corporation", self.T2T, self.TOKS)
         self.assertEqual((ok, reason), (False, "name_mismatch"))
+
+
+class TestValidateLinks(unittest.TestCase):
+    def _map(self):
+        t2t = {"SNX": "TD SYNNEX Corporation", "WMT": "Walmart Inc.", "ADSK": "Autodesk Inc",
+               "MZTI": "Mozzarti Inc", "NRP": "Natural Resource Partners LP",
+               "ATGL": "Alpha Technology Group Ltd", "AMR": "Alpha Metallurgical Resources Inc",
+               "AOSL": "Alpha and Omega Semiconductor Ltd", "APT": "Alpha Pro Tech Ltd"}
+        by_cik = {i: {"ticker": tk, "title": ti} for i, (tk, ti) in enumerate(t2t.items())}
+        return (by_cik, {})
+
+    def _bars_fn(self, t):
+        good = bars([50] * 63)
+        glitch = bars([115] * 30 + [0.07] + [115] * 32)   # MZTI glitch
+        return {"ADSK": good, "SNX": good, "MZTI": glitch, "WMT": good,
+                "NRP": good, "ATGL": good}.get(t, good)
+
+    def test_keeps_good_rejects_bad(self):
+        links = [
+            {"supplier": "ADSK", "customer": "SNX", "customer_raw": "TD Synnex Corporation"},
+            {"supplier": "MZTI", "customer": "WMT", "customer_raw": "Walmart Inc."},   # supplier glitch
+            {"supplier": "NRP", "customer": "ATGL", "customer_raw": "Alpha"},           # ambiguous
+        ]
+        good, rejected = validate_links(links, bars_fn=self._bars_fn, ticker_map=self._map())
+        self.assertEqual([g["supplier"] for g in good], ["ADSK"])
+        reasons = {r["supplier"]: r["reason"] for r in rejected}
+        self.assertEqual(reasons["MZTI"], "supplier_bad_bars")
+        self.assertEqual(reasons["NRP"], "ambiguous")
 
 
 if __name__ == "__main__":

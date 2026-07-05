@@ -6,7 +6,8 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.express import BETA_MAX, BETA_MIN, RISK_BUDGET, STOP, _clamp_beta, build_idea  # noqa: E402
+from elp.express import (BETA_MAX, BETA_MIN, RISK_BUDGET, STOP, _clamp_beta, build_idea,  # noqa: E402
+                         describe_leg)
 
 
 def liquid_bars(px=50.0, start=date(2020, 1, 1)):
@@ -63,6 +64,40 @@ class TestExpress(unittest.TestCase):
         self.assertEqual(idea["primary"]["instrument"], "spread")
         self.assertEqual(idea["primary"]["k_long"], 129.0)     # snapped from 129.06
         self.assertTrue(idea["primary"]["k_short"] < idea["primary"]["k_long"])
+
+
+class TestDescribeLeg(unittest.TestCase):
+    def test_long_stock_shows_shares_price_and_notional(self):
+        leg = {"role": "primary", "ticker": "GILD", "direction": 1, "instrument": "stock",
+               "notional": 200000.0, "entry_px": 123.84}
+        s = describe_leg(leg)
+        self.assertIn("long", s)
+        self.assertIn("1,615 sh", s)          # round(200000/123.84)
+        self.assertIn("GILD", s)
+        self.assertIn("$123.84", s)
+        self.assertIn("$200k", s)
+
+    def test_short_bear_put_spread_states_structure_and_risk(self):
+        leg = {"role": "primary", "ticker": "PG", "direction": -1, "instrument": "spread",
+               "notional": 200000.0, "entry_px": 147.4, "S0": 147.4, "k_long": 147.0,
+               "k_short": 133.0, "debit": 3.60, "dte": 45}
+        s = describe_leg(leg)
+        self.assertIn("bear put spread", s)
+        self.assertIn("buy 147P", s)          # long the higher-strike put
+        self.assertIn("sell 133P", s)         # short the lower-strike put
+        self.assertIn("exp 45d", s)           # DTE spelled out, not "45DTE"
+        self.assertIn("14 spreads", s)        # round(200000/(100*147.4))
+        self.assertIn("max risk", s)
+
+    def test_neutralizer_tags_pair_vs_hedge(self):
+        pair = {"role": "neutralizer", "ticker": "VC", "direction": -1, "instrument": "stock",
+                "notional": 200000.0, "entry_px": 102.45}
+        self.assertIn("pair", describe_leg(pair, "stock-pair"))
+        hedge = {"role": "neutralizer", "ticker": "SPY", "direction": 1, "instrument": "stock",
+                 "notional": 60000.0, "entry_px": 744.78}
+        h = describe_leg(hedge, "stock-hedge")
+        self.assertIn("hedge", h)             # β-hedge tag
+        self.assertIn("81 sh", h)             # round(60000/744.78)
 
 
 if __name__ == "__main__":

@@ -73,3 +73,32 @@ def build_idea(view: dict, day, bars: dict, signaling: dict, used: set) -> dict:
     return {"supplier": view["supplier"], "customer": view["customer"], "side": view["side"],
             "entry_date": day, "primary": primary, "neutralizer": neutralizer,
             "expression": expression, "risk_cap": "soft", "peak": 0.0}
+
+
+def _money(x: float) -> str:
+    """Compact approximate dollars: '≈$5.0k' for thousands, '≈$740' below."""
+    return f"≈${x / 1000:.1f}k" if x >= 1000 else f"≈${x:.0f}"
+
+
+def describe_leg(leg: dict, expression: str = "") -> str:
+    """Human-readable one-line description of a leg, shared by the dashboard and the email so
+    they can't drift. Exact share count for stock; for a bear-put-spread, the explicit structure
+    (buy the higher-strike put, sell the lower), an implied contract count, and max risk. Every
+    figure is derived from the leg's own notional/price fields — none comes from an LLM. The
+    contract count and max risk are `≈` because the spread is a $200k-notional Grade-C model,
+    not a literally-sized order."""
+    notl, px = leg["notional"], leg["entry_px"]
+    if leg["instrument"] == "spread":
+        spot = leg.get("S0", px)
+        contracts = max(1, round(notl / (100 * spot)))
+        max_risk = contracts * leg["debit"] * 100
+        return (f'bear put spread on {leg["ticker"]} (short): '
+                f'buy {leg["k_long"]:.0f}P / sell {leg["k_short"]:.0f}P · '
+                f'≈{contracts} spreads · ${leg["debit"]:.2f} debit · exp {leg["dte"]}d · '
+                f'{_money(max_risk)} max risk')
+    shares = round(notl / px) if px else 0
+    side = "long" if leg["direction"] > 0 else "short"
+    tag = ""
+    if leg.get("role") == "neutralizer":
+        tag = " · pair" if expression == "stock-pair" else " · β-hedge"
+    return f'{side} {shares:,} sh {leg["ticker"]} @ ${px:.2f} (${notl / 1000:.0f}k{tag})'

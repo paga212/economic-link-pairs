@@ -26,7 +26,9 @@ STATE = {
     "closed": [],
     "stats": {"n": 0, "win_rate": None, "mean_ret": None},
 }
-NOTES = {"SWKS": "Skyworks — Apple", "AXL": "American Axle — GM"}
+# Keyed by (supplier, customer) — a supplier may name several customers; the note must match
+# the customer actually traded, not just the supplier.
+NOTES = {("SWKS", "AAPL"): "Skyworks — Apple", ("AXL", "GM"): "American Axle — GM"}
 
 
 class TestPrompt(unittest.TestCase):
@@ -41,6 +43,16 @@ class TestPrompt(unittest.TestCase):
     def test_prompt_handles_no_open_trades(self):
         p = _prompt({"open": [], "stats": {}}, {})
         self.assertIn("none open", p)
+
+    def test_note_matches_traded_customer_not_another(self):
+        # Regression: a supplier with two customers; the trade is on one of them. The note beside
+        # it must be THAT customer's note, not the other's (the (supplier,customer) keying fix).
+        state = {"open": [{"supplier": "VC", "customer": "F", "kind": "SHORT put-spread",
+                           "days": 8, "ret": 0.0, "stop": -0.05}], "stats": {}}
+        notes = {("VC", "F"): "Visteon — Ford", ("VC", "GM"): "Visteon — GM"}
+        p = _prompt(state, notes)
+        self.assertIn("Visteon — Ford", p)
+        self.assertNotIn("Visteon — GM", p)
 
 
 class TestBuildDigest(unittest.TestCase):

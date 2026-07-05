@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.trades import net_return, simulate  # noqa: E402
+from elp.trades import describe_open, net_return, simulate  # noqa: E402
 
 
 def series(prices, start=date(2020, 1, 1)):
@@ -50,6 +50,31 @@ class TestTrades(unittest.TestCase):
         closed, openn = simulate([("S", "C")], {"C": series(cust), "S": series(supp)}, lookback=self.LB)
         self.assertEqual(len(closed) + len(openn), 0)
 
+
+    def test_describe_open_stock(self):
+        # LONG stock: entry price exposed, no spread fields, live return = px/entry - 1.
+        t = {"supplier": "S", "customer": "C", "side": 1, "instrument": "stock",
+             "entry_date": date(2026, 6, 1), "entry_px": 100.0, "peak": 0.10}
+        row = describe_open(t, 110.0, date(2026, 6, 20))
+        self.assertEqual(row["kind"], "LONG stock")
+        self.assertEqual(row["entry_px"], 100.0)
+        self.assertEqual(row["days"], 19)
+        self.assertAlmostEqual(row["ret"], 0.10, places=9)
+        self.assertNotIn("k_long", row)              # stock carries no strikes
+
+    def test_describe_open_spread(self):
+        # SHORT bear-put-spread: strikes, premium, DTE, entry spot all exposed.
+        t = {"supplier": "S", "customer": "C", "side": -1, "instrument": "spread",
+             "entry_date": date(2026, 6, 1), "entry_px": 50.0, "peak": 0.02,
+             "S0": 50.0, "K1": 50.0, "K2": 45.0, "T0": 45 / 365, "iv": 0.4, "dte": 45,
+             "debit": 1.5}
+        row = describe_open(t, 48.0, date(2026, 6, 20))
+        self.assertEqual(row["kind"], "SHORT put-spread")
+        self.assertEqual((row["k_long"], row["k_short"]), (50.0, 45.0))
+        self.assertEqual(row["debit"], 1.5)
+        self.assertEqual(row["spot0"], 50.0)
+        self.assertEqual(row["dte"], 45)
+        self.assertIsInstance(row["ret"], float)
 
     def test_net_return_costs(self):
         # long: only round-trip transaction cost (no borrow)

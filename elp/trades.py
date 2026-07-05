@@ -71,6 +71,24 @@ def _mark(t: dict, px: float, d) -> tuple[float, bool]:
     return t["side"] * (px / t["entry_px"] - 1.0), False
 
 
+def describe_open(t: dict, px: float, d) -> dict:
+    """Serialize an open trade for the dashboard/state: live return, stop, and the concrete
+    structure — stock entry price, or the bear-put-spread strikes/premium/DTE. Positions are
+    equal-weighted (one unit per supplier); there is no differentiated sizing in the engine."""
+    ret, _ = _mark(t, px, d)
+    row = {
+        "supplier": t["supplier"], "customer": t["customer"], "side": t["side"],
+        "instrument": t["instrument"],
+        "kind": "LONG stock" if t["side"] > 0 else "SHORT put-spread",
+        "entry": t["entry_date"].isoformat(), "days": (d - t["entry_date"]).days,
+        "entry_px": round(t["entry_px"], 4), "ret": ret, "stop": t["peak"] - TRAIL,
+    }
+    if t["instrument"] == "spread":                 # defined-risk bear put spread
+        row.update(spot0=round(t["S0"], 4), k_long=round(t["K1"], 4), k_short=round(t["K2"], 4),
+                   debit=round(t["debit"], 4), dte=t["dte"], iv=round(t["iv"], 4))
+    return row
+
+
 def simulate(links, prices, enter=ENTER, exit_=EXIT, trail=TRAIL, lookback=LOOKBACK,
              short_mode=SHORT_MODE):
     """Return (closed_trades, open_trades). Longs = cash stock; shorts = bear put spread

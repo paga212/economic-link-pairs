@@ -6,11 +6,19 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.express import RISK_BUDGET, STOP, build_idea  # noqa: E402
+from elp.express import BETA_MAX, BETA_MIN, RISK_BUDGET, STOP, _clamp_beta, build_idea  # noqa: E402
 
 
 def liquid_bars(px=50.0, start=date(2020, 1, 1)):
     return [(start + timedelta(days=i), px, 1_000_000.0) for i in range(63)]  # $50M ADV
+
+
+class TestClampBeta(unittest.TestCase):
+    def test_clamps_degenerate_and_extreme_betas(self):
+        self.assertEqual(_clamp_beta(0.0085), BETA_MIN)   # PG's degenerate ~0.01 -> floor
+        self.assertEqual(_clamp_beta(-0.4), BETA_MIN)     # negative -> floor
+        self.assertEqual(_clamp_beta(5.0), BETA_MAX)      # spurious high -> ceiling
+        self.assertEqual(_clamp_beta(0.6), 0.6)           # sane value untouched
 
 
 class TestExpress(unittest.TestCase):

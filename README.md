@@ -11,9 +11,22 @@ worst, rebalancing monthly. The paper reports a long/short 4-factor alpha of
 over 150 bps/month (>18%/yr) on 1980–2004 CRSP/Compustat data, with customer
 links taken from Compustat segment files (SFAS 131: customers >10% of sales).
 
-The source paper PDF is in this repo. The implementation plan is in
-[PLAN.md](PLAN.md) and the supporting literature/data research in
-[research/](research/). Implementation notes live in [CLAUDE.md](CLAUDE.md).
+The source paper PDF is in this repo. 
+
+_A good summary of the paper is:  
+
+Companies are connected. If one company depends heavily on another as its main customer, then bad news for the customer should hurt the supplier too. But investors are busy and often miss these links, so the supplier's stock reacts slowly.
+
+The authors call this "limited attention." Because prices are slow to catch up, you can predict them. They tested a strategy: each month, buy suppliers whose big customers just did well, and bet against suppliers whose customers just did badly.
+
+The result: the strategy earned about 1.5 percent a month, roughly 18 percent a year, in their 1981 to 2004 test. I'd treat that as a historical backtest number worth verifying from the paper directly, not a guarantee of future returns. The effect was strongest for stocks that few investors watched closely, which supports their "people aren't paying attention" explanation.
+
+That's the whole paper: investors overlook obvious business connections, and that creates predictable stock moves._
+
+
+The implementation plan is in [PLAN.md](PLAN.md) and the supporting literature/data research in [research/](research/). 
+
+Implementation notes live in [CLAUDE.md](CLAUDE.md).
 
 ## Status: live forward paper-trade (dynamic per-trade)
 

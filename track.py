@@ -13,7 +13,7 @@ from datetime import date, datetime, timezone
 
 from elp.links import load_universe
 from elp.tiingo import fetch_daily
-from elp.trades import (BORROW_APR, SPREAD_BPS, TRAIL, _mark, net_return, simulate, trade_stats)
+from elp.trades import (BORROW_APR, SPREAD_BPS, describe_open, net_return, simulate, trade_stats)
 
 START_FILE, STATE_FILE = "paper_start.txt", "paper_state.json"
 
@@ -46,12 +46,7 @@ def main() -> None:
     open_rows = []
     for t in opens:
         d, px = last[t["supplier"]]
-        ret, _ = _mark(t, px, d)
-        open_rows.append({
-            "supplier": t["supplier"], "customer": t["customer"],
-            "kind": "LONG stock" if t["side"] > 0 else "SHORT put-spread",
-            "entry": t["entry_date"].isoformat(), "days": (d - t["entry_date"]).days,
-            "ret": ret, "stop": t["peak"] - TRAIL})
+        open_rows.append(describe_open(t, px, d))
 
     st = trade_stats(fwd, SPREAD_BPS, BORROW_APR)
     print(f"paper start {start} | open {len(open_rows)} | OOS closed {st.get('n', 0)}")

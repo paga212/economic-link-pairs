@@ -43,10 +43,21 @@ def build() -> None:
             + (f"<p class=sub>Watch:</p><ul>{watch}</ul>" if watch else "")
             + f"<p class=muted>{escape(dg.get('caveat', ''))}</p>")
 
+    def struct(o):
+        """One-line trade structure: stock entry price, or spread strikes/premium/DTE."""
+        if o.get("instrument") == "spread" and "k_long" in o:
+            return (f"bear put spread · long {o['k_long']:.2f}p / short {o['k_short']:.2f}p · "
+                    f"net debit {o['debit']:.2f} · spot@entry {o['spot0']:.2f} · "
+                    f"{o['dte']} DTE · IV~{o['iv']*100:.0f}% (proxy)")
+        if "entry_px" in o:
+            return f"long stock · entry {o['entry_px']:.2f} · equal-weight (1 unit)"
+        return "—"
+
     open_rows = "".join(
         f"<tr><td>{escape(o['kind'])}</td><td>{escape(o['supplier'])}</td>"
         f"<td>{escape(o['customer'])}</td><td>{escape(o['entry'])}</td><td>{o['days']}d</td>"
         f"<td class={rcls(o['ret'])}>{o['ret']*100:+.1f}%</td><td>{o['stop']*100:+.1f}%</td></tr>"
+        f"<tr class=detail><td colspan=7 class=muted>{escape(struct(o))}</td></tr>"
         for o in s["open"]) or "<tr><td colspan=7 class=muted>no open trades</td></tr>"
 
     st = s.get("stats", {})
@@ -75,6 +86,7 @@ def build() -> None:
  .sub,.muted{{color:#666}} .muted{{font-style:italic}}
  table{{border-collapse:collapse;width:100%;margin:.3rem 0}} th,td{{text-align:left;padding:.35rem .6rem;border-bottom:1px solid #eee;font-size:.92rem}}
  th{{color:#666;font-weight:600;font-size:.82rem}}
+ .detail td{{border-top:0;padding-top:0;font-size:.84rem}}
  .pos{{color:#0a7a3f;font-weight:600}} .neg{{color:#b02020;font-weight:600}}
  .banner{{background:#fff8e1;border:1px solid #f0d98a;border-radius:6px;padding:.6rem .8rem;font-size:.88rem;color:#664d03}}
  footer{{color:#999;font-size:.8rem;margin-top:2rem}}

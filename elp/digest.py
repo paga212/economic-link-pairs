@@ -30,7 +30,7 @@ SYSTEM = (
 def _prompt(state: dict, notes: dict) -> str:
     lines = ["Open paper trades (supplier <- principal customer | kind | days held | link):"]
     for o in state.get("open", []):
-        note = notes.get(o["supplier"], "")
+        note = notes.get((o["supplier"], o["customer"]), "")
         lines.append(f'- {o["supplier"]} <- {o["customer"]} | {o["kind"]} | {o["days"]}d | {note}')
     if not state.get("open"):
         lines.append("- (none open right now)")

@@ -20,7 +20,9 @@ def main() -> None:
     except FileNotFoundError:
         print(f"[digest] no {STATE} yet — run track.py first; skipping")
         return
-    notes = {s: n for s, c, n in load_universe()}
+    # Key by (supplier, customer): a supplier can name several customers, and the trade is on a
+    # specific one — keying by supplier alone would paste a different customer's note beside it.
+    notes = {(s, c): n for s, c, n in load_universe()}
     try:
         d = build_digest(state, notes)
     except Exception as e:                    # no key / API / network -> fail soft

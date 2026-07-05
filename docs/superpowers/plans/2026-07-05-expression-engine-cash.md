@@ -153,13 +153,22 @@ class TestLiquidity(unittest.TestCase):
         self.assertFalse(is_tradeable(thin))
 
     def test_beta_of_identical_series_is_one(self):
-        a = bars([100 * 1.01 ** i for i in range(64)], [1] * 64)
+        rb = [0.01, -0.02, 0.015, -0.005, 0.02, -0.01] * 11   # 66 varying returns
+        p = [100.0]
+        for r in rb:
+            p.append(p[-1] * (1 + r))
+        a = bars(p, [1] * len(p))
         self.assertAlmostEqual(beta(a, a), 1.0, places=6)
 
     def test_beta_of_double_moves_is_two(self):
-        b = bars([100 * 1.01 ** i for i in range(64)], [1] * 64)
-        a = bars([100 * 1.02 ** i for i in range(64)], [1] * 64)  # ~2x the log-returns
-        self.assertAlmostEqual(beta(a, b), 2.0, places=1)
+        rb = [0.01, -0.02, 0.015, -0.005, 0.02, -0.01] * 11
+        pb, pa = [100.0], [100.0]
+        for r in rb:
+            pb.append(pb[-1] * (1 + r))
+            pa.append(pa[-1] * (1 + 2 * r))   # a moves exactly 2x b each day
+        b = bars(pb, [1] * len(pb))
+        a = bars(pa, [1] * len(pa))
+        self.assertAlmostEqual(beta(a, b), 2.0, places=6)
 
 
 if __name__ == "__main__":

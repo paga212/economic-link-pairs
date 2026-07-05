@@ -14,6 +14,15 @@ from elp.trades import DTE, RISK_FREE, SPREAD_WIDTH, TRAIL
 RISK_BUDGET = 10_000.0      # max drawdown per idea (soft, stop-based for cash)
 HEDGE_ETF = "SPY"           # broad-market hedge; sector-extensible later
 STOP = TRAIL                # cash notional = RISK_BUDGET / STOP
+BETA_MIN, BETA_MAX = 0.3, 3.0   # bound the ETF-hedge beta: a noisy trailing estimate
+                                # (e.g. PG's ~0.01 in a low-vol window) must not size a
+                                # near-useless (or absurd/negative) hedge leg
+
+
+def _clamp_beta(b: float) -> float:
+    """Bound the hedge beta to a sane band so a degenerate trailing estimate can't produce a
+    near-zero (or absurdly large / negative) neutralizing leg."""
+    return min(max(b, BETA_MIN), BETA_MAX)
 
 
 def _primary_leg(view: dict) -> dict:
@@ -56,7 +65,7 @@ def build_idea(view: dict, day, bars: dict, signaling: dict, used: set) -> dict:
                        "entry_px": bars[cp][-1][1]}
         expression = "stock-pair"
     else:
-        b = beta(bars[view["supplier"]], bars[HEDGE_ETF]) if HEDGE_ETF in bars else 1.0
+        b = _clamp_beta(beta(bars[view["supplier"]], bars[HEDGE_ETF])) if HEDGE_ETF in bars else 1.0
         neutralizer = {"role": "neutralizer", "ticker": HEDGE_ETF, "direction": -view["side"],
                        "instrument": "stock", "notional": notional * b,    # beta-neutral
                        "entry_px": bars[HEDGE_ETF][-1][1]}

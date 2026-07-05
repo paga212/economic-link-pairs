@@ -61,6 +61,21 @@ is always included.
 Pierre adds this to crontab once the App Password is in place (same pattern as the paper
 cron; the spec does not edit crontab).
 
+## 5b. Cloud delivery (basement-independent) — GitHub Actions
+
+The basement cron dies with the basement PC (the storm proved it). Primary delivery therefore
+runs off-machine as a GitHub Actions scheduled workflow, `.github/workflows/weekly-email.yml`
+(Mondays 08:00 UTC + `workflow_dispatch` for manual test). It checks out the repo and runs
+`python3 email_report.py` (stdlib-only, so no install step) with `GMAIL_APP_PASSWORD` supplied
+from repo Actions **secrets**. Because `email_report.py` reads only the *committed*
+`paper_state.json`/`digest.json` and does no data refresh, the cloud job emails the last state
+the basement pushed — so a dark basement still yields the last-known snapshot.
+
+Belt-and-suspenders: GitHub Actions is the scheduled primary; the §5 basement cron is kept as an
+**on-demand fallback** (run the one-liner if the cloud path ever fails) rather than a second
+weekly schedule, to avoid a guaranteed weekly duplicate email. Scheduling both weekly would
+require a shared git-marker dedupe (more fragile than it's worth for a self-email); deferred.
+
 ## 6. Testing
 
 Offline unit tests (no network, no SMTP socket):

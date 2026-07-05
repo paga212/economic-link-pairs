@@ -2,17 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Status: greenfield
+## Status: live forward paper-trade
 
-As of this writing the repository contains only one file: the source paper
-`Economic Links and Predictable Returns (Cohen & Frazzini 2006).pdf`. There is
-no code, build system, dependency manifest, or test suite yet. Do not document
-build/lint/test commands until they actually exist — add them here as they are
-introduced.
+This is an active git repository (~25 commits). The live system is a **dynamic
+per-trade forward paper-trade** of the customer-supplier lead-lag strategy: it
+runs the engine on daily data, opens/manages trades (trailing stop + signal
+exit), and scores out-of-sample closed trades net of costs. **Recommendations
+only — it never executes, connects to a broker, or moves money.** See
+`PLAN.md` for the full design and `NOTES.md` for the build log.
 
-This folder is **not** a git repository yet (the machine convention is one git
-repo per project under `~/projects`). Consider `git init` (or `newrepo`) before
-the first substantive commit.
+Built so far: Phase 0 (data spine + signal check), Phase 1 (backtest engine),
+Phase 2a (EDGAR extractor), Phase D (dynamic per-trade engine), Phase B
+(LLM-diversified link universe). Deliberately **stdlib-only — no third-party
+deps** (no pandas/numpy); Tiingo is the production price source.
+
+### Run
+```
+python3 -m unittest discover -s tests   # 26 offline logic tests
+python3 track.py                         # daily tick → paper_state.json (needs Tiingo token)
+python3 dashboard.py                     # paper_state.json → site/index.html
+```
+`run_paper.sh` chains track → dashboard → serve → commit/push (cron `0 22 * * 1-5`).
+
+### Architecture (deterministic core; LLM owns orchestration/parsing only)
+- `elp/trades.py` — dynamic per-trade engine (entry signal, trailing stop, exits, net-of-cost stats)
+- `elp/options.py` — Black-Scholes bear-put-spread pricer (defined-risk short leg, Grade-C IV)
+- `elp/signal.py` — prior-month customer return → supplier signal
+- `elp/backtest.py` — monthly cross-sectional long/short engine (engine validation)
+- `elp/links.py` — `load_universe()` over the diversified link table (`universe_links.json`)
+- `elp/llm.py` — LLM link extraction (Phase B)
+- `elp/tiingo.py` — production prices (`fetch_daily`); `elp/prices.py` — keyless Yahoo prototype
+- `elp/edgar.py`, `elp/cf_links.py` — SEC EDGAR extractor; free Cohen-Frazzini link-file parser
+- Entry scripts: `track.py`, `dashboard.py`, and the `phase0/1/2a/2a_build/b_build/c_backtest/c_coverage/d_dynamic.py` phase drivers
 
 ## What this project is about
 
@@ -44,26 +65,27 @@ Key data facts for replication:
   files**, mapped to the customer's CRSP `permno`.
 - **Sample period**: customer-supplier data cover **1980–2004**.
 
-## Likely shape of the work (once code exists)
+## Pipeline shape
 
-A faithful replication will generally need:
+The stages are kept separable (data ingest → link mapping → signal → portfolio
+→ performance) so each can be verified against the paper independently:
 
-- **Link data**: customer-supplier relationships. In the paper this comes from
-  Compustat segment files. If those are unavailable, a documented proxy /
-  substitute source must be chosen and noted.
-- **Returns data**: monthly equity returns (CRSP-style) for suppliers and their
-  named customers.
-- **Signal construction**: prior-month customer return → supplier trade signal.
-- **Portfolio formation & backtest**: monthly rebalanced long-short book, with
-  standard risk adjustment (e.g. CAPM / Fama-French factors) to report alpha.
-
-When building these, keep the pipeline stages separable (data ingest → link
-mapping → signal → portfolio → performance) so each can be verified against the
-paper independently.
+- **Link data**: the paper uses Compustat segment files (unavailable freely).
+  We use a diversified LLM-extracted EDGAR link table (`universe_links.json`,
+  via `elp/llm.py` / `elp/edgar.py`), with the free Cohen-Frazzini link file
+  (`elp/cf_links.py`) as historical ground truth. The named-link limits are
+  documented in `research/09`.
+- **Returns data**: daily equity returns from Tiingo (`elp/tiingo.py`);
+  keyless Yahoo (`elp/prices.py`) is a prototype only.
+- **Signal construction**: prior-month customer return → supplier signal (`elp/signal.py`).
+- **Portfolio / trade formation**: the live system is the dynamic per-trade
+  engine (`elp/trades.py`); `elp/backtest.py` is the monthly cross-sectional
+  long/short engine used for validation.
 
 ## Conventions
 
 Follow the machine-global conventions in `~/.claude/CLAUDE.md` (concise commits
 and push after meaningful changes, finance/quant framing, autonomy rules).
-Prefer the standard library and well-established quant tooling (pandas, numpy)
-over bespoke code or new dependencies.
+This project is deliberately **stdlib-only** — no third-party dependencies (not
+even pandas/numpy). Keep it that way unless a dependency clearly earns its keep;
+prefer bespoke stdlib code over adding a package.

@@ -15,27 +15,34 @@ The source paper PDF is in this repo. The implementation plan is in
 [PLAN.md](PLAN.md) and the supporting literature/data research in
 [research/](research/). Implementation notes live in [CLAUDE.md](CLAUDE.md).
 
-## Status: live recommender + forward paper-trade
+## Status: live forward paper-trade (dynamic per-trade)
 
 Decision (see `NOTES.md`, `research/10`): rigorous free *historical* proof is infeasible
 (C-F links are permno-keyed; no free delisted ticker map), so we prove it **forward** —
-a live recommender logged out-of-sample and scored as holding months complete.
+a live paper-trade logged out-of-sample and scored net of costs as trades close. The live
+system is a **dynamic per-trade engine** (`elp/trades.py`): it enters on the customer
+signal, manages each trade with a trailing stop + signal-reversal exit, and expresses the
+short leg as a defined-risk **bear-put-spread** (no borrow). `track.py` runs the daily tick
+and `dashboard.py` renders the results.
 
 Stdlib-only (no third-party deps). Run:
 
 ```
-python3 -m unittest discover tests   # offline logic tests (15)
-python3 recommend.py                 # emit + log this month's long/short recs (Tiingo)
-python3 score.py                     # score matured recs vs realized returns
-python3 phase0.py / phase1.py        # earlier signal-direction check / engine on curated set
-python3 phase_c_backtest.py          # directional historical check on resolvable C-F links
+python3 -m unittest discover -s tests   # offline logic tests (26)
+python3 track.py                         # daily tick: open/manage trades + score OOS closed → paper_state.json
+python3 dashboard.py                     # paper_state.json → site/index.html
+python3 phase0.py / phase1.py            # earlier signal-direction check / engine on curated set
+python3 phase_c_backtest.py              # directional historical check on resolvable C-F links
 ```
 
-`recommend.py` needs a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`). It logs to
-`paper_log.jsonl` (the OOS audit trail). Recommendations only — no execution.
+`track.py` needs a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`). It writes
+`paper_state.json` (dashboard + OOS audit trail) and `paper_start.txt` (the OOS boundary).
+`run_paper.sh` chains track → dashboard → serve → commit/push on a weekday-evening cron.
+Recommendations only — no execution.
 
-Prices come from keyless Yahoo — a **prototype source, not production** (production
-is Tiingo per [research/08](research/08-data-procurement.md)) and survivorship-biased.
+Production prices come from **Tiingo** (`elp/tiingo.py`, per
+[research/08](research/08-data-procurement.md)); keyless Yahoo (`elp/prices.py`) survives
+only as the `phase0.py` prototype and is survivorship-biased.
 
 - **Phase 0** (`phase0.py`, `elp/signal.py`): on the built-in Apple/AMAT-supplier
   pairs the same-month link is strong (corr ~+0.5) but the one-month *lag* is absent

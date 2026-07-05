@@ -1,7 +1,15 @@
-# Implementation Plan (DRAFT — pending approval)
+# Implementation Plan (APPROVED — partially built)
 
-Status: **plan mode**. Nothing here is built yet. This is the proposal to agree
-on before writing code. Decisions locked with you on 2026-07-04:
+Status (as of 2026-07-05): decisions **approved 2026-07-04** and the build is
+underway. **Built:** Phase 0 (data spine + signal check), Phase 1 (backtest
+engine), Phase 2a (EDGAR extractor), Phase D (dynamic per-trade engine, now the
+live system), Phase B (LLM-diversified link universe) — the forward paper-trade
+is running (`track.py`). **Remaining:** Phase 3 (full agent fleet), Phase 4
+(email delivery), Phase 5 (paper-validation window), Phase 6/7 (options overlay,
+gated behind Phase 5). Per-phase status is marked in §6. The design below —
+including the §11 options overlay — remains the plan of record.
+
+Decisions locked with you on 2026-07-04:
 
 - **Data budget:** modest paid (~$50-150/mo)
 - **Universe:** S&P 500 to start
@@ -68,12 +76,13 @@ knob that degrades Fable→Opus automatically if Fable 5 isn't available.
 
 ## 6. Phased build (each phase independently verifiable)
 
-- **Phase 0 — Data spine.** Vendor integration; S&P 500 + a small hardcoded link set (a few known supplier→S&P-500-customer pairs); monthly returns. *Verify:* reproduce the correct signal direction on a known historical pair.
-- **Phase 1 — Backtest engine.** Point-in-time backtest on the small link set with cost + borrow modeling, EW & VW, 4-factor alpha. *Verify:* stable across reruns; sign/magnitude in the literature's ballpark on the same sample.
-- **Phase 2 — Link discovery (LLM).** EDGAR parser + entity resolution → point-in-time link table + QA agent. *Verify:* hand-audit a sample of extracted links against the filings (precision target).
-- **Phase 3 — Daily pipeline + agents.** Wire Master + News/Catalyst + Risk/Borrow; model routing; cron. *Verify:* end-to-end run on today's data; manually inspect a couple of pairs.
-- **Phase 4 — Delivery.** Email + dashboard. *Verify:* receive the email; load the dashboard.
-- **Phase 5 — Paper-trading validation.** Log daily recommendations, track realized out-of-sample P&L for several weeks before trusting. This is how we answer the net-of-cost question the literature couldn't.
+- **Phase 0 — Data spine.** ✅ **Built** (`phase0.py`, `elp/signal.py`, `elp/prices.py`, `elp/tiingo.py`). Vendor integration; small curated link set; returns. *Verified:* signal direction on known pairs — same-month link strong, one-month lag absent (effect lives in neglected suppliers, as the paper says).
+- **Phase 1 — Backtest engine.** ✅ **Built** (`elp/backtest.py`, `elp/cf_links.py`, `phase1.py`). Data-source-agnostic monthly long/short engine + free C-F link parser. *Verified:* stable across reruns; unit-tested.
+- **Phase 2 — Link discovery (LLM).** 🟨 **Partial** — Phase 2a EDGAR extractor built (`elp/edgar.py`); Phase B LLM link expansion built and live (`elp/llm.py`, `universe_links.json`). Remaining: entity-resolution hardening + dedicated QA agent. Named-link yield/quality limits documented in `research/09`.
+- **Phase D — Dynamic per-trade engine.** ✅ **Built** (`elp/trades.py`, `elp/options.py`, `track.py`) — *the live system.* Signal-triggered trades, trailing stop + signal exit, bear-put-spread shorts, net-of-cost scoring.
+- **Phase 3 — Daily pipeline + agents.** ⬜ **Pending.** Wire Master + News/Catalyst + Risk/Borrow; model routing. (Daily pipeline + cron already exist via `run_paper.sh`; the full agent fleet does not.)
+- **Phase 4 — Delivery.** 🟨 **Partial** — dashboard built (`dashboard.py` → `site/index.html`, served by `serve.sh`); **email digest pending** (needs a target/SMTP). *Verify:* receive the email; load the dashboard.
+- **Phase 5 — Paper-trading validation.** 🟨 **Running** — OOS clock started (`paper_start.txt`); accruing net-of-cost P&L. This is how we answer the net-of-cost question the literature couldn't.
 
 ## 7. Tech stack (ponytail full / YAGNI)
 

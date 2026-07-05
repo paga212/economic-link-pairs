@@ -3,6 +3,15 @@
 Autonomous build session. Everything below is committed and pushed to `main`.
 Full plan in `PLAN.md`; literature/data research in `research/`.
 
+> **Update 2026-07-05 (correction to the record below).**
+> - **Phase B shipped.** The LLM-diversified link universe is built and live (commits
+>   `3ac4afa`, `95575c0`, `9b37f19`); the forward clock was restarted on it. Items in
+>   "To make it a real forward test" that hinged on the Anthropic key for Phase B are done.
+> - **The monthly `recommend.py`/`score.py` flow was superseded** by the daily dynamic
+>   tracker `track.py` (→ `paper_state.json`). Those two files no longer exist; ignore the
+>   monthly-cron snippet below and use `run_paper.sh` (already on a weekday-evening cron).
+> - **Test count is now 26** (not 14); run `python3 -m unittest discover -s tests`.
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month
@@ -13,7 +22,8 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
   link file (26k links, 1980-2005, permno-keyed).
 - **Phase 2a** (`elp/edgar.py`, `phase2a*.py`): SEC EDGAR link extractor.
 - **Data**: Tiingo wired as production prices (`elp/tiingo.py`), token validated.
-- **Tests**: 14 offline unit tests, all pass (`python3 -m unittest discover -s tests`).
+- **Tests**: 26 offline unit tests, all pass (`python3 -m unittest discover -s tests`).
+  *(Was 14 on 2026-07-04; the suite grew with Phase B/D.)*
 
 ## Key empirical findings
 1. **Tiingo works but needs `permaTicker`.** Delisted spot-check: CELG retained through
@@ -52,9 +62,10 @@ tail) → −0.11% at 2× costs. The spread number is a **Grade-C optimistic upp
 erode it. Needs real options data (Phase 6) to confirm.
 
 ### To make it a real forward test (remaining, mostly your calls)
-- **Run it monthly.** Add a cron (early each month) so the OOS record accrues:
-  `0 9 2 * * cd ~/projects/economic-link-pairs && python3 recommend.py && python3 score.py && git add paper_log.jsonl && git commit -m "paper: monthly rec" && git push`
-  (I did not edit your crontab — enable when you want; say the word and I'll set it up.)
+- **~~Run it monthly.~~** *(Superseded 2026-07-05.)* The monthly `recommend.py`/`score.py`
+  cron below no longer applies — those files were replaced by the daily dynamic tracker.
+  The live cadence is `run_paper.sh` on `0 22 * * 1-5` (weekday evenings): it runs
+  `track.py` → `dashboard.py` → `serve.sh`, then commits `paper_state.json` / `paper_start.txt`.
 - **Anthropic key** → unlocks Phase B: LLM-inferred links from EDGAR to diversify the
   Apple-heavy universe (drop the key in a file like the Tiingo one).
 - **Delivery** → email + dashboard once you give the target (couldn't find `macro-dashboard`).

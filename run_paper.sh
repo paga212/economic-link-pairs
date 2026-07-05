@@ -5,6 +5,7 @@ set -uo pipefail
 cd /home/pierre/projects/economic-link-pairs || exit 1
 
 python3 track.py     >> paper_run.log 2>&1
+python3 digest.py    >> paper_run.log 2>&1   # Fable-5 (fallback Opus) ranking/narrative; fails soft
 python3 dashboard.py >> paper_run.log 2>&1
 bash serve.sh
 

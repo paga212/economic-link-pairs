@@ -12,6 +12,24 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
 >   monthly-cron snippet below and use `run_paper.sh` (already on a weekday-evening cron).
 > - **Test count is now 26** (not 14); run `python3 -m unittest discover -s tests`.
 
+> **Update 2026-07-05 (Phase 3 — Fable-5 Master digest shipped).**
+> - Built the Master/Orchestrator daily digest: `elp/digest.py` + top-level `digest.py`,
+>   wired into `run_paper.sh` between `track.py` and `dashboard.py`; `dashboard.py` renders a
+>   "Daily read" section. It ranks the open paper trades and writes rationale/summary/watch;
+>   **every number shown is pulled from `paper_state.json`, never the model** (PLAN.md §2).
+>   Fails soft — no key / API error → dashboard keeps the numeric tables unchanged.
+> - **Fable-5 IS reachable on the API** (`claude-fable-5` served directly; the Opus-4.8
+>   auto-fallback in `elp/llm.complete_fallback` did not trigger). So the §5 "may not be
+>   enabled" caveat is resolved: it works.
+> - **Gotcha found + fixed:** Fable-5 runs **extended thinking by default** — thinking tokens
+>   count against `max_tokens`. At `max_tokens=1500` thinking used ~1083 and the JSON
+>   truncated (`stop_reason=max_tokens`). Raised the digest call to `max_tokens=4096`; unused
+>   ceiling isn't billed. One digest ≈ ~2.5k output tokens (thinking + JSON) ≈ a few cents.
+> - **Tests: now 34** (added `tests/test_digest.py`, fully offline — LLM monkeypatched). Run
+>   `python3 -m unittest discover -s tests`. Verified live: `python3 digest.py` → model used
+>   printed; `python3 dashboard.py` → digest section; every % cross-checked against state.
+> - `digest.json` is generated + gitignored (like `dashboard.html`).
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month

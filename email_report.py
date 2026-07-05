@@ -15,19 +15,13 @@ from datetime import datetime, timezone
 from email.message import EmailMessage
 from html import escape
 
+from elp.express import describe_leg
+
 TO = "pagrelletaumont@gmail.com"                 # sender AND sole recipient — never external
 SMTP_HOST, SMTP_PORT = "smtp.gmail.com", 587
 STATE_FILE, DIGEST_FILE, EML_FILE = "paper_state.json", "digest.json", "email_report.eml"
 DASHBOARD_URL = "http://100.103.143.120:8787/"
 _PW_FILE = ".gmail_app_password"
-
-
-def _leg(l: dict) -> str:
-    d = "long" if l["direction"] > 0 else "short"
-    if l["instrument"] == "spread":
-        return f'{d} put-spread {l["k_long"]:.0f}/{l["k_short"]:.0f}p · debit {l["debit"]:.2f} · {l["dte"]}DTE'
-    tag = " · β-neutral" if l["role"] == "neutralizer" else ""
-    return f'{d} {l["ticker"]} @ {l["entry_px"]:.2f} (${l["notional"]/1000:.0f}k{tag})'
 
 
 def render(state: dict, digest: dict | None) -> tuple[str, str]:
@@ -38,7 +32,7 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
     for o in opens:
         direction = "LONG" if o["side"] > 0 else "SHORT"
         col = "#0a7a3f" if o["ret"] > 0 else "#b02020"
-        p, n = _leg(o["primary"]), _leg(o["neutralizer"])
+        p, n = describe_leg(o["primary"], o["expression"]), describe_leg(o["neutralizer"], o["expression"])
         rows += (f'<tr><td style="{td}"><b>{direction} {escape(o["supplier"])}</b>'
                  f'<div style="color:#888;font-size:12px">vs {escape(o["customer"])} · {o["days"]}d</div></td>'
                  f'<td style="{td};font-size:13px">{escape(o["expression"])}</td>'

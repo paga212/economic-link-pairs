@@ -39,6 +39,7 @@ class TestPrompt(unittest.TestCase):
         self.assertIn("Skyworks — Apple", p)      # link note is included as context
         self.assertIn("n=0", p)                     # closed count surfaced
         self.assertIn("JSON", p)                    # asks for structured output
+        self.assertIn("attention", p.lower())       # merged-watch: flag concerns inline, no list
 
     def test_prompt_handles_no_open_trades(self):
         p = _prompt({"open": [], "stats": {}}, {})
@@ -76,15 +77,14 @@ class TestBuildDigest(unittest.TestCase):
         self._patch_llm(json.dumps({
             "summary": "Two-name book.",
             "ranked": [{"supplier": "AXL", "rationale": "GM demand softening."},
-                       {"supplier": "SWKS", "rationale": "Apple momentum intact."}],
-            "watch": ["AXL near entry"]}))
+                       {"supplier": "SWKS", "rationale": "Apple momentum intact."}]}))
         d = build_digest(STATE, NOTES)
         self.assertEqual([r["supplier"] for r in d["ranked_open"]], ["AXL", "SWKS"])
         axl = d["ranked_open"][0]
         self.assertEqual(axl["ret"], -0.0210)        # number preserved verbatim from state
         self.assertEqual(axl["rationale"], "GM demand softening.")
         self.assertEqual(d["model_used"], "claude-fable-5")
-        self.assertEqual(d["watch"], ["AXL near entry"])
+        self.assertNotIn("watch", d)                 # merged into the ranked list; no separate one
 
     def test_drops_hallucinated_ticker_and_backfills_missing(self):
         # Model invents NVDA (not open) and forgets AXL -> NVDA dropped, AXL appended with "—".

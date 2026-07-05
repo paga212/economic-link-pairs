@@ -35,7 +35,10 @@ class TestRender(unittest.TestCase):
             self.assertIn("GILD", blob)
             self.assertIn("PG", blob)
             self.assertIn("stock-hedge", blob)          # expression
-            self.assertIn("147/133", blob)              # spread strikes
+            self.assertIn("buy 147P", blob)             # spread: long the higher-strike put
+            self.assertIn("sell 133P", blob)            # spread: short the lower-strike put
+            self.assertIn("exp 45d", blob)              # DTE spelled out, not "45DTE"
+            self.assertIn("1,615 sh", blob)             # exact share count on the long leg
             self.assertIn("recommendations only", blob.lower())   # caveat
             self.assertIn("100.103.143.120:8787", blob)          # dashboard link
         self.assertIn("+6.0%", html)                    # net from state

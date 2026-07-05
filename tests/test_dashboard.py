@@ -9,9 +9,10 @@ from dashboard import idea_row  # noqa: E402
 
 IDEA = {"supplier": "SWKS", "customer": "AAPL", "side": -1, "expression": "stock-pair",
         "entry": "2026-06-01", "days": 8, "ret": 0.012, "stop": -0.05, "risk_cap": "soft",
-        "primary": {"ticker": "SWKS", "direction": -1, "instrument": "spread", "notional": 200000.0,
+        "primary": {"role": "primary", "ticker": "SWKS", "direction": -1, "instrument": "spread",
+                    "notional": 200000.0, "entry_px": 143.06, "S0": 143.06,
                     "k_long": 143.0, "k_short": 129.0, "debit": 3.6, "dte": 45},
-        "neutralizer": {"ticker": "QRVO", "direction": 1, "instrument": "stock",
+        "neutralizer": {"role": "neutralizer", "ticker": "QRVO", "direction": 1, "instrument": "stock",
                         "notional": 200000.0, "entry_px": 95.0}}
 
 

@@ -9,20 +9,13 @@ import json
 import os
 from html import escape
 
+from elp.express import describe_leg
+
 OUT, STATE, DIGEST = "site/index.html", "paper_state.json", "digest.json"
-
-
-def _leg_str(leg):
-    d = "long" if leg["direction"] > 0 else "short"
-    if leg["instrument"] == "spread":
-        return (f"{d} put-spread {leg['k_long']:.0f}/{leg['k_short']:.0f}p "
-                f"debit {leg['debit']:.2f} {leg['dte']}DTE")
-    return f"{d} {leg['ticker']} @ {leg['entry_px']:.2f}"
 
 
 def idea_row(o):
     """One idea as an HTML row: plain-English net direction + both legs + expression tag."""
-    from html import escape
     direction = "LONG" if o["side"] > 0 else "SHORT"
     cap = "$10k hard" if o.get("risk_cap") == "hard" else "~$10k stop (gap risk)"
     rcls = "pos" if o["ret"] > 0 else "neg"
@@ -30,8 +23,8 @@ def idea_row(o):
         f"<tr><td><b>{direction} {escape(o['supplier'])}</b><br>"
         f"<span class=sub>vs {escape(o['customer'])}</span></td>"
         f"<td>{escape(o['expression'])}</td>"
-        f"<td class=sub>primary: {escape(_leg_str(o['primary']))}<br>"
-        f"neutralizer: {escape(_leg_str(o['neutralizer']))}</td>"
+        f"<td class=sub>primary: {escape(describe_leg(o['primary'], o['expression']))}<br>"
+        f"neutralizer: {escape(describe_leg(o['neutralizer'], o['expression']))}</td>"
         f"<td>{escape(o['entry'])}</td><td>{o['days']}d</td>"
         f"<td class={rcls}>{o['ret']*100:+.1f}%</td>"
         f"<td class=sub>{cap}</td></tr>")
@@ -60,12 +53,13 @@ def build() -> None:
             f"<span class={rcls(r['ret'])}>{r['ret']*100:+.1f}%</span>)</span> — "
             f"{escape(r.get('rationale', '—'))}</li>"
             for r in dg.get("ranked_open", []))
-        watch = "".join(f"<li>{escape(w)}</li>" for w in dg.get("watch", []))
         digest_html = (
             f"<h2>Daily read <span class=sub>({escape(str(dg.get('model_used', '—')))})</span></h2>"
+            f"<p class=sub>An AI read of the open book &mdash; ordering and wording only; every "
+            f"number shown is computed from the trades, not the model. A &#9888; flags a trade "
+            f"needing attention.</p>"
             f"<p>{escape(dg.get('summary', ''))}</p>"
             + (f"<ol class=ranked>{ranked}</ol>" if ranked else "")
-            + (f"<p class=sub>Watch:</p><ul>{watch}</ul>" if watch else "")
             + f"<p class=muted>{escape(dg.get('caveat', ''))}</p>")
 
     open_rows = "".join(idea_row(o) for o in s["open"]) or \

@@ -23,6 +23,7 @@ SYSTEM = (
     "(Cohen & Frazzini 2008: a supplier's stock lags news about its principal customer). "
     "You ONLY rank and explain; you NEVER compute, estimate, or state any number — all "
     "returns, P&L and stops are computed elsewhere and displayed next to your text. "
+    "Write for a professional reader: short, plain, declarative sentences; no hype, no numbers. "
     "Respond with a single JSON object and nothing else."
 )
 
@@ -39,11 +40,12 @@ def _prompt(state: dict, notes: dict) -> str:
     lines.append(f'\nClosed out-of-sample trades scored so far: n={st.get("n") or 0}.')
     lines.append(
         '\nReturn JSON exactly of this shape:\n'
-        '{"summary": "one short paragraph reading the book as a whole",\n'
-        ' "ranked": [{"supplier": "TICK", "rationale": "one sentence on conviction, grounded '
-        'in the economic link — no numbers"}],\n'
-        ' "watch": ["short note on any trade needing attention (e.g. thesis weakening, long held)"]}\n'
-        'Rank ALL open suppliers, most attractive first. Use only the tickers listed above.'
+        '{"summary": "2-3 short, declarative sentences reading the book as a whole",\n'
+        ' "ranked": [{"supplier": "TICK", "rationale": "at most ~12 words on conviction, grounded '
+        'in the economic link, no numbers; if the trade needs attention (thesis weakening, held a '
+        'long time, near its stop) prefix the rationale with ⚠ and say why briefly"}]}\n'
+        'Rank ALL open suppliers, most attractive first. Use only the tickers listed above. '
+        "Do NOT return a separate watch list — fold any concern into that name's rationale."
     )
     return "\n".join(lines)
 
@@ -73,7 +75,6 @@ def build_digest(state: dict, notes: dict) -> dict:
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "model_used": model,
         "summary": str(data.get("summary") or "").strip(),
-        "watch": [str(w).strip() for w in (data.get("watch") or []) if str(w).strip()],
         "caveat": CAVEAT,
         "ranked_open": ranked,
     }

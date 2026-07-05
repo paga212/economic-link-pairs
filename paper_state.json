@@ -1,82 +1,100 @@
 {
- "generated_utc": "2026-07-04T23:25:01.681522+00:00",
+ "generated_utc": "2026-07-05T01:30:03.202118+00:00",
  "start": "2026-07-04",
  "open": [
   {
-   "supplier": "TGI",
-   "customer": "BA",
-   "kind": "LONG stock",
-   "entry": "2025-06-27",
-   "days": 27,
-   "ret": 0.008530438154323416,
-   "stop": -0.041469561845676586
+   "supplier": "PG",
+   "customer": "WMT",
+   "kind": "SHORT put-spread",
+   "entry": "2026-05-21",
+   "days": 42,
+   "ret": -0.02540226859751416,
+   "stop": -0.042156150339688364
   },
   {
-   "supplier": "SMCI",
-   "customer": "NVDA",
+   "supplier": "NRP",
+   "customer": "ATGL",
    "kind": "SHORT put-spread",
+   "entry": "2026-06-05",
+   "days": 27,
+   "ret": 0.030330247670825615,
+   "stop": -0.006912986688520667
+  },
+  {
+   "supplier": "GILD",
+   "customer": "CAH",
+   "kind": "LONG stock",
    "entry": "2026-06-10",
    "days": 22,
-   "ret": 0.00426070267596307,
-   "stop": -0.045739297324036934
+   "ret": 0.08771798396359687,
+   "stop": 0.037717983963596866
   },
   {
-   "supplier": "SWKS",
+   "supplier": "FRPH",
+   "customer": "VMC",
+   "kind": "LONG stock",
+   "entry": "2026-06-15",
+   "days": 17,
+   "ret": 0.07839795483596079,
+   "stop": 0.0390498508734554
+  },
+  {
+   "supplier": "WWD",
+   "customer": "RTX",
+   "kind": "LONG stock",
+   "entry": "2026-06-16",
+   "days": 16,
+   "ret": -0.008350334487830402,
+   "stop": -0.014653413673672858
+  },
+  {
+   "supplier": "SGMO",
+   "customer": "PFE",
+   "kind": "SHORT put-spread",
+   "entry": "2026-06-24",
+   "days": 8,
+   "ret": -0.0017110936181472607,
+   "stop": -0.05
+  },
+  {
+   "supplier": "TTWO",
    "customer": "AAPL",
    "kind": "SHORT put-spread",
    "entry": "2026-06-24",
    "days": 8,
-   "ret": 0.024366200905958948,
-   "stop": -0.025633799094041055
+   "ret": -0.02143713894077622,
+   "stop": -0.05
   },
   {
-   "supplier": "CRUS",
-   "customer": "AAPL",
-   "kind": "SHORT put-spread",
-   "entry": "2026-06-24",
-   "days": 8,
-   "ret": 0.02008581855086682,
-   "stop": -0.029914181449133184
-  },
-  {
-   "supplier": "GLW",
-   "customer": "AAPL",
-   "kind": "SHORT put-spread",
-   "entry": "2026-06-24",
-   "days": 8,
-   "ret": 0.005545047296849203,
-   "stop": -0.0444549527031508
-  },
-  {
-   "supplier": "DAN",
+   "supplier": "VC",
    "customer": "F",
    "kind": "SHORT put-spread",
    "entry": "2026-06-24",
    "days": 8,
-   "ret": 0.027175681058113937,
-   "stop": -0.022824318941886065
+   "ret": 0.0372148906942379,
+   "stop": 4.482620660063025e-05
   },
   {
-   "supplier": "ALV",
-   "customer": "F",
+   "supplier": "MZTI",
+   "customer": "WMT",
    "kind": "SHORT put-spread",
-   "entry": "2026-06-24",
-   "days": 8,
-   "ret": 0.005928746159868839,
-   "stop": -0.035376472678283734
+   "entry": "2026-07-01",
+   "days": 1,
+   "ret": 0.000801314704051984,
+   "stop": -0.04919868529594802
   },
   {
-   "supplier": "LEA",
-   "customer": "GM",
+   "supplier": "ADSK",
+   "customer": "SNX",
    "kind": "SHORT put-spread",
-   "entry": "2026-06-26",
-   "days": 6,
-   "ret": 0.013398485465530973,
-   "stop": -0.03540908846822839
+   "entry": "2026-07-02",
+   "days": 0,
+   "ret": 0.0,
+   "stop": -0.05
   },
   {
-   "supplier": "UCTT",
-   "customer": "AMAT",
+   "supplier": "AMGN",
+   "customer": "MCK",
    "kind": "LONG stock",
    "entry": "2026-07-02",
    "days": 0,
@@ -84,8 +102,8 @@
    "stop": -0.05
   },
   {
-   "supplier": "MKSI",
-   "customer": "AMAT",
+   "supplier": "IONS",
+   "customer": "AZN",
    "kind": "LONG stock",
    "entry": "2026-07-02",
    "days": 0,
@@ -93,18 +111,9 @@
    "stop": -0.05
   },
   {
-   "supplier": "ICHR",
-   "customer": "LRCX",
-   "kind": "LONG stock",
-   "entry": "2026-07-02",
-   "days": 0,
-   "ret": 0.0,
-   "stop": -0.05
-  },
-  {
-   "supplier": "BALL",
-   "customer": "KO",
-   "kind": "LONG stock",
+   "supplier": "MCHPP",
+   "customer": "ARW",
+   "kind": "SHORT put-spread",
    "entry": "2026-07-02",
    "days": 0,
    "ret": 0.0,

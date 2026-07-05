@@ -1,0 +1,236 @@
+[
+ {
+  "supplier": "ADSK",
+  "customer": "SNX",
+  "pct": 14,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "TD Synnex Corporation",
+  "date": "2026-03-03"
+ },
+ {
+  "supplier": "AMGN",
+  "customer": "MCK",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "McKesson Corporation",
+  "date": "2026-02-13"
+ },
+ {
+  "supplier": "AMGN",
+  "customer": "COR",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Cencora, Inc.",
+  "date": "2026-02-13"
+ },
+ {
+  "supplier": "AMGN",
+  "customer": "CAH",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Cardinal Health, Inc.",
+  "date": "2026-02-13"
+ },
+ {
+  "supplier": "FRPH",
+  "customer": "VMC",
+  "pct": 26,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Vulcan Materials Company",
+  "date": "2026-04-15"
+ },
+ {
+  "supplier": "GILD",
+  "customer": "CAH",
+  "pct": 29,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Cardinal Health, Inc.",
+  "date": "2026-02-24"
+ },
+ {
+  "supplier": "GILD",
+  "customer": "COR",
+  "pct": 21,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Cencora, Inc.",
+  "date": "2026-02-24"
+ },
+ {
+  "supplier": "GILD",
+  "customer": "MCK",
+  "pct": 24,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "McKesson Corporation",
+  "date": "2026-02-24"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "AZN",
+  "pct": 16,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "AstraZeneca",
+  "date": "2026-02-26"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "BIIB",
+  "pct": null,
+  "named": true,
+  "confidence": 0.85,
+  "customer_raw": "Biogen",
+  "date": "2026-02-26"
+ },
+ {
+  "supplier": "LRCX",
+  "customer": "TSM",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Taiwan Semiconductor Manufacturing Company",
+  "date": "2025-08-11"
+ },
+ {
+  "supplier": "MCHPP",
+  "customer": "ARW",
+  "pct": 12,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Arrow Electronics",
+  "date": "2026-05-21"
+ },
+ {
+  "supplier": "MZTI",
+  "customer": "WMT",
+  "pct": 19,
+  "named": true,
+  "confidence": 0.99,
+  "customer_raw": "Walmart Inc.",
+  "date": "2025-08-21"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "ATGL",
+  "pct": 26,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Alpha",
+  "date": "2026-02-27"
+ },
+ {
+  "supplier": "PG",
+  "customer": "WMT",
+  "pct": 16,
+  "named": true,
+  "confidence": 0.99,
+  "customer_raw": "Walmart Inc.",
+  "date": "2025-08-04"
+ },
+ {
+  "supplier": "SGMO",
+  "customer": "PFE",
+  "pct": 28,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Pfizer Inc.",
+  "date": "2026-03-30"
+ },
+ {
+  "supplier": "TTWO",
+  "customer": "AAPL",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Apple",
+  "date": "2026-05-22"
+ },
+ {
+  "supplier": "TTWO",
+  "customer": "SONY",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Sony",
+  "date": "2026-05-22"
+ },
+ {
+  "supplier": "TTWO",
+  "customer": "MSFT",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Microsoft",
+  "date": "2026-05-22"
+ },
+ {
+  "supplier": "VC",
+  "customer": "F",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Ford Motor Company",
+  "date": "2026-02-19"
+ },
+ {
+  "supplier": "VC",
+  "customer": "GM",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "General Motors",
+  "date": "2026-02-19"
+ },
+ {
+  "supplier": "WWD",
+  "customer": "RTX",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "RTX Corporation",
+  "date": "2025-11-25"
+ },
+ {
+  "supplier": "WWD",
+  "customer": "BA",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "The Boeing Company",
+  "date": "2025-11-25"
+ },
+ {
+  "supplier": "WWD",
+  "customer": "GE",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "General Electric Company",
+  "date": "2025-11-25"
+ },
+ {
+  "supplier": "WWD",
+  "customer": "CAT",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "Caterpillar Inc.",
+  "date": "2025-11-25"
+ },
+ {
+  "supplier": "WWD",
+  "customer": "GEV",
+  "pct": null,
+  "named": true,
+  "confidence": 0.95,
+  "customer_raw": "GE Vernova",
+  "date": "2025-11-25"
+ }
+]

@@ -47,6 +47,16 @@ def _fetch(url: str, symbol: str) -> list:
         raise RuntimeError(f"Tiingo HTTP {e.code} for {symbol}") from None  # never surface the token
 
 
+def _parse_bars(rows: list) -> list[tuple[date, float, float]]:
+    """(date, adjusted close, adjusted volume) oldest-first; tolerates missing adjVolume."""
+    out: list[tuple[date, float, float]] = []
+    for row in rows:
+        d = datetime.fromisoformat(row["date"].replace("Z", "")).date()
+        vol = row.get("adjVolume", row.get("volume", 0.0))
+        out.append((d, float(row["adjClose"]), float(vol or 0.0)))
+    return out
+
+
 def fetch_monthly(symbol: str, start: str = "1995-01-01") -> list[tuple[date, float]]:
     """Monthly (first-of-month date, adjusted close) series, oldest first."""
     rows = _fetch(_URL.format(sym=symbol.lower(), start=start), symbol)
@@ -57,11 +67,12 @@ def fetch_monthly(symbol: str, start: str = "1995-01-01") -> list[tuple[date, fl
     return out
 
 
+def fetch_daily_bars(symbol: str, start: str = "2015-01-01") -> list[tuple[date, float, float]]:
+    """Daily (date, adjusted close, adjusted volume) series, oldest first."""
+    url = f"https://api.tiingo.com/tiingo/daily/{symbol.lower()}/prices?startDate={start}"
+    return _parse_bars(_fetch(url, symbol))
+
+
 def fetch_daily(symbol: str, start: str = "2015-01-01") -> list[tuple[date, float]]:
     """Daily (date, adjusted close) series, oldest first (for the per-trade engine)."""
-    url = (f"https://api.tiingo.com/tiingo/daily/{symbol.lower()}/prices?startDate={start}")
-    out: list[tuple[date, float]] = []
-    for row in _fetch(url, symbol):
-        d = datetime.fromisoformat(row["date"].replace("Z", "")).date()
-        out.append((d, float(row["adjClose"])))
-    return out
+    return [(d, px) for d, px, _ in fetch_daily_bars(symbol, start)]

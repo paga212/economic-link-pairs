@@ -26,3 +26,20 @@ def _price_ok(bars) -> tuple[bool, str]:
         if p0 > 0 and p1 > 0 and (p1 / p0 > GAP_MAX or p0 / p1 > GAP_MAX):
             return False, "bad_bars"
     return True, ""
+
+
+def _name_ok(ticker, raw, ticker_to_title, title_token_sets) -> tuple[bool, str]:
+    """(ok, reason) for the customer name<->ticker mapping. Rejects unknown tickers, generic
+    names that match many companies (ambiguous), and titles unrelated to the extracted name."""
+    if ticker not in ticker_to_title:
+        return False, "unknown_ticker"
+    raw_tokens = set(norm(raw).split())
+    if not raw_tokens:
+        return False, "ambiguous"
+    matches = sum(1 for toks in title_token_sets if raw_tokens <= toks)
+    if matches > AMBIG_MAX:
+        return False, "ambiguous"
+    sim = SequenceMatcher(None, norm(raw), norm(ticker_to_title[ticker])).ratio()
+    if sim < NAME_SIM_MIN:
+        return False, "name_mismatch"
+    return True, ""

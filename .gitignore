@@ -27,3 +27,7 @@ site/
 
 # Git worktrees created under .claude/worktrees/ are local scratch — never track them
 .claude/worktrees/
+
+# Weekly email report: Gmail App Password (secret) + dry-run artifact
+.gmail_app_password
+email_report.eml

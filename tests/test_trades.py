@@ -87,5 +87,34 @@ class TestTrades(unittest.TestCase):
                                0.10 - 2 * 25 / 1e4 - 0.05 * 73 / 365, places=9)  # -50bps -1%
 
 
+class TestIdeaReturn(unittest.TestCase):
+    def _idea(self, neut_notional):
+        from elp.express import RISK_BUDGET, STOP
+        n = RISK_BUDGET / STOP
+        return {"entry_date": date(2020, 1, 1),
+                "primary": {"ticker": "S", "direction": 1, "instrument": "stock",
+                            "notional": n, "entry_px": 100.0},
+                "neutralizer": {"ticker": "H", "direction": -1, "instrument": "stock",
+                                "notional": neut_notional, "entry_px": 50.0}}
+
+    def test_dollar_neutral_pair_nets_the_two_legs(self):
+        from elp.express import RISK_BUDGET, STOP
+        from elp.trades import idea_return
+        idea = self._idea(RISK_BUDGET / STOP)          # equal notionals
+        # long S +10%, short H where H +4% -> short loses 4%; net = +10% - 4% = +6%
+        ret, expired = idea_return(idea, {"S": 110.0, "H": 52.0}, date(2020, 1, 20))
+        self.assertAlmostEqual(ret, 0.06, places=6)
+        self.assertFalse(expired)
+
+    def test_beta_weighted_hedge(self):
+        from elp.express import RISK_BUDGET, STOP
+        from elp.trades import idea_return
+        n = RISK_BUDGET / STOP
+        idea = self._idea(0.5 * n)                     # beta 0.5 hedge
+        # long S +10%; short H +10% weighted 0.5 -> -5%; net +5%
+        ret, _ = idea_return(idea, {"S": 110.0, "H": 55.0}, date(2020, 1, 20))
+        self.assertAlmostEqual(ret, 0.05, places=6)
+
+
 if __name__ == "__main__":
     unittest.main()

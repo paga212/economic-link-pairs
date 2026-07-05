@@ -71,6 +71,27 @@ def _mark(t: dict, px: float, d) -> tuple[float, bool]:
     return t["side"] * (px / t["entry_px"] - 1.0), False
 
 
+def _leg_ret(leg: dict, px: float, d) -> tuple[float, bool]:
+    """Signed return contribution of one leg (as a fraction of its own notional)."""
+    if leg["instrument"] == "spread":
+        elapsed = (d - leg["_entry_date"]).days
+        trem = max(leg["T0"] - elapsed / 365.0, 1e-6)
+        val = bear_put_spread(px, leg["k_long"], leg["k_short"], trem, leg["iv"], RISK_FREE)
+        return (val - leg["debit"]) / leg["S0"], elapsed >= leg["dte"]
+    return leg["direction"] * (px / leg["entry_px"] - 1.0), False
+
+
+def idea_return(idea: dict, marks: dict, d) -> tuple[float, bool]:
+    """Net idea return per unit primary notional, and whether any spread leg expired."""
+    p, n = idea["primary"], idea["neutralizer"]
+    p.setdefault("_entry_date", idea["entry_date"])
+    n.setdefault("_entry_date", idea["entry_date"])
+    p_ret, p_exp = _leg_ret(p, marks[p["ticker"]], d)
+    n_ret, n_exp = _leg_ret(n, marks[n["ticker"]], d)
+    w = n["notional"] / p["notional"]
+    return p_ret + w * n_ret, (p_exp or n_exp)
+
+
 def describe_open(t: dict, px: float, d) -> dict:
     """Serialize an open trade for the dashboard/state: live return, stop, and the concrete
     structure — stock entry price, or the bear-put-spread strikes/premium/DTE. Positions are

@@ -22,45 +22,45 @@ _TIINGO_NEWS = "https://api.tiingo.com/tiingo/news"
 
 def google_rss(query: str, days: int = 30) -> list[dict]:
     """Recent headlines for `query` from Google News RSS (keyless). [] on any error."""
-    q = urllib.parse.quote(f"{query} when:{days}d")
-    url = f"{_RSS}?q={q}&hl=en-US&gl=US&ceid=US:en"
     try:
+        q = urllib.parse.quote(f"{query} when:{days}d")
+        url = f"{_RSS}?q={q}&hl=en-US&gl=US&ceid=US:en"
         with urllib.request.urlopen(urllib.request.Request(url, headers=_UA), timeout=20) as r:
             root = ET.fromstring(r.read())
-    except (urllib.error.URLError, ET.ParseError, ValueError):
+        out = []
+        for item in root.findall(".//item"):
+            title = (item.findtext("title") or "").strip()
+            if not title:
+                continue
+            src = item.find("{*}source")
+            out.append({"title": title,
+                        "source": src.text.strip() if src is not None and src.text else "Google News",
+                        "date": (item.findtext("pubDate") or "").strip(),
+                        "url": (item.findtext("link") or "").strip()})
+        return out
+    except Exception:
         return []
-    out = []
-    for item in root.findall(".//item"):
-        title = (item.findtext("title") or "").strip()
-        if not title:
-            continue
-        src = item.find("{*}source")
-        out.append({"title": title,
-                    "source": src.text.strip() if src is not None and src.text else "Google News",
-                    "date": (item.findtext("pubDate") or "").strip(),
-                    "url": (item.findtext("link") or "").strip()})
-    return out
 
 
 def tiingo_news(tickers: str, start: str | None = None, end: str | None = None,
                 limit: int = 20) -> list[dict]:
     """Recent Tiingo news for `tickers`, optionally date-windowed. [] on any error."""
-    params = {"tickers": tickers, "limit": str(limit), "token": _token()}
-    if start:
-        params["startDate"] = start
-    if end:
-        params["endDate"] = end
-    url = f"{_TIINGO_NEWS}?{urllib.parse.urlencode(params)}"
     try:
+        params = {"tickers": tickers, "limit": str(limit), "token": _token()}
+        if start:
+            params["startDate"] = start
+        if end:
+            params["endDate"] = end
+        url = f"{_TIINGO_NEWS}?{urllib.parse.urlencode(params)}"
         with urllib.request.urlopen(urllib.request.Request(url, headers=_UA), timeout=20) as r:
             data = json.load(r)
-    except (urllib.error.URLError, json.JSONDecodeError, ValueError):
+        out = []
+        for a in data if isinstance(data, list) else []:
+            title = (a.get("title") or "").strip()
+            if not title:
+                continue
+            out.append({"title": title, "source": a.get("source") or "Tiingo",
+                        "date": (a.get("publishedDate") or "")[:10], "url": a.get("url") or ""})
+        return out
+    except Exception:
         return []
-    out = []
-    for a in data if isinstance(data, list) else []:
-        title = (a.get("title") or "").strip()
-        if not title:
-            continue
-        out.append({"title": title, "source": a.get("source") or "Tiingo",
-                    "date": (a.get("publishedDate") or "")[:10], "url": a.get("url") or ""})
-    return out

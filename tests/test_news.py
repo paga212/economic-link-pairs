@@ -52,6 +52,14 @@ class TestFetchers(unittest.TestCase):
         self.assertEqual(news.google_rss("AAPL"), [])
         self.assertEqual(news.tiingo_news("CAH"), [])
 
+    def test_tiingo_missing_token_returns_empty(self):
+        orig = news._token
+        news._token = lambda: (_ for _ in ()).throw(RuntimeError("no token"))
+        try:
+            self.assertEqual(news.tiingo_news("CAH"), [])
+        finally:
+            news._token = orig
+
 
 if __name__ == "__main__":
     unittest.main()

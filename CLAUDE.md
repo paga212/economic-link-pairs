@@ -13,27 +13,38 @@ only — it never executes, connects to a broker, or moves money.** See
 
 Built so far: Phase 0 (data spine + signal check), Phase 1 (backtest engine),
 Phase 2a (EDGAR extractor), Phase D (dynamic per-trade engine), Phase B
-(LLM-diversified link universe). Deliberately **stdlib-only — no third-party
-deps** (no pandas/numpy); Tiingo is the production price source.
+(LLM-diversified link universe), Phase 3 (Fable-5 daily digest), the paired
+long/short expression engine, link validation, and Phase 4 delivery (dashboard +
+weekly email). Deliberately **stdlib-only — no third-party deps** (no
+pandas/numpy); Tiingo is the production price source.
 
 ### Run
 ```
-python3 -m unittest discover -s tests   # 26 offline logic tests
+python3 -m unittest discover -s tests   # 71 offline logic tests
 python3 track.py                         # daily tick → paper_state.json (needs Tiingo token)
-python3 dashboard.py                     # paper_state.json → site/index.html
+python3 digest.py                        # Fable-5 daily digest → digest.json (needs Anthropic key)
+python3 dashboard.py                     # paper_state.json (+ digest.json) → site/index.html
+EMAIL_DRYRUN=1 python3 email_report.py   # render the weekly email → email_report.eml (no send)
 ```
-`run_paper.sh` chains track → dashboard → serve → commit/push (cron `0 22 * * 1-5`).
+`run_paper.sh` chains track → digest → dashboard → serve → commit/push (cron `0 22 * * 1-5`).
+The weekly email is delivered from the cloud by GitHub Actions
+(`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC), independent of this machine.
 
 ### Architecture (deterministic core; LLM owns orchestration/parsing only)
 - `elp/trades.py` — dynamic per-trade engine (entry signal, trailing stop, exits, net-of-cost stats)
+- `elp/express.py` — expression engine: turns each signal into a paired two-legged long/short idea (primary leg + liquidity-chosen neutralizer / ETF hedge)
+- `elp/liquidity.py` — tradeability / dollar-ADV gate used by the expression engine and link validation
+- `elp/linkcheck.py` — link validation (price-sanity + name↔ticker checks; quarantines bad links to `rejected_links.json`)
 - `elp/options.py` — Black-Scholes bear-put-spread pricer (defined-risk short leg, Grade-C IV)
 - `elp/signal.py` — prior-month customer return → supplier signal
+- `elp/digest.py` — Fable-5 Master/Orchestrator daily digest (ranks/narrates open trades; never emits a number)
 - `elp/backtest.py` — monthly cross-sectional long/short engine (engine validation)
 - `elp/links.py` — `load_universe()` over the diversified link table (`universe_links.json`)
-- `elp/llm.py` — LLM link extraction (Phase B)
+- `elp/llm.py` — LLM link extraction + `complete_fallback` (Fable-5 → Opus-4.8) (Phase B / Phase 3)
 - `elp/tiingo.py` — production prices (`fetch_daily`); `elp/prices.py` — keyless Yahoo prototype
 - `elp/edgar.py`, `elp/cf_links.py` — SEC EDGAR extractor; free Cohen-Frazzini link-file parser
-- Entry scripts: `track.py`, `dashboard.py`, and the `phase0/1/2a/2a_build/b_build/c_backtest/c_coverage/d_dynamic.py` phase drivers
+- Entry scripts: `track.py`, `digest.py`, `dashboard.py`, `email_report.py`, `linkcheck.py`, and the `phase0/1/2a/2a_build/b_build/c_backtest/c_coverage/d_dynamic.py` phase drivers
+- Delivery: `dashboard.py` → `site/index.html` (served by `serve.sh`); `email_report.py` (stdlib `smtplib` weekly report, self-only recipient) sent from the cloud by `.github/workflows/weekly-email.yml`
 
 ## What this project is about
 

@@ -30,6 +30,28 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
 >   printed; `python3 dashboard.py` → digest section; every % cross-checked against state.
 > - `digest.json` is generated + gitignored (like `dashboard.html`).
 
+> **Update 2026-07-05 (later — expression engine, link validation, email delivery, storm recovery).**
+> - **Expression engine shipped (#3).** Each signal is now a paired **two-legged long/short
+>   idea** opened/closed as one unit: a primary leg on the supplier + a liquidity-chosen
+>   **neutralizer** (counterpart supplier or ETF hedge). `elp/express.py` + `elp/liquidity.py`;
+>   `paper_state.json` open rows now carry `expression` (`stock-pair`/`stock-hedge`) with
+>   `primary`/`neutralizer` legs. #6 clamped the ETF-hedge beta to [0.3, 3.0].
+> - **Link validation shipped (#5).** `elp/linkcheck.py` runs price-sanity + name↔ticker
+>   checks on the Phase-B universe and quarantines bad links to `rejected_links.json`
+>   (caught `NRP→ATGL` wrong-ticker via ambiguity, `MZTI→WMT` glitch-bar). Durable guard on
+>   every Phase-B rebuild.
+> - **Phase 4 delivery DONE — email shipped (#7).** `email_report.py` (stdlib `smtplib` +
+>   Gmail App Password, self-only recipient, `EMAIL_DRYRUN` gate) renders the weekly report
+>   from `paper_state.json`/`digest.json`. **Delivered from the cloud** by GitHub Actions
+>   (`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC) so it arrives even when the
+>   basement PC is down — the storm on 2026-07-05 motivated this. Secret `GMAIL_APP_PASSWORD`
+>   lives in repo Actions secrets; live send verified into the inbox. Basement cron is an
+>   on-demand fallback. This resolves the "Delivery" and "macro-dashboard target" open items below.
+> - **Storm / bad-reboot recovery.** A power loss corrupted the local `.git` (zero-length
+>   objects); recovered cleanly from `origin` (working tree was never at risk). Repo healthy,
+>   67 core tests green at recovery.
+> - **Tests: now 71.** Run `python3 -m unittest discover -s tests`.
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month
@@ -86,7 +108,9 @@ erode it. Needs real options data (Phase 6) to confirm.
   `track.py` → `dashboard.py` → `serve.sh`, then commits `paper_state.json` / `paper_start.txt`.
 - **Anthropic key** → unlocks Phase B: LLM-inferred links from EDGAR to diversify the
   Apple-heavy universe (drop the key in a file like the Tiingo one).
-- **Delivery** → email + dashboard once you give the target (couldn't find `macro-dashboard`).
+- **~~Delivery~~ → DONE (2026-07-05).** Weekly email (`email_report.py`) to
+  `pagrelletaumont@gmail.com`, sent from the cloud by GitHub Actions (basement-independent);
+  dashboard served by `serve.sh`. See the 2026-07-05 update block above.
 - **Kill rule** → set your bar (strawman ≥0.5 Sharpe / 5-10 ideas); if paper P&L doesn't
   clear it after N months, stop. Honest prior: the evidence says this is likely weak.
 
@@ -99,13 +123,16 @@ expansion is what diversifies it.
 - Fable-5 key test (drop your Anthropic key in a file, same as Tiingo).
 - Success bar: net Sharpe + ideas/month (strawman: ≥0.5 Sharpe, 5-10 ideas).
 - Is $10-20k **per idea** or **total** book?
-- Where does the `macro-dashboard` project / delivery target live? (not found in ~/projects)
+- ~~Where does the `macro-dashboard` delivery target live?~~ Resolved: delivery is the weekly
+  email to `pagrelletaumont@gmail.com` + the served dashboard (no separate `macro-dashboard`).
 
 ## How to run
 ```
-python3 -m unittest discover -s tests   # 14 tests
-python3 phase0.py        # signal-direction check (Yahoo)
-python3 phase1.py        # long/short engine (Tiingo)
-python3 phase2a.py       # EDGAR extraction on known suppliers
-python3 phase2a_build.py 30   # named-link yield sample
+python3 -m unittest discover -s tests   # 71 offline tests
+python3 track.py                         # daily tick → paper_state.json (Tiingo token)
+python3 digest.py                        # Fable-5 daily digest → digest.json (Anthropic key)
+python3 dashboard.py                     # → site/index.html (served by serve.sh)
+EMAIL_DRYRUN=1 python3 email_report.py   # render weekly email → email_report.eml (no send)
+python3 linkcheck.py                     # validate the link universe → rejected_links.json
+# earlier phase drivers: phase0.py, phase1.py, phase2a.py, phase2a_build.py 30
 ```

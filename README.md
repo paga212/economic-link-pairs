@@ -28,17 +28,24 @@ and `dashboard.py` renders the results.
 Stdlib-only (no third-party deps). Run:
 
 ```
-python3 -m unittest discover -s tests   # offline logic tests (26)
+python3 -m unittest discover -s tests   # offline logic tests (71)
 python3 track.py                         # daily tick: open/manage trades + score OOS closed → paper_state.json
-python3 dashboard.py                     # paper_state.json → site/index.html
+python3 digest.py                        # Fable-5 daily digest (ranked read of the open book) → digest.json
+python3 dashboard.py                     # paper_state.json (+ digest.json) → site/index.html
 python3 phase0.py / phase1.py            # earlier signal-direction check / engine on curated set
 python3 phase_c_backtest.py              # directional historical check on resolvable C-F links
 ```
 
 `track.py` needs a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`). It writes
 `paper_state.json` (dashboard + OOS audit trail) and `paper_start.txt` (the OOS boundary).
-`run_paper.sh` chains track → dashboard → serve → commit/push on a weekday-evening cron.
+`run_paper.sh` chains track → digest → dashboard → serve → commit/push on a weekday-evening cron.
 Recommendations only — no execution.
+
+**Delivery.** A `digest.py` step ranks/narrates the open book with Fable-5 (numbers still
+come from `paper_state.json`, never the model), rendered into the dashboard. A weekly email
+report (`email_report.py`, stdlib `smtplib`, self-only recipient) is sent **from the cloud**
+by GitHub Actions (`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC), so it arrives
+even when this machine is down; the basement cron is an on-demand fallback.
 
 Production prices come from **Tiingo** (`elp/tiingo.py`, per
 [research/08](research/08-data-procurement.md)); keyless Yahoo (`elp/prices.py`) survives

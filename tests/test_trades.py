@@ -145,6 +145,16 @@ class TestSimulateIdeas(unittest.TestCase):
         pair = next(i for i in ideas if i["expression"] == "stock-pair")
         self.assertIn(pair["neutralizer"]["ticker"], {"S1", "S2"})
 
+    def test_skips_untradeable_primary_supplier(self):
+        from elp.trades import simulate_ideas
+        # $0.07 penny supplier with a SHORT signal (customer -20%) must be skipped, not crash.
+        cust = [100] * 10 + [80] * 8
+        supp = [0.07] * 18
+        spy = [400] * 18
+        bars = {"C": self._bars(cust), "S": self._bars(supp), "SPY": self._bars(spy)}
+        closed, opens = simulate_ideas([("S", "C")], bars, lookback=5)
+        self.assertEqual(closed + opens, [])   # untradeable primary -> no idea, no crash
+
 
 if __name__ == "__main__":
     unittest.main()

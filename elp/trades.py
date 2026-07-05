@@ -175,7 +175,8 @@ def _bars_maps(bars: dict) -> dict:
 
 def simulate_ideas(links, bars, enter=ENTER, exit_=EXIT, trail=TRAIL, lookback=LOOKBACK):
     """Event-driven two-legged ideas. Returns (closed_ideas, open_ideas). CASH expressions."""
-    from elp.express import HEDGE_ETF, build_idea      # local import avoids a cycle
+    from elp.express import build_idea
+    from elp.liquidity import is_tradeable
     maps = _bars_maps(bars)
     cust_of: dict[str, str] = {}
     for s, c in links:
@@ -220,6 +221,8 @@ def simulate_ideas(links, bars, enter=ENTER, exit_=EXIT, trail=TRAIL, lookback=L
         # 3) open new ideas
         for s, c in cust_of.items():
             if s in open_ideas or s in used or s not in maps or d not in maps[s]["px"]:
+                continue
+            if not is_tradeable(bars[s]):        # primary must clear the liquidity gate
                 continue
             csig = tr.get(c, {}).get(d)
             if csig is None:

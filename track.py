@@ -11,7 +11,7 @@ import json
 import os
 from datetime import date, datetime, timezone
 
-from elp.links import HIGHSIGNAL_LINKS
+from elp.links import load_universe
 from elp.tiingo import fetch_daily
 from elp.trades import (BORROW_APR, SPREAD_BPS, TRAIL, _mark, net_return, simulate, trade_stats)
 
@@ -27,7 +27,7 @@ def _paper_start() -> date:
 
 
 def main() -> None:
-    links = [(s, c) for s, c, _ in HIGHSIGNAL_LINKS]
+    links = [(s, c) for s, c, _ in load_universe()]
     prices = {}
     for t in sorted({x for pair in links for x in pair}):
         try:

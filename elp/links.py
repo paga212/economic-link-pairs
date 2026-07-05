@@ -1,11 +1,11 @@
-"""Hardcoded customer->supplier links for Phase 0 validation.
+"""Customer->supplier link universe.
 
-Illustrative, widely-reported high-concentration supplier/customer relationships,
-both legs still listed so Yahoo has data. These are NOT a verified point-in-time
-link set and the concentration notes are approximate from memory — the real links
-come from the free Cohen-Frazzini dataset (Phase 1) and DIY EDGAR extraction
-(Phase 2). Each entry: (supplier, customer, note).
+`load_universe()` returns the Phase-B LLM-extracted, disclosure-derived links
+(universe_links.json) when present, else falls back to the hand-curated HIGHSIGNAL_LINKS.
+The LINKS / CURATED_DIVERSE sets remain for the older phase scripts.
 """
+import json
+import os
 
 LINKS: list[tuple[str, str, str]] = [
     ("CRUS", "AAPL", "Cirrus Logic — Apple historically the large majority of sales"),
@@ -56,3 +56,28 @@ HIGHSIGNAL_LINKS: list[tuple[str, str, str]] = [
     ("BALL", "KO", "Ball — Coca-Cola (cans)"),
     ("BALL", "PEP", "Ball — PepsiCo (cans)"),
 ]
+
+
+def load_universe(path: str = "universe_links.json", min_conf: float = 0.6):
+    """Phase-B disclosure-derived links (named + confident), else the hand-curated set.
+
+    Returns list of (supplier, customer, note). The daily tracker uses this; refresh the
+    file with phase_b_build.py (it is NOT re-extracted on every run).
+    """
+    if os.path.exists(path):
+        try:
+            data = json.load(open(path))
+            seen, out = set(), []
+            for x in data:
+                s, c = x.get("supplier"), x.get("customer")
+                if not (s and c) or s == c or not x.get("named"):
+                    continue
+                if (x.get("confidence") or 0) < min_conf or (s, c) in seen:
+                    continue
+                seen.add((s, c))
+                out.append((s, c, str(x.get("customer_raw", ""))))
+            if out:
+                return out
+        except Exception:
+            pass
+    return HIGHSIGNAL_LINKS

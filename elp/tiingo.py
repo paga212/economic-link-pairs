@@ -76,3 +76,28 @@ def fetch_daily_bars(symbol: str, start: str = "2015-01-01") -> list[tuple[date,
 def fetch_daily(symbol: str, start: str = "2015-01-01") -> list[tuple[date, float]]:
     """Daily (date, adjusted close) series, oldest first (for the per-trade engine)."""
     return [(d, px) for d, px, _ in fetch_daily_bars(symbol, start)]
+
+
+_FUND = "https://api.tiingo.com/tiingo/fundamentals/{sym}/{kind}"
+
+
+def fetch_marketcap(ticker: str) -> float | None:
+    """Latest non-zero marketCap from Tiingo fundamentals daily. None on any error/empty."""
+    try:
+        rows = _fetch(_FUND.format(sym=ticker.lower(), kind="daily"), ticker)
+        for r in reversed(rows):
+            mc = r.get("marketCap")
+            if mc:
+                return float(mc)
+    except Exception:
+        return None
+    return None
+
+
+def fetch_statement_dates(ticker: str) -> list[str]:
+    """Sorted unique fiscal period-end dates (YYYY-MM-DD) from Tiingo statements. [] on error."""
+    try:
+        rows = _fetch(_FUND.format(sym=ticker.lower(), kind="statements"), ticker)
+        return sorted({r["date"][:10] for r in rows if r.get("date")})
+    except Exception:
+        return []

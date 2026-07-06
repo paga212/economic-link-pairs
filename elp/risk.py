@@ -106,7 +106,7 @@ def assess_idea_risk(idea, bars_fn=fetch_daily_bars, mktcap_fn=fetch_marketcap,
     _, days_to = next_earnings_est(dates, today)
     try:
         entry = date.fromisoformat(idea["entry"]) if idea.get("entry") else None
-    except ValueError:
+    except (ValueError, TypeError):
         entry = None
     rse = reported_since_entry(dates, entry, today) if entry else False
 
@@ -116,11 +116,11 @@ def assess_idea_risk(idea, bars_fn=fetch_daily_bars, mktcap_fn=fetch_marketcap,
 
 def narrate(idea: dict, facts: dict) -> str:
     """One Opus sentence from the computed facts; adds no numbers. '' on any error (fail soft)."""
-    prompt = (f"Idea: supplier {idea['supplier']} vs customer {idea['customer']}. Risk facts:\n"
-              f"{json.dumps(facts)}\n"
-              "Write one short sentence on borrow / earnings-timing / liquidity risk. If borrow "
-              "class is 'hard', note the short can still be put on via options (a put spread).")
     try:
+        prompt = (f"Idea: supplier {idea['supplier']} vs customer {idea['customer']}. Risk facts:\n"
+                  f"{json.dumps(facts)}\n"
+                  "Write one short sentence on borrow / earnings-timing / liquidity risk. If borrow "
+                  "class is 'hard', note the short can still be put on via options (a put spread).")
         return complete(prompt, model=OPUS, system=_NARRATE_SYS, max_tokens=256).strip()
     except Exception:
         return ""
@@ -136,7 +136,7 @@ def build_risk(state: dict) -> dict:
             facts = {"borrow": {"ticker": None, "class": "na"},
                      "earnings": {"days_to": None, "reported_since_entry": False},
                      "liquidity": "ok", "note": ""}
-        per[f'{o["supplier"]}|{o["customer"]}'] = facts
+        per[f'{o.get("supplier")}|{o.get("customer")}'] = facts
     return {"generated_utc": datetime.now(timezone.utc).isoformat(), "model_used": OPUS,
             "per_idea": per}
 

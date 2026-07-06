@@ -79,12 +79,15 @@ class TestOrchestration(unittest.TestCase):
                 "neutralizer": {"ticker": "MZTI", "direction": -1, "instrument": "stock"}}
         facts = risk.assess_idea_risk(idea, bars_fn=boom, mktcap_fn=boom, dates_fn=boom,
                                       today=date(2026, 7, 5))            # must NOT raise
-        self.assertIn(facts["liquidity"], ("ok", "thin"))
+        self.assertEqual(facts["liquidity"], "thin")
 
     def test_narrate_fails_soft(self):
         def boom(*a, **k): raise risk.AnthropicError("HTTP 500", code=500)
         risk.complete = boom
         self.assertEqual(risk.narrate({"supplier": "X", "customer": "Y"}, {}), "")
+
+    def test_narrate_fail_soft_on_malformed_idea(self):
+        self.assertEqual(risk.narrate({}, {"borrow": {"class": "na"}}), "")   # missing supplier/customer
 
     def test_build_risk_keys_every_idea(self):
         risk.assess_idea_risk = lambda o, **k: {"borrow": {"ticker": None, "class": "na"},

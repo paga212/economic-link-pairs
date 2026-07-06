@@ -67,5 +67,32 @@ class TestSeries(unittest.TestCase):
         self.assertTrue(all(isinstance(y, float) for _, y in s))
 
 
+from elp.tradeviz import PAGE_CSS, trade_detail_html  # noqa: E402
+
+
+class TestDetailHtml(unittest.TestCase):
+    def _bars(self):
+        return {"GILD": [(date(2026, 6, 1), 90.0, 1e6), (date(2026, 6, 2), 100.0, 1e6),
+                         (date(2026, 6, 3), 110.0, 1e6)],
+                "VC": [(date(2026, 6, 1), 50.0, 1e6), (date(2026, 6, 2), 50.0, 1e6),
+                       (date(2026, 6, 3), 50.0, 1e6)]}
+
+    def test_block_has_header_charts_and_table(self):
+        html = trade_detail_html(_idea("2026-06-02"), self._bars())
+        self.assertIn("LONG GILD", html)
+        self.assertIn("vs CAH", html)
+        self.assertIn("<svg", html)                 # at least one chart
+        self.assertIn("combined", html.lower())     # combined section / label
+        self.assertIn("Grade-C", html)              # honest caveat
+
+    def test_missing_bars_is_fail_soft(self):
+        html = trade_detail_html(_idea("2026-06-02"), {"GILD": [], "VC": []})
+        self.assertIn("no price data", html)        # leg note, no crash
+
+    def test_page_css_is_nonempty_string(self):
+        self.assertIsInstance(PAGE_CSS, str)
+        self.assertIn("svg.chart", PAGE_CSS)
+
+
 if __name__ == "__main__":
     unittest.main()

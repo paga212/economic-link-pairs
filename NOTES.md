@@ -72,6 +72,27 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
 > - **Tests: now 95** (`test_news`, `test_llm`, `test_catalyst`, `test_catalyst_entry` added). The
 >   remaining Phase-3 agent is Risk/Borrow (borrow/ADV/earnings-window derate).
 
+> **Update 2026-07-05 (Risk/Borrow agent shipped — #10; Phase-3 agent fleet complete).**
+> - **Risk/Borrow agent (hybrid: code computes, LLM narrates).** Per open idea `elp/risk.py`
+>   derives **borrow** (market-cap + ADV proxy on the short *stock* leg — a long idea's neutralizer;
+>   short primaries are put-spreads → no borrow), **earnings-window** (Madsen: quarterly-cadence
+>   estimate of next earnings + reported-since-entry), and a **liquidity** re-check; a thin Opus
+>   `narrate` writes one sentence (no numbers). `risk.py` → `risk.json`; `run_paper.sh` runs
+>   `catalyst → risk → digest`. The digest down-ranks hard-borrow / post-earnings / thin ideas; a
+>   hard-borrow short is flagged **"short via options"** (NOT untradeable — primaries are already
+>   put-spreads). New Tiingo helpers `fetch_marketcap` / `fetch_statement_dates`. Fail-soft
+>   everywhere; recommendations only (never touches engine open/close).
+> - Built subagent-driven (6 TDD tasks); reviews caught + fixed three fail-soft edge cases and a
+>   borrow-proxy false-positive (**missing market-cap now defers to ADV**, not auto-"hard").
+> - **Live smoke:** short-spread ideas → `borrow=na`; the two long ideas' short neutralizers
+>   borrow-checked; the digest ranked ⚠ names low and even reasoned "borrow hard but irrelevant
+>   here" for a long idea's hedge leg.
+> - **Honest limits:** borrow is Grade-C (no free borrow feed); earnings is a cadence estimate, not
+>   the announced date. Note: `risk.py` is fully fail-soft, so with no key/token it still writes a
+>   `risk.json` of conservative labels (it does not "write nothing").
+> - **Tests: now 113.** **Phase-3 agent fleet is COMPLETE** (Master digest, expression engine, link
+>   validation, News/Catalyst, Risk/Borrow). The next remaining plan work is gated behind Phase 5.
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month

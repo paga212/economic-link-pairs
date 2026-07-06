@@ -43,7 +43,7 @@ def _unknown(source: str, why: str) -> dict:
 
 
 def _verdict_from(source: str, data: dict) -> dict:
-    data = data or {}
+    data = data if isinstance(data, dict) else {}
     return {"source": source,
             "customer_catalyst": data.get("customer_catalyst", "unknown"),
             "catalyst_note": str(data.get("catalyst_note", "")).strip(),
@@ -59,7 +59,11 @@ def _source_verdict(source: str, cust: str, sup: str, cust_items: list, sup_item
     prompt = (f"Idea: supplier {sup} <- principal customer {cust}.\n"
               f"Recent {cust} (customer) headlines:\n{_headlines_block(cust_items)}\n"
               f"Recent {sup} (supplier) headlines:\n{_headlines_block(sup_items)}\n" + _SCHEMA)
-    return _verdict_from(source, parse_json(complete(prompt, model=OPUS, system=_SRC_SYS)))
+    try:
+        text = complete(prompt, model=OPUS, system=_SRC_SYS)
+    except AnthropicError:
+        return _unknown(source, "llm unavailable")
+    return _verdict_from(source, parse_json(text))
 
 
 def rss_agent(idea: dict) -> dict:

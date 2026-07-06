@@ -52,6 +52,13 @@ class TestSourceAgents(unittest.TestCase):
         self.assertEqual(v["customer_catalyst"], "unknown")
         self.assertIn("web search", v["catalyst_note"].lower())
 
+    def test_source_agent_fail_soft_when_llm_raises(self):
+        catalyst.google_rss = lambda q, days=30: [{"title": "x", "source": "s", "date": "", "url": ""}]
+        def boom(*a, **k): raise catalyst.AnthropicError("HTTP 500", code=500)
+        catalyst.complete = boom
+        v = catalyst.rss_agent({"supplier": "GILD", "customer": "CAH"})
+        self.assertEqual(v["customer_catalyst"], "unknown")   # degraded, did not raise
+
 
 class TestMajority(unittest.TestCase):
     def test_majority_and_confounding_are_conservative(self):

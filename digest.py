@@ -23,8 +23,13 @@ def main() -> None:
     # Key by (supplier, customer): a supplier can name several customers, and the trade is on a
     # specific one — keying by supplier alone would paste a different customer's note beside it.
     notes = {(s, c): n for s, c, n in load_universe()}
+    catalyst = {}
     try:
-        d = build_digest(state, notes)
+        catalyst = json.load(open("catalyst.json")).get("per_idea", {})
+    except (FileNotFoundError, ValueError):
+        pass
+    try:
+        d = build_digest(state, notes, catalyst)
     except Exception as e:                    # no key / API / network -> fail soft
         print(f"[digest] skipped ({type(e).__name__}: {e}) — dashboard keeps prior digest")
         return

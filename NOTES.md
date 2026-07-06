@@ -152,8 +152,11 @@ erode it. Needs real options data (Phase 6) to confirm.
 - **~~Delivery~~ → DONE (2026-07-05).** Weekly email (`email_report.py`) to
   `pagrelletaumont@gmail.com`, sent from the cloud by GitHub Actions (basement-independent);
   dashboard served by `serve.sh`. See the 2026-07-05 update block above.
-- **Kill rule** → set your bar (strawman ≥0.5 Sharpe / 5-10 ideas); if paper P&L doesn't
-  clear it after N months, stop. Honest prior: the evidence says this is likely weak.
+- **Kill rule → SET 2026-07-05.** Pass = net Sharpe ≥ 0.5 **and** positive net expectancy
+  (mean net return/trade > 0) **and** ≥5 ideas/month, judged at the **later of** 12 months after
+  paper_start (2026-07-04) **and** ≥30 closed OOS trades. Any miss → stop; the options overlay is
+  cancelled, not "tried anyway." Full definition in PLAN §11.8. Honest prior: evidence says the
+  edge is likely weak, so FAIL is the base case to disprove.
 
 ### Known limitation
 The `HIGHSIGNAL_LINKS` universe is Apple-supplier-heavy, so the long/short legs are
@@ -162,7 +165,7 @@ expansion is what diversifies it.
 
 ## Other open inputs (none blocking, all previously raised)
 - Fable-5 key test (drop your Anthropic key in a file, same as Tiingo).
-- Success bar: net Sharpe + ideas/month (strawman: ≥0.5 Sharpe, 5-10 ideas).
+- ~~Success bar~~ → SET (see the "Kill rule → SET 2026-07-05" item above and PLAN §11.8).
 - Is $10-20k **per idea** or **total** book?
 - ~~Where does the `macro-dashboard` delivery target live?~~ Resolved: delivery is the weekly
   email to `pagrelletaumont@gmail.com` + the served dashboard (no separate `macro-dashboard`).

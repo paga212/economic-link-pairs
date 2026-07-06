@@ -3,10 +3,12 @@
 Status (as of 2026-07-05): decisions **approved 2026-07-04** and the build is
 underway. **Built:** Phase 0 (data spine + signal check), Phase 1 (backtest
 engine), Phase 2a (EDGAR extractor), Phase D (dynamic per-trade engine, now the
-live system), Phase B (LLM-diversified link universe) — the forward paper-trade
-is running (`track.py`). **Remaining:** Phase 3 (full agent fleet), Phase 4
-(email delivery), Phase 5 (paper-validation window), Phase 6/7 (options overlay,
-gated behind Phase 5). Per-phase status is marked in §6. The design below —
+live system), Phase B (LLM-diversified link universe), most of Phase 3 (Fable-5
+Master digest, expression engine, link validation, News/Catalyst agent), and
+Phase 4 (delivery: dashboard + basement-independent weekly email) — the forward
+paper-trade is running (`track.py`). **Remaining:** Phase 3's Risk/Borrow agent,
+Phase 5 (paper-validation window, running), Phase 6/7 (options overlay, gated
+behind Phase 5). Per-phase status is marked in §6. The design below —
 including the §11 options overlay — remains the plan of record.
 
 Decisions locked with you on 2026-07-04:
@@ -80,7 +82,7 @@ knob that degrades Fable→Opus automatically if Fable 5 isn't available.
 - **Phase 1 — Backtest engine.** ✅ **Built** (`elp/backtest.py`, `elp/cf_links.py`, `phase1.py`). Data-source-agnostic monthly long/short engine + free C-F link parser. *Verified:* stable across reruns; unit-tested.
 - **Phase 2 — Link discovery (LLM).** 🟨 **Partial** — Phase 2a EDGAR extractor built (`elp/edgar.py`); Phase B LLM link expansion built and live (`elp/llm.py`, `universe_links.json`). Remaining: entity-resolution hardening + dedicated QA agent. Named-link yield/quality limits documented in `research/09`.
 - **Phase D — Dynamic per-trade engine.** ✅ **Built** (`elp/trades.py`, `elp/options.py`, `track.py`) — *the live system.* Signal-triggered trades, trailing stop + signal exit, bear-put-spread shorts, net-of-cost scoring.
-- **Phase 3 — Daily pipeline + agents.** 🟨 **Partial** — the **Master/Orchestrator digest** shipped (`elp/digest.py`, `digest.py`, Fable-5 with Opus-4.8 fallback; ranks/narrates the open book, numbers pulled from state). The **expression engine** (`elp/express.py`: paired two-legged long/short ideas, liquidity-chosen expression) and **link validation** (`elp/linkcheck.py`) also shipped. Remaining: News/Catalyst + Risk/Borrow agents.
+- **Phase 3 — Daily pipeline + agents.** 🟨 **Partial** — shipped: the **Master/Orchestrator digest** (`elp/digest.py`, `digest.py`, Fable-5 with Opus-4.8 fallback; ranks/narrates the open book, numbers pulled from state), the **expression engine** (`elp/express.py`: paired two-legged long/short ideas, liquidity-chosen expression), **link validation** (`elp/linkcheck.py`), and the **News/Catalyst agent** (`elp/news.py`, `elp/catalyst.py`, `catalyst.py`: a 3-source RSS + Tiingo + web-search Opus ensemble reconciled by a master, soft-derating `none`/confounded ideas in the digest; fail-soft, recommendations only). *Verified:* live smoke correctly flagged a confounded name and confirmed a real customer-earnings catalyst. **Remaining: the Risk/Borrow agent** (borrow availability / ADV / earnings-window timing derate).
 - **Phase 4 — Delivery.** ✅ **Built** — dashboard (`dashboard.py` → `site/index.html`, served by `serve.sh`) **and** a weekly email report (`email_report.py`, stdlib `smtplib`, self-only recipient) sent **from the cloud** by GitHub Actions (`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC, basement-independent). *Verified:* live send landed in the inbox; dashboard served.
 - **Phase 5 — Paper-trading validation.** 🟨 **Running** — OOS clock started (`paper_start.txt`); accruing net-of-cost P&L. This is how we answer the net-of-cost question the literature couldn't.
 

@@ -52,6 +52,26 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
 >   67 core tests green at recovery.
 > - **Tests: now 71.** Run `python3 -m unittest discover -s tests`.
 
+> **Update 2026-07-05 (News/Catalyst agent shipped — #9).**
+> - **Phase-3 News/Catalyst agent.** Per open idea, three independent Opus source-agents judge
+>   the customer catalyst + supplier confounding from separate evidence — Google News RSS
+>   (`elp/news.py::google_rss`), Tiingo news (`tiingo_news`), and a web-search server tool
+>   (`elp/llm.py::WEB_SEARCH_TOOL`, verified **enabled** on the API) — then a master `reconcile`
+>   (Opus; deterministic `_majority` fallback) folds them into one verdict. `elp/catalyst.py` +
+>   top-level `catalyst.py` → `catalyst.json`; wired into `run_paper.sh` **before** `digest.py`.
+> - **Soft-derate only.** The digest down-ranks `none`/confounded ideas and the dashboard/email
+>   show a per-idea flag (`catalyst: confirmed` / `⚠ no clear catalyst` / `⚠ confounded`). It does
+>   NOT change which trades open/close — recommendations only. Numbers still come from state.
+> - **Fail-soft everywhere:** dead source → `[]` → `unknown`; web-search 4xx → two-source
+>   ensemble; no key → skip + exit 0. Built subagent-driven (7 TDD tasks); review caught two real
+>   fail-soft holes (`_token()` outside try; unguarded source-agent LLM call), both fixed + regression-tested.
+> - **Cost:** ~4 Opus calls/idea (3 agents + reconcile) + web-search fees ≈ a few dollars/day on
+>   the 6-idea book. Batching all ideas into fewer calls is an easy later lever.
+> - **Live smoke:** flagged `TTWO` confounded (its move is GTA VI, not the Apple link), confirmed
+>   `ADSK`'s Synnex-earnings catalyst; the digest led with the one clean, unconfounded name.
+> - **Tests: now 95** (`test_news`, `test_llm`, `test_catalyst`, `test_catalyst_entry` added). The
+>   remaining Phase-3 agent is Risk/Borrow (borrow/ADV/earnings-window derate).
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month

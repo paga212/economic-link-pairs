@@ -28,8 +28,13 @@ def main() -> None:
         catalyst = json.load(open("catalyst.json")).get("per_idea", {})
     except (FileNotFoundError, ValueError):
         pass
+    risk = {}
     try:
-        d = build_digest(state, notes, catalyst)
+        risk = json.load(open("risk.json")).get("per_idea", {})
+    except (FileNotFoundError, ValueError):
+        pass
+    try:
+        d = build_digest(state, notes, catalyst, risk)
     except Exception as e:                    # no key / API / network -> fail soft
         print(f"[digest] skipped ({type(e).__name__}: {e}) — dashboard keeps prior digest")
         return

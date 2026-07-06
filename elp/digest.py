@@ -28,16 +28,24 @@ SYSTEM = (
 )
 
 
-def _prompt(state: dict, notes: dict, catalyst: dict | None = None) -> str:
+def _prompt(state: dict, notes: dict, catalyst: dict | None = None, risk: dict | None = None) -> str:
     catalyst = catalyst or {}
-    lines = ["Open paper trades (supplier <- principal customer | kind | days held | link | catalyst):"]
+    risk = risk or {}
+    lines = ["Open paper trades (supplier <- principal customer | kind | days held | link | catalyst | risk):"]
     for o in state.get("open", []):
         note = notes.get((o["supplier"], o["customer"]), "")
         kind = o.get("kind", "LONG" if o.get("side", 0) > 0 else "SHORT")
-        cv = catalyst.get(f'{o["supplier"]}|{o["customer"]}')
+        key = f'{o["supplier"]}|{o["customer"]}'
+        cv = catalyst.get(key)
         ctag = (f' | catalyst={cv.get("customer_catalyst", "?")}, '
                 f'confounded={cv.get("confounding", "?")}') if cv else ""
-        lines.append(f'- {o["supplier"]} <- {o["customer"]} | {kind} | {o["days"]}d | {note}{ctag}')
+        rv = risk.get(key)
+        rtag = ""
+        if rv:
+            b = (rv.get("borrow") or {}).get("class", "?")
+            e = "post-earnings" if (rv.get("earnings") or {}).get("reported_since_entry") else "ok"
+            rtag = f' | borrow={b}, earnings={e}, liq={rv.get("liquidity", "?")}'
+        lines.append(f'- {o["supplier"]} <- {o["customer"]} | {kind} | {o["days"]}d | {note}{ctag}{rtag}')
     if not state.get("open"):
         lines.append("- (none open right now)")
     st = state.get("stats", {}) or {}
@@ -49,18 +57,21 @@ def _prompt(state: dict, notes: dict, catalyst: dict | None = None) -> str:
         'in the economic link, no numbers; if the trade needs attention (thesis weakening, held a '
         'long time, near its stop) prefix the rationale with ⚠ and say why briefly"}]}\n'
         'Rank ALL open suppliers, most attractive first. Rank LOWER any idea whose catalyst is '
-        '"none" or confounded="yes" (the signal is unconfirmed or already priced), and say so in '
-        "its rationale. Use only the tickers listed above. Do NOT return a separate watch list."
+        '"none" or confounded="yes", whose borrow=hard (note the short can still go on via options), '
+        'whose earnings=post-earnings (the lead-lag edge fades after the supplier reports), or whose '
+        'liq=thin — and say so in its rationale. Use only the tickers listed above. Do NOT return a '
+        "separate watch list."
     )
     return "\n".join(lines)
 
 
-def build_digest(state: dict, notes: dict, catalyst: dict | None = None) -> dict:
+def build_digest(state: dict, notes: dict, catalyst: dict | None = None,
+                 risk: dict | None = None) -> dict:
     """Call the Master agent and deterministically merge its ordering/prose with the state
     numbers. Raises (via complete_fallback) on API failure so the caller can fail soft."""
     # Fable-5 runs extended thinking by default; those tokens count against max_tokens, so
     # budget generously (thinking ~1-2k + the JSON ~600). Unused ceiling isn't billed.
-    text, model = complete_fallback(_prompt(state, notes, catalyst), primary=PRIMARY,
+    text, model = complete_fallback(_prompt(state, notes, catalyst, risk), primary=PRIMARY,
                                     fallback=FALLBACK, system=SYSTEM, max_tokens=4096)
     data = parse_json(text) or {}
 

@@ -14,6 +14,10 @@ import urllib.request
 MODEL = "claude-haiku-4-5"
 _URL = "https://api.anthropic.com/v1/messages"
 
+# Anthropic server tool: the API runs the search and returns results inline (no client loop).
+# The exact `type` string is a dated identifier that may change; probe availability before relying.
+WEB_SEARCH_TOOL = {"type": "web_search_20250305", "name": "web_search", "max_uses": 3}
+
 
 class AnthropicError(RuntimeError):
     """API failure that carries the HTTP status (None for network errors), so callers can
@@ -39,11 +43,14 @@ def _key() -> str:
     return k.strip().strip("'").strip('"').strip()
 
 
-def complete(prompt: str, model: str = MODEL, max_tokens: int = 1024, system: str | None = None) -> str:
+def complete(prompt: str, model: str = MODEL, max_tokens: int = 1024,
+             system: str | None = None, tools: list | None = None) -> str:
     body = {"model": model, "max_tokens": max_tokens,
             "messages": [{"role": "user", "content": prompt}]}
     if system:
         body["system"] = system
+    if tools:
+        body["tools"] = tools
     req = urllib.request.Request(_URL, data=json.dumps(body).encode(), headers={
         "x-api-key": _key(), "anthropic-version": "2023-06-01", "content-type": "application/json"})
     try:

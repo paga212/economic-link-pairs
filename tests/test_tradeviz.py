@@ -1,0 +1,102 @@
+"""Offline tests for the trade-detail viz (pure; no network)."""
+import os
+import sys
+import unittest
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from elp.tradeviz import svg_line  # noqa: E402
+
+
+class TestSvg(unittest.TestCase):
+    def test_line_renders_polyline_and_entry_marker(self):
+        svg = svg_line([{"pts": [(0, 1.0), (1, 2.0), (2, 1.5)], "cls": "pv", "dash": False}],
+                       entry_idx=1)
+        self.assertIn("<svg", svg)
+        self.assertIn("<polyline", svg)
+        self.assertIn('class="pv"', svg)
+        self.assertIn("class=entry", svg)          # vertical entry marker
+
+    def test_dashed_series_has_dasharray(self):
+        svg = svg_line([{"pts": [(0, 1.0), (1, 1.1)], "cls": "hyp", "dash": True}])
+        self.assertIn("stroke-dasharray", svg)
+
+    def test_empty_is_placeholder(self):
+        self.assertIn("no data", svg_line([{"pts": [], "cls": "x", "dash": False}]))
+
+
+from datetime import date  # noqa: E402
+
+from elp.tradeviz import combined_series, leg_price_series  # noqa: E402
+
+
+def _idea(entry, p_ticker="GILD", n_ticker="VC"):
+    return {"supplier": "GILD", "customer": "CAH", "side": 1, "expression": "stock-pair",
+            "entry": entry,
+            "primary": {"role": "primary", "ticker": p_ticker, "direction": 1, "instrument": "stock",
+                        "notional": 200000.0, "entry_px": 100.0},
+            "neutralizer": {"role": "neutralizer", "ticker": n_ticker, "direction": -1,
+                            "instrument": "stock", "notional": 200000.0, "entry_px": 50.0}}
+
+
+class TestSeries(unittest.TestCase):
+    def test_combined_splits_at_entry_and_matches_idea_return(self):
+        # entry on the middle day; GILD rises 90->100->110, VC flat 50
+        bars = {"GILD": [(date(2026, 6, 1), 90.0, 1e6), (date(2026, 6, 2), 100.0, 1e6),
+                         (date(2026, 6, 3), 110.0, 1e6)],
+                "VC": [(date(2026, 6, 1), 50.0, 1e6), (date(2026, 6, 2), 50.0, 1e6),
+                       (date(2026, 6, 3), 50.0, 1e6)]}
+        cs = combined_series(_idea("2026-06-02"), bars)
+        # pre-entry (day 0) is dashed and negative (GILD 90 vs entry ref 100)
+        self.assertAlmostEqual(cs["dashed"][0][1], -0.10, places=6)
+        self.assertEqual(cs["entry_idx"], 1)
+        self.assertAlmostEqual(cs["solid"][-1][1], 0.10, places=6)   # day 2: +10% long leg, VC flat
+
+    def test_leg_price_series_stock_is_prices(self):
+        bars = [(date(2026, 6, 1), 90.0, 1e6), (date(2026, 6, 2), 100.0, 1e6)]
+        leg = {"ticker": "GILD", "direction": 1, "instrument": "stock", "entry_px": 100.0}
+        self.assertEqual(leg_price_series(leg, bars, date(2026, 6, 2)), [(0, 90.0), (1, 100.0)])
+
+    def test_leg_price_series_spread_reprices(self):
+        bars = [(date(2026, 6, 1), 100.0, 1e6), (date(2026, 6, 10), 95.0, 1e6)]
+        leg = {"ticker": "PG", "direction": -1, "instrument": "spread", "notional": 2e5,
+               "entry_px": 100.0, "S0": 100.0, "k_long": 100.0, "k_short": 90.0,
+               "T0": 45 / 365.0, "iv": 0.3, "dte": 45}
+        s = leg_price_series(leg, bars, date(2026, 6, 1))
+        self.assertEqual(len(s), 2)
+        self.assertTrue(all(isinstance(y, float) for _, y in s))
+
+
+from elp.tradeviz import PAGE_CSS, trade_detail_html  # noqa: E402
+
+
+class TestDetailHtml(unittest.TestCase):
+    def _bars(self):
+        return {"GILD": [(date(2026, 6, 1), 90.0, 1e6), (date(2026, 6, 2), 100.0, 1e6),
+                         (date(2026, 6, 3), 110.0, 1e6)],
+                "VC": [(date(2026, 6, 1), 50.0, 1e6), (date(2026, 6, 2), 50.0, 1e6),
+                       (date(2026, 6, 3), 50.0, 1e6)]}
+
+    def test_block_has_header_charts_and_table(self):
+        html = trade_detail_html(_idea("2026-06-02"), self._bars())
+        self.assertIn("LONG GILD", html)
+        self.assertIn("vs CAH", html)
+        self.assertIn("<svg", html)                 # at least one chart
+        self.assertIn("combined", html.lower())     # combined section / label
+        self.assertIn("Grade-C", html)              # honest caveat
+
+    def test_missing_bars_is_fail_soft(self):
+        html = trade_detail_html(_idea("2026-06-02"), {"GILD": [], "VC": []})
+        self.assertIn("no price data", html)        # leg note, no crash
+
+    def test_page_css_is_nonempty_string(self):
+        self.assertIsInstance(PAGE_CSS, str)
+        self.assertIn("svg.chart", PAGE_CSS)
+
+    def test_pair_neutralizer_size_not_mislabeled(self):
+        html = trade_detail_html(_idea("2026-06-02"), self._bars())
+        self.assertNotIn("β-hedge", html)   # stock-pair neutralizer -> "pair", not hedge
+
+
+if __name__ == "__main__":
+    unittest.main()

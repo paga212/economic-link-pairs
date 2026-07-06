@@ -9,6 +9,7 @@ python3 catalyst.py  >> paper_run.log 2>&1   # News/Catalyst ensemble -> catalys
 python3 risk.py      >> paper_run.log 2>&1   # Risk/Borrow facts -> risk.json (fails soft)
 python3 digest.py    >> paper_run.log 2>&1   # Fable-5 digest; consumes catalyst.json + risk.json
 python3 dashboard.py >> paper_run.log 2>&1
+python3 tradeviz.py  >> paper_run.log 2>&1   # per-trade detail page -> site/trades.html (fails soft)
 bash serve.sh
 
 git add paper_state.json paper_start.txt

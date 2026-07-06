@@ -46,3 +46,17 @@ class TestScorecardPanel(unittest.TestCase):
         self.assertIn("PENDING", html)
         self.assertIn("net Sharpe", html)
         self.assertIn("0/30", html)          # gate progress
+
+
+class TestDashboardLink(unittest.TestCase):
+    def test_index_links_to_trades_page(self):
+        import dashboard, json, os, shutil
+        cwd = os.getcwd(); tmp = os.path.join(os.path.dirname(__file__), "_dashtmp")
+        os.makedirs(tmp, exist_ok=True); os.chdir(tmp)
+        try:
+            json.dump({"generated_utc": "t", "start": "2026-07-04", "open": [], "closed": [],
+                       "stats": {}}, open("paper_state.json", "w"))
+            dashboard.build()
+            self.assertIn("trades.html", open("site/index.html").read())
+        finally:
+            os.chdir(cwd); shutil.rmtree(tmp, ignore_errors=True)

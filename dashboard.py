@@ -140,6 +140,7 @@ def build() -> None:
 </style></head><body>
 <h1>Economic Link Pairs — Paper Trade</h1>
 <p class=sub>generated {escape(str(s['generated_utc']))} · paper start {escape(str(s['start']))} · recommendations only, no execution</p>
+<p class=sub><a href="trades.html">Trade details (per-trade charts) →</a></p>
 <div class=banner><b>Forward out-of-sample paper-trade,</b> net of costs. Dynamic per-trade
 management (trailing stop + signal exit); shorts as bear-put-spreads (Grade-C, optimistic).
 The evidence prior is weak — judged against a pre-set 12-month kill rule.</div>

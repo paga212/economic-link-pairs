@@ -24,6 +24,7 @@ paper_run.log
 dashboard.html
 digest.json
 catalyst.json
+risk.json
 site/
 
 # Git worktrees created under .claude/worktrees/ are local scratch — never track them

@@ -61,6 +61,15 @@ class TestPrompt(unittest.TestCase):
         self.assertIn("confounded=yes", p)
         self.assertIn("rank", p.lower())         # instruction to down-rank exists
 
+    def test_prompt_includes_risk_when_supplied(self):
+        risk = {"SWKS|AAPL": {"borrow": {"class": "hard"},
+                              "earnings": {"reported_since_entry": True}, "liquidity": "thin"}}
+        p = _prompt(STATE, NOTES, None, risk)
+        self.assertIn("borrow=hard", p)
+        self.assertIn("earnings=post-earnings", p)
+        self.assertIn("liq=thin", p)
+        self.assertIn("options", p.lower())      # instruction mentions the options fallback
+
     def test_note_matches_traded_customer_not_another(self):
         # Regression: a supplier with two customers; the trade is on one of them. The note beside
         # it must be THAT customer's note, not the other's (the (supplier,customer) keying fix).

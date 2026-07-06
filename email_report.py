@@ -17,6 +17,7 @@ from html import escape
 
 from elp.express import describe_leg
 from elp.catalyst import catalyst_flag
+from elp.risk import risk_flag
 
 TO = "pagrelletaumont@gmail.com"                 # sender AND sole recipient — never external
 SMTP_HOST, SMTP_PORT = "smtp.gmail.com", 587
@@ -33,12 +34,17 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
         cat = json.load(open("catalyst.json")).get("per_idea", {})
     except (FileNotFoundError, ValueError):
         cat = {}
+    try:
+        rsk = json.load(open("risk.json")).get("per_idea", {})
+    except (FileNotFoundError, ValueError):
+        rsk = {}
     rows, tlines = "", []
     for o in opens:
         direction = "LONG" if o["side"] > 0 else "SHORT"
         col = "#0a7a3f" if o["ret"] > 0 else "#b02020"
         p, n = describe_leg(o["primary"], o["expression"]), describe_leg(o["neutralizer"], o["expression"])
-        flag = catalyst_flag(cat.get(f'{o["supplier"]}|{o["customer"]}'))
+        key = f'{o["supplier"]}|{o["customer"]}'
+        flag = " · ".join(f for f in (catalyst_flag(cat.get(key)), risk_flag(rsk.get(key))) if f)
         rows += (f'<tr><td style="{td}"><b>{direction} {escape(o["supplier"])}</b>'
                  f'<div style="color:#888;font-size:12px">vs {escape(o["customer"])} · {o["days"]}d'
                  + (f' · {escape(flag)}' if flag else '') + '</div></td>'

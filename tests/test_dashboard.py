@@ -29,3 +29,7 @@ class TestIdeaRow(unittest.TestCase):
     def test_row_shows_catalyst_flag_when_supplied(self):
         html = idea_row(IDEA, {"customer_catalyst": "none", "confounding": "yes"})
         self.assertIn("confounded", html)
+
+    def test_row_shows_risk_flag_when_supplied(self):
+        html = idea_row(IDEA, None, {"borrow": {"class": "hard"}})
+        self.assertIn("hard to borrow", html)

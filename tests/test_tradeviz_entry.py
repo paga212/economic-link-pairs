@@ -51,6 +51,11 @@ class TestEntry(unittest.TestCase):
         entry.build()                                 # must not raise
         self.assertTrue(os.path.exists("site/trades.html"))
 
+    def test_corrupt_state_is_fail_soft(self):
+        open("paper_state.json", "w").write("not json{")
+        entry.build()                          # must not raise
+        self.assertTrue(os.path.exists("site/trades.html"))
+
 
 _ORIG = entry.fetch_daily_bars
 

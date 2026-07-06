@@ -111,11 +111,11 @@ PAGE_CSS = (
     "font-size:.9rem}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #eee}")
 
 
-def _leg_row(leg: dict, bars: list) -> str:
+def _leg_row(leg: dict, bars: list, expression: str) -> str:
     latest = f'{bars[-1][1]:.2f}' if bars else "—"
     return (f'<tr><td>{escape(leg["ticker"])}</td>'
             f'<td>{"long" if leg["direction"] > 0 else "short"}</td>'
-            f'<td class=sub>{escape(describe_leg(leg))}</td>'
+            f'<td class=sub>{escape(describe_leg(leg, expression))}</td>'
             f'<td>{leg.get("entry_px", 0.0):.2f}</td><td>{latest}</td></tr>')
 
 
@@ -154,8 +154,8 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict) -> str:
         last = cs["solid"][-1][1] if cs["solid"] else cs["dashed"][-1][1]
         pnl = last * p["notional"]
         table = ('<table><tr><th>Leg</th><th>Dir</th><th>Size</th><th>Entry px</th><th>Latest px</th></tr>'
-                 + _leg_row(p, bars_by_ticker.get(p["ticker"], []))
-                 + _leg_row(n, bars_by_ticker.get(n["ticker"], []))
+                 + _leg_row(p, bars_by_ticker.get(p["ticker"], []), idea["expression"])
+                 + _leg_row(n, bars_by_ticker.get(n["ticker"], []), idea["expression"])
                  + f'<tr><td colspan=5 class=sub>combined: return <b>{last * 100:+.2f}%</b> · '
                    f'P&amp;L <b>{pnl / 1000:+.1f}k</b> on ${p["notional"] / 1000:.0f}k primary notional</td></tr></table>')
     else:

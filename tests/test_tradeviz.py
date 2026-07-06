@@ -93,6 +93,10 @@ class TestDetailHtml(unittest.TestCase):
         self.assertIsInstance(PAGE_CSS, str)
         self.assertIn("svg.chart", PAGE_CSS)
 
+    def test_pair_neutralizer_size_not_mislabeled(self):
+        html = trade_detail_html(_idea("2026-06-02"), self._bars())
+        self.assertNotIn("β-hedge", html)   # stock-pair neutralizer -> "pair", not hedge
+
 
 if __name__ == "__main__":
     unittest.main()

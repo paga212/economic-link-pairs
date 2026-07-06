@@ -30,7 +30,7 @@ def _bars_for(idea: dict) -> dict:
 def build() -> None:
     try:
         state = json.load(open(STATE))
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         state = {"open": []}
     blocks = ""
     for idea in state.get("open", []):

@@ -44,5 +44,75 @@ class TestPure(unittest.TestCase):
         self.assertFalse(reported_since_entry([], date(2026, 4, 1), date(2026, 7, 5)))
 
 
+class TestOrchestration(unittest.TestCase):
+    def tearDown(self):
+        risk.complete = _ORIG_COMPLETE
+        risk.assess_idea_risk = _ORIG_ASSESS
+        risk.narrate = _ORIG_NARRATE
+
+    def _bars(self, t):  # liquid stub: (date, price, volume) x 63, $50M ADV
+        return [(date(2026, 1, 1), 50.0, 1_000_000.0)] * 63
+
+    def test_long_pair_flags_hard_borrow_on_small_neutralizer(self):
+        idea = {"supplier": "GILD", "customer": "CAH", "side": 1, "entry": "2026-06-25",
+                "primary": {"role": "primary", "ticker": "GILD", "direction": 1, "instrument": "stock"},
+                "neutralizer": {"role": "neutralizer", "ticker": "MZTI", "direction": -1, "instrument": "stock"}}
+        facts = risk.assess_idea_risk(idea, bars_fn=self._bars,
+                                      mktcap_fn=lambda t: 5e8,          # small cap -> hard
+                                      dates_fn=lambda t: ["2026-03-31"], today=date(2026, 7, 5))
+        self.assertEqual(facts["borrow"]["ticker"], "MZTI")
+        self.assertEqual(facts["borrow"]["class"], "hard")
+        self.assertEqual(facts["liquidity"], "ok")
+
+    def test_short_spread_idea_has_no_borrow(self):
+        idea = {"supplier": "PG", "customer": "WMT", "side": -1, "entry": "2026-07-01",
+                "primary": {"role": "primary", "ticker": "PG", "direction": -1, "instrument": "spread"},
+                "neutralizer": {"role": "neutralizer", "ticker": "SPY", "direction": 1, "instrument": "stock"}}
+        facts = risk.assess_idea_risk(idea, bars_fn=self._bars, mktcap_fn=lambda t: 5e9,
+                                      dates_fn=lambda t: [], today=date(2026, 7, 5))
+        self.assertEqual(facts["borrow"]["class"], "na")
+
+    def test_assess_degrades_when_fetch_raises(self):
+        def boom(t): raise RuntimeError("net down")
+        idea = {"supplier": "GILD", "customer": "CAH", "side": 1, "entry": "2026-06-25",
+                "primary": {"ticker": "GILD", "direction": 1, "instrument": "stock"},
+                "neutralizer": {"ticker": "MZTI", "direction": -1, "instrument": "stock"}}
+        facts = risk.assess_idea_risk(idea, bars_fn=boom, mktcap_fn=boom, dates_fn=boom,
+                                      today=date(2026, 7, 5))            # must NOT raise
+        self.assertIn(facts["liquidity"], ("ok", "thin"))
+
+    def test_narrate_fails_soft(self):
+        def boom(*a, **k): raise risk.AnthropicError("HTTP 500", code=500)
+        risk.complete = boom
+        self.assertEqual(risk.narrate({"supplier": "X", "customer": "Y"}, {}), "")
+
+    def test_build_risk_keys_every_idea(self):
+        risk.assess_idea_risk = lambda o, **k: {"borrow": {"ticker": None, "class": "na"},
+            "earnings": {"days_to": 30, "reported_since_entry": False}, "liquidity": "ok"}
+        risk.narrate = lambda idea, facts: ""
+        state = {"open": [{"supplier": "GILD", "customer": "CAH"}, {"supplier": "PG", "customer": "WMT"}]}
+        out = risk.build_risk(state)
+        self.assertEqual(set(out["per_idea"]), {"GILD|CAH", "PG|WMT"})
+        self.assertEqual(out["model_used"], risk.OPUS)
+
+    def test_risk_flag_precedence(self):
+        self.assertIn("hard to borrow", risk.risk_flag({"borrow": {"class": "hard"}}))
+        self.assertIn("post-earnings", risk.risk_flag({"borrow": {"class": "na"},
+            "earnings": {"reported_since_entry": True}}))
+        self.assertIn("thin", risk.risk_flag({"borrow": {"class": "na"},
+            "earnings": {"reported_since_entry": False}, "liquidity": "thin"}))
+        self.assertEqual(risk.risk_flag(None), "")
+
+
+_ORIG_COMPLETE = None
+_ORIG_ASSESS = None
+_ORIG_NARRATE = None
+
+
+def setUpModule():
+    global _ORIG_COMPLETE, _ORIG_ASSESS, _ORIG_NARRATE
+    _ORIG_COMPLETE, _ORIG_ASSESS, _ORIG_NARRATE = risk.complete, risk.assess_idea_risk, risk.narrate
+
+
 if __name__ == "__main__":
     unittest.main()

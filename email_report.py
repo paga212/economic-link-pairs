@@ -16,6 +16,7 @@ from email.message import EmailMessage
 from html import escape
 
 from elp.express import describe_leg
+from elp.catalyst import catalyst_flag
 
 TO = "pagrelletaumont@gmail.com"                 # sender AND sole recipient — never external
 SMTP_HOST, SMTP_PORT = "smtp.gmail.com", 587
@@ -28,18 +29,24 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
     """(html, text) report. Every number comes from `state`, not an LLM."""
     opens = state.get("open", [])
     td = "padding:8px 10px;border-bottom:1px solid #eee"   # style body; each cell wraps it
+    try:
+        cat = json.load(open("catalyst.json")).get("per_idea", {})
+    except (FileNotFoundError, ValueError):
+        cat = {}
     rows, tlines = "", []
     for o in opens:
         direction = "LONG" if o["side"] > 0 else "SHORT"
         col = "#0a7a3f" if o["ret"] > 0 else "#b02020"
         p, n = describe_leg(o["primary"], o["expression"]), describe_leg(o["neutralizer"], o["expression"])
+        flag = catalyst_flag(cat.get(f'{o["supplier"]}|{o["customer"]}'))
         rows += (f'<tr><td style="{td}"><b>{direction} {escape(o["supplier"])}</b>'
-                 f'<div style="color:#888;font-size:12px">vs {escape(o["customer"])} · {o["days"]}d</div></td>'
+                 f'<div style="color:#888;font-size:12px">vs {escape(o["customer"])} · {o["days"]}d'
+                 + (f' · {escape(flag)}' if flag else '') + '</div></td>'
                  f'<td style="{td};font-size:13px">{escape(o["expression"])}</td>'
                  f'<td style="{td};font-size:12px;color:#444">{escape(p)}<br>{escape(n)}</td>'
                  f'<td style="{td};color:{col};font-weight:600;text-align:right">{o["ret"]*100:+.1f}%</td></tr>')
         tlines.append(f'{direction} {o["supplier"]} vs {o["customer"]} [{o["expression"]}] '
-                      f'{o["ret"]*100:+.1f}% | {p}; {n}')
+                      f'{o["ret"]*100:+.1f}%' + (f' [{flag}]' if flag else '') + f' | {p}; {n}')
 
     st = state.get("stats", {}) or {}
     if st.get("n"):

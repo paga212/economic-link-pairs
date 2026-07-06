@@ -10,18 +10,21 @@ import os
 from html import escape
 
 from elp.express import describe_leg
+from elp.catalyst import catalyst_flag
 
 OUT, STATE, DIGEST = "site/index.html", "paper_state.json", "digest.json"
 
 
-def idea_row(o):
-    """One idea as an HTML row: plain-English net direction + both legs + expression tag."""
+def idea_row(o, catalyst=None):
+    """One idea as an HTML row: net direction + both legs + expression + catalyst flag."""
     direction = "LONG" if o["side"] > 0 else "SHORT"
     cap = "$10k hard" if o.get("risk_cap") == "hard" else "~$10k stop (gap risk)"
     rcls = "pos" if o["ret"] > 0 else "neg"
+    flag = catalyst_flag(catalyst)
+    fhtml = f"<br><span class=sub>{escape(flag)}</span>" if flag else ""
     return (
         f"<tr><td><b>{direction} {escape(o['supplier'])}</b><br>"
-        f"<span class=sub>vs {escape(o['customer'])}</span></td>"
+        f"<span class=sub>vs {escape(o['customer'])}</span>{fhtml}</td>"
         f"<td>{escape(o['expression'])}</td>"
         f"<td class=sub>primary: {escape(describe_leg(o['primary'], o['expression']))}<br>"
         f"neutralizer: {escape(describe_leg(o['neutralizer'], o['expression']))}</td>"
@@ -62,7 +65,11 @@ def build() -> None:
             + (f"<ol class=ranked>{ranked}</ol>" if ranked else "")
             + f"<p class=muted>{escape(dg.get('caveat', ''))}</p>")
 
-    open_rows = "".join(idea_row(o) for o in s["open"]) or \
+    try:
+        cat = json.load(open("catalyst.json")).get("per_idea", {})
+    except (FileNotFoundError, ValueError):
+        cat = {}
+    open_rows = "".join(idea_row(o, cat.get(f'{o["supplier"]}|{o["customer"]}')) for o in s["open"]) or \
         "<tr><td colspan=7 class=muted>no open ideas</td></tr>"
 
     st = s.get("stats", {})

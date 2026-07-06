@@ -51,6 +51,19 @@ class TestRender(unittest.TestCase):
         self.assertIn("Daily read", html_yes)
         self.assertIn("Book looks fine.", html_yes)
 
+    def test_catalyst_flag_appears_when_catalyst_json_present(self):
+        import email_report, json, os
+        cwd = os.getcwd(); tmp = os.path.join(os.path.dirname(__file__), "_emailcat")
+        os.makedirs(tmp, exist_ok=True); os.chdir(tmp)
+        try:
+            json.dump({"per_idea": {"GILD|CAH": {"customer_catalyst": "confirmed",
+                       "confounding": "no"}}}, open("catalyst.json", "w"))
+            html, text = email_report.render(STATE, None)
+            self.assertIn("catalyst: confirmed", html)
+        finally:
+            os.chdir(cwd)
+            import shutil; shutil.rmtree(tmp, ignore_errors=True)
+
 
 import email_report  # noqa: E402
 

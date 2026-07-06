@@ -54,6 +54,13 @@ class TestPrompt(unittest.TestCase):
         self.assertIn("TTWO", p)
         self.assertIn("SHORT", p)          # derived from side
 
+    def test_prompt_includes_catalyst_when_supplied(self):
+        catalyst = {"SWKS|AAPL": {"customer_catalyst": "none", "confounding": "yes"}}
+        p = _prompt(STATE, NOTES, catalyst)
+        self.assertIn("catalyst=none", p)
+        self.assertIn("confounded=yes", p)
+        self.assertIn("rank", p.lower())         # instruction to down-rank exists
+
     def test_note_matches_traded_customer_not_another(self):
         # Regression: a supplier with two customers; the trade is on one of them. The note beside
         # it must be THAT customer's note, not the other's (the (supplier,customer) keying fix).

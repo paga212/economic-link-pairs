@@ -25,3 +25,7 @@ class TestIdeaRow(unittest.TestCase):
         self.assertIn("stock-pair", html)          # expression tag
         self.assertIn("143", html)                 # snapped strike shown
         self.assertIn("+1.2%", html)                # net return from state, not a model
+
+    def test_row_shows_catalyst_flag_when_supplied(self):
+        html = idea_row(IDEA, {"customer_catalyst": "none", "confounding": "yes"})
+        self.assertIn("confounded", html)

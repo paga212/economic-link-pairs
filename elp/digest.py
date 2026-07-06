@@ -28,12 +28,16 @@ SYSTEM = (
 )
 
 
-def _prompt(state: dict, notes: dict) -> str:
-    lines = ["Open paper trades (supplier <- principal customer | kind | days held | link):"]
+def _prompt(state: dict, notes: dict, catalyst: dict | None = None) -> str:
+    catalyst = catalyst or {}
+    lines = ["Open paper trades (supplier <- principal customer | kind | days held | link | catalyst):"]
     for o in state.get("open", []):
         note = notes.get((o["supplier"], o["customer"]), "")
         kind = o.get("kind", "LONG" if o.get("side", 0) > 0 else "SHORT")
-        lines.append(f'- {o["supplier"]} <- {o["customer"]} | {kind} | {o["days"]}d | {note}')
+        cv = catalyst.get(f'{o["supplier"]}|{o["customer"]}')
+        ctag = (f' | catalyst={cv.get("customer_catalyst", "?")}, '
+                f'confounded={cv.get("confounding", "?")}') if cv else ""
+        lines.append(f'- {o["supplier"]} <- {o["customer"]} | {kind} | {o["days"]}d | {note}{ctag}')
     if not state.get("open"):
         lines.append("- (none open right now)")
     st = state.get("stats", {}) or {}
@@ -44,19 +48,20 @@ def _prompt(state: dict, notes: dict) -> str:
         ' "ranked": [{"supplier": "TICK", "rationale": "at most ~12 words on conviction, grounded '
         'in the economic link, no numbers; if the trade needs attention (thesis weakening, held a '
         'long time, near its stop) prefix the rationale with ⚠ and say why briefly"}]}\n'
-        'Rank ALL open suppliers, most attractive first. Use only the tickers listed above. '
-        "Do NOT return a separate watch list — fold any concern into that name's rationale."
+        'Rank ALL open suppliers, most attractive first. Rank LOWER any idea whose catalyst is '
+        '"none" or confounded="yes" (the signal is unconfirmed or already priced), and say so in '
+        "its rationale. Use only the tickers listed above. Do NOT return a separate watch list."
     )
     return "\n".join(lines)
 
 
-def build_digest(state: dict, notes: dict) -> dict:
+def build_digest(state: dict, notes: dict, catalyst: dict | None = None) -> dict:
     """Call the Master agent and deterministically merge its ordering/prose with the state
     numbers. Raises (via complete_fallback) on API failure so the caller can fail soft."""
     # Fable-5 runs extended thinking by default; those tokens count against max_tokens, so
     # budget generously (thinking ~1-2k + the JSON ~600). Unused ceiling isn't billed.
-    text, model = complete_fallback(_prompt(state, notes), primary=PRIMARY, fallback=FALLBACK,
-                                    system=SYSTEM, max_tokens=4096)
+    text, model = complete_fallback(_prompt(state, notes, catalyst), primary=PRIMARY,
+                                    fallback=FALLBACK, system=SYSTEM, max_tokens=4096)
     data = parse_json(text) or {}
 
     open_by_sup = {o["supplier"]: o for o in state.get("open", [])}

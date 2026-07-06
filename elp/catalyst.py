@@ -107,3 +107,46 @@ def _majority(verdicts: list) -> dict:
     confidence = "high" if agree == n and n >= 2 else "med" if agree > n / 2 else "low"
     return {"customer_catalyst": cat, "confounding": conf, "confidence": confidence,
             "note": f"{agree}/{n} sources agree ({cat}); confounding={conf}"}
+
+
+def reconcile(cust: str, sup: str, verdicts: list) -> dict:
+    """Master Opus call folding the three source verdicts into one; deterministic _majority
+    fallback if the model errors or returns unparseable JSON."""
+    prompt = (f"Idea: supplier {sup} <- customer {cust}. Three independent verdicts:\n"
+              f"{json.dumps(verdicts, indent=1)}\n"
+              'Reconcile into ONE. Return JSON: {"customer_catalyst":"confirmed|weak|none",'
+              '"confounding":"yes|no","confidence":"high|med|low","note":"one sentence for the reader"}.')
+    try:
+        data = parse_json(complete(prompt, model=OPUS, system=_REC_SYS, max_tokens=512))
+    except AnthropicError:
+        data = None
+    if not isinstance(data, dict) or "customer_catalyst" not in data:
+        return _majority(verdicts)
+    return {"customer_catalyst": data.get("customer_catalyst", "none"),
+            "confounding": data.get("confounding", "no"),
+            "confidence": data.get("confidence", "low"),
+            "note": str(data.get("note", "")).strip()}
+
+
+def assess_idea(idea: dict) -> dict:
+    verdicts = [rss_agent(idea), tiingo_agent(idea), web_agent(idea)]
+    final = reconcile(idea["customer"], idea["supplier"], verdicts)
+    final["sources"] = verdicts          # keep raw source verdicts for transparency/audit
+    return final
+
+
+def build_catalyst(state: dict) -> dict:
+    per = {f'{o["supplier"]}|{o["customer"]}': assess_idea(o) for o in state.get("open", [])}
+    return {"generated_utc": datetime.now(timezone.utc).isoformat(), "model_used": OPUS,
+            "per_idea": per}
+
+
+def catalyst_flag(cv: dict | None) -> str:
+    """Short reader-facing flag, shared by dashboard + email."""
+    if not cv:
+        return ""
+    if cv.get("confounding") == "yes":
+        return "⚠ confounded (supplier news)"
+    cat = cv.get("customer_catalyst")
+    return {"confirmed": "catalyst: confirmed", "weak": "catalyst: weak",
+            "none": "⚠ no clear catalyst"}.get(cat, "")

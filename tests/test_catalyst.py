@@ -80,11 +80,51 @@ class TestMajority(unittest.TestCase):
 _orig_rss = None
 _orig_tiingo = None
 _orig_complete = None
+_orig_assess = None
 
 
 def setUpModule():
-    global _orig_rss, _orig_tiingo, _orig_complete
+    global _orig_rss, _orig_tiingo, _orig_complete, _orig_assess
     _orig_rss, _orig_tiingo, _orig_complete = catalyst.google_rss, catalyst.tiingo_news, catalyst.complete
+    _orig_assess = catalyst.assess_idea
+
+
+class TestReconcileAndBuild(unittest.TestCase):
+    def tearDown(self):
+        catalyst.complete = _orig_complete
+        catalyst.assess_idea = _orig_assess
+
+    def test_reconcile_parses_master_json(self):
+        catalyst.complete = lambda prompt, **kw: json.dumps(
+            {"customer_catalyst": "confirmed", "confounding": "no", "confidence": "high",
+             "note": "Two sources confirm a guidance raise."})
+        out = catalyst.reconcile("CAH", "GILD", [{"customer_catalyst": "confirmed"}])
+        self.assertEqual(out["customer_catalyst"], "confirmed")
+        self.assertEqual(out["confidence"], "high")
+
+    def test_reconcile_falls_back_to_majority_on_bad_json(self):
+        catalyst.complete = lambda prompt, **kw: "not json"
+        verdicts = [{"customer_catalyst": "none", "confounding_supplier_news": "no"},
+                    {"customer_catalyst": "none", "confounding_supplier_news": "no"}]
+        out = catalyst.reconcile("CAH", "GILD", verdicts)
+        self.assertEqual(out["customer_catalyst"], "none")   # from _majority
+
+    def test_build_catalyst_keys_every_open_idea(self):
+        catalyst.assess_idea = lambda idea: {"customer_catalyst": "weak", "confounding": "no",
+                                             "confidence": "med", "note": "x", "sources": []}
+        state = {"open": [{"supplier": "GILD", "customer": "CAH"},
+                          {"supplier": "PG", "customer": "WMT"}]}
+        c = catalyst.build_catalyst(state)
+        self.assertEqual(set(c["per_idea"]), {"GILD|CAH", "PG|WMT"})
+        self.assertEqual(c["model_used"], catalyst.OPUS)
+
+    def test_catalyst_flag_text(self):
+        self.assertIn("confounded", catalyst.catalyst_flag({"confounding": "yes"}))
+        self.assertIn("confirmed", catalyst.catalyst_flag({"customer_catalyst": "confirmed",
+                                                           "confounding": "no"}))
+        self.assertIn("no clear", catalyst.catalyst_flag({"customer_catalyst": "none",
+                                                          "confounding": "no"}))
+        self.assertEqual(catalyst.catalyst_flag(None), "")
 
 
 if __name__ == "__main__":

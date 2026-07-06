@@ -51,3 +51,47 @@ def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None)
         parts.append(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>')
     parts.append("</svg>")
     return "".join(parts)
+
+
+from elp.options import bear_put_spread          # noqa: E402
+from elp.trades import RISK_FREE, idea_return     # noqa: E402
+
+
+def _price_map(bars):
+    return {d: px for d, px, _ in bars}
+
+
+def combined_series(idea: dict, bars_by_ticker: dict) -> dict:
+    """Combined trade return per unit primary notional at each common date, split at entry:
+    solid (>= entry) and dashed (< entry, the hypothetical earlier hold). Reuses idea_return."""
+    p, n = idea["primary"], idea["neutralizer"]
+    entry = date.fromisoformat(idea["entry"])
+    idea["entry_date"] = entry                    # idea_return reads this eagerly via setdefault
+    pm = {t: _price_map(bars_by_ticker.get(t, [])) for t in (p["ticker"], n["ticker"])}
+    dates = sorted(set(pm[p["ticker"]]) & set(pm[n["ticker"]]))
+    solid, dashed, entry_idx = [], [], None
+    for i, d in enumerate(dates):
+        marks = {p["ticker"]: pm[p["ticker"]][d], n["ticker"]: pm[n["ticker"]][d]}
+        ret, _ = idea_return(idea, marks, d)
+        if d >= entry:
+            if entry_idx is None:
+                entry_idx = i
+            solid.append((i, ret))
+        else:
+            dashed.append((i, ret))
+    if dashed and solid:
+        dashed.append(solid[0])                   # connect the dashed segment to the solid start
+    return {"dates": dates, "solid": solid, "dashed": dashed, "entry_idx": entry_idx}
+
+
+def leg_price_series(leg: dict, bars: list, entry: date) -> list:
+    """Per-leg chart series: stock -> the underlying price; spread -> its repriced mark."""
+    out = []
+    for i, (d, px, _) in enumerate(bars):
+        if leg["instrument"] == "spread":
+            trem = max(leg["T0"] - (d - entry).days / 365.0, 1e-6)
+            y = bear_put_spread(px, leg["k_long"], leg["k_short"], trem, leg["iv"], RISK_FREE)
+        else:
+            y = px
+        out.append((i, y))
+    return out

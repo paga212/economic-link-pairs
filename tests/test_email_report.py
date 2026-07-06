@@ -44,6 +44,12 @@ class TestRender(unittest.TestCase):
         self.assertIn("+6.0%", html)                    # net from state
         self.assertIn("$60k", html)                     # clamped hedge notional
 
+    def test_kill_rule_line_present(self):
+        html, text = render(STATE, None)
+        for blob in (html, text):
+            self.assertIn("Kill rule:", blob)
+            self.assertIn("PENDING", blob)     # STATE has 0 closed -> gate not open
+
     def test_digest_included_only_when_present(self):
         html_no, _ = render(STATE, None)
         self.assertNotIn("Daily read", html_no)

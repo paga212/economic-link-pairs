@@ -11,12 +11,13 @@ import json
 import os
 import smtplib
 import ssl
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from email.message import EmailMessage
 from html import escape
 
 from elp.express import describe_leg
 from elp.catalyst import catalyst_flag
+from elp.killrule import scorecard, scorecard_line
 from elp.risk import risk_flag
 
 TO = "pagrelletaumont@gmail.com"                 # sender AND sole recipient — never external
@@ -70,6 +71,11 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
 
     caveat = ("Forward out-of-sample paper-trade, net of costs. Each idea is a two-legged "
               "long/short unit risk-budgeted to ~$10k max drawdown. Recommendations only, no execution.")
+    try:
+        kill_line = scorecard_line(scorecard(state, date.fromisoformat(state["start"]), date.today()))
+    except (ValueError, TypeError):
+        kill_line = ""
+    kill_html = f'<p style="color:#555;font-size:13px">{escape(kill_line)}</p>' if kill_line else ""
     html = (f'<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:760px;'
             f'margin:0 auto;color:#1a1a1a;line-height:1.5">'
             f'<h1 style="font-size:20px;margin:0">Economic Link Pairs — Paper-Trade Weekly</h1>'
@@ -79,6 +85,7 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
             f'font-size:13px;color:#664d03">{escape(caveat)}</div>{dg}'
             f'<h2 style="font-size:16px;margin:20px 0 6px">Open ideas ({len(opens)})</h2>'
             f'<table style="border-collapse:collapse;width:100%;font-size:14px">{rows}</table>'
+            f'{kill_html}'
             f'<h2 style="font-size:16px;margin:20px 0 6px">Out-of-sample results (net)</h2>'
             f'<p style="color:#555">{escape(oos_t)}</p>'
             f'<p style="margin-top:16px"><a href="{DASHBOARD_URL}" style="color:#1155cc">Open the live dashboard →</a></p>'
@@ -91,6 +98,7 @@ def render(state: dict, digest: dict | None) -> tuple[str, str]:
             + (f"Daily read ({digest.get('model_used','')}): {digest['summary']}\n\n"
                if digest and digest.get("summary") else "")
             + f"Open ideas ({len(opens)}):\n" + "\n".join(f"- {ln}" for ln in tlines)
+            + (f"\n\n{kill_line}" if kill_line else "")
             + f"\n\nOut-of-sample results: {oos_t}\n\nLive dashboard: {DASHBOARD_URL}\n")
     return html, text
 

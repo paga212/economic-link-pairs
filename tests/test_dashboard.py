@@ -33,3 +33,16 @@ class TestIdeaRow(unittest.TestCase):
     def test_row_shows_risk_flag_when_supplied(self):
         html = idea_row(IDEA, None, {"borrow": {"class": "hard"}})
         self.assertIn("hard to borrow", html)
+
+
+class TestScorecardPanel(unittest.TestCase):
+    def test_panel_shows_verdict_and_metrics(self):
+        from dashboard import _scorecard_html
+        sc = {"verdict": "PENDING", "months": 0.1, "n_closed": 0,
+              "sharpe": None, "expectancy": None, "ideas_per_month": None,
+              "sharpe_ok": False, "expectancy_ok": False, "volume_ok": False}
+        html = _scorecard_html(sc)
+        self.assertIn("Kill-rule scorecard", html)
+        self.assertIn("PENDING", html)
+        self.assertIn("net Sharpe", html)
+        self.assertIn("0/30", html)          # gate progress

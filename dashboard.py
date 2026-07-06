@@ -7,13 +7,35 @@ Run: python3 dashboard.py
 """
 import json
 import os
+from datetime import date
 from html import escape
 
 from elp.express import describe_leg
 from elp.catalyst import catalyst_flag
+from elp.killrule import scorecard
 from elp.risk import risk_flag
 
 OUT, STATE, DIGEST = "site/index.html", "paper_state.json", "digest.json"
+
+
+def _scorecard_html(sc: dict) -> str:
+    """Phase-5 kill-rule panel: verdict badge + the three gate metrics with checks."""
+    def f(x, pct=False):
+        return "—" if x is None else (f"{x * 100:+.2f}%" if pct else f"{x:.2f}")
+    badge = {"PASS": "pos", "FAIL": "neg", "PENDING": "muted"}.get(sc["verdict"], "muted")
+
+    def row(ok, label, val, thr):
+        return (f"<li><b class={'pos' if ok else 'neg'}>{'✓' if ok else '✗'}</b> {label} "
+                f"<b>{val}</b> ({thr})</li>")
+    return (
+        f"<h2>Kill-rule scorecard <span class={badge}>[{escape(sc['verdict'])}]</span></h2>"
+        f"<p class=sub>Phase-5 gate (PLAN §11.8): pass needs all three, judged at the later of 12 "
+        f"months and 30 closed trades. Gate: month {sc['months']:.1f}/12 · {sc['n_closed']}/30 closed.</p>"
+        "<ul>"
+        + row(sc["sharpe_ok"], "net Sharpe", f(sc["sharpe"]), "&ge; 0.50")
+        + row(sc["expectancy_ok"], "net expectancy", f(sc["expectancy"], pct=True) + "/trade", "&gt; 0")
+        + row(sc["volume_ok"], "dealflow", f(sc["ideas_per_month"]) + " ideas/mo", "&ge; 5")
+        + "</ul>")
 
 
 def idea_row(o, catalyst=None, risk=None):
@@ -97,6 +119,12 @@ def build() -> None:
         oos = ("<p class=muted>No closed out-of-sample trades yet — the forward test just "
                "started. Results accrue as trades close.</p>")
 
+    scorecard_html = ""
+    try:
+        scorecard_html = _scorecard_html(scorecard(s, date.fromisoformat(s["start"]), date.today()))
+    except (ValueError, TypeError):
+        scorecard_html = ""
+
     doc = f"""<!doctype html><html><head><meta charset=utf-8>
 <title>Economic Link Pairs — Paper Trade</title>
 <style>
@@ -118,6 +146,7 @@ The evidence prior is weak — judged against a pre-set 12-month kill rule.</div
 {digest_html}
 <h2>Open trades</h2>
 <table><tr><th>Idea</th><th>Expression</th><th>Legs</th><th>Since</th><th>Held</th><th>Net</th><th>Risk cap</th></tr>{open_rows}</table>
+{scorecard_html}
 <h2>Out-of-sample results (net)</h2>{oos}
 <footer>economic-link-pairs · Cohen &amp; Frazzini (2008) customer-supplier lead-lag</footer>
 </body></html>"""

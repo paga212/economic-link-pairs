@@ -22,8 +22,10 @@ class TestPure(unittest.TestCase):
         self.assertEqual(borrow_class("VC", -1, "stock", 5e9, 5e7), "easy")
         # short small-cap stock -> hard
         self.assertEqual(borrow_class("MZTI", -1, "stock", 5e8, 1e6), "hard")
-        # missing marketcap -> hard (conservative)
-        self.assertEqual(borrow_class("MZTI", -1, "stock", None, 5e7), "hard")
+        # unknown mktcap + liquid -> easy
+        self.assertEqual(borrow_class("X", -1, "stock", None, 5e7), "easy")
+        # unknown mktcap + illiquid -> hard
+        self.assertEqual(borrow_class("MZTI", -1, "stock", None, 1e6), "hard")
 
     def test_next_earnings_est_future_and_past_last_announce(self):
         # last period end 2026-03-31; +40d announce = 2026-05-10 < today -> next = +131d

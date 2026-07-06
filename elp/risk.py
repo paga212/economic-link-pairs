@@ -19,15 +19,16 @@ HEDGE_ETF = "SPY"
 
 
 def borrow_class(ticker, direction, instrument, marketcap, adv) -> str:
-    """'na' unless the leg is a short stock; 'easy' for the broad ETF or a large, liquid name;
-    else 'hard' (Grade-C market-cap + ADV proxy — there is no free borrow-fee feed)."""
+    """'na' unless the leg is a short stock; 'easy' for the broad ETF or a liquid name; else
+    'hard' (Grade-C market-cap + ADV proxy — no free borrow-fee feed). A MISSING market cap is
+    not held against the name: ADV alone then decides (Tiingo fundamentals coverage is spotty)."""
     if not (instrument == "stock" and direction < 0):
         return "na"
     if ticker == HEDGE_ETF:
         return "easy"
-    if marketcap is not None and marketcap >= BORROW_MKTCAP_MIN and adv >= BORROW_ADV_MIN:
-        return "easy"
-    return "hard"
+    big = marketcap is None or marketcap >= BORROW_MKTCAP_MIN   # unknown mktcap -> benefit of the doubt
+    liquid = adv >= BORROW_ADV_MIN
+    return "easy" if (big and liquid) else "hard"
 
 
 def _latest(period_end_dates: list[str]):

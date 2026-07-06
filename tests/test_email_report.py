@@ -64,6 +64,18 @@ class TestRender(unittest.TestCase):
             os.chdir(cwd)
             import shutil; shutil.rmtree(tmp, ignore_errors=True)
 
+    def test_risk_flag_appears_when_risk_json_present(self):
+        import email_report, json, os, shutil
+        cwd = os.getcwd(); tmp = os.path.join(os.path.dirname(__file__), "_emailrisk")
+        os.makedirs(tmp, exist_ok=True); os.chdir(tmp)
+        try:
+            json.dump({"per_idea": {"GILD|CAH": {"borrow": {"class": "hard"}}}},
+                      open("risk.json", "w"))
+            html, text = email_report.render(STATE, None)
+            self.assertIn("hard to borrow", html)
+        finally:
+            os.chdir(cwd); shutil.rmtree(tmp, ignore_errors=True)
+
 
 import email_report  # noqa: E402
 

@@ -93,6 +93,24 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
 > - **Tests: now 113.** **Phase-3 agent fleet is COMPLETE** (Master digest, expression engine, link
 >   validation, News/Catalyst, Risk/Borrow). The next remaining plan work is gated behind Phase 5.
 
+> **Update 2026-07-06 (kill-rule bar + scorecard + trade-detail page; then paused on Phase 5).**
+> - **Kill rule SET** (PLAN §11.8): pass = net Sharpe ≥ 0.5 **and** positive net expectancy **and**
+>   ≥5 ideas/month, judged at the **later of** 12 months after paper_start (2026-07-04) and ≥30
+>   closed OOS trades. Any miss → stop; the options overlay is cancelled, not "tried anyway."
+> - **Kill-rule scorecard shipped** (`elp/killrule.py`, commit `a0c0aae`): pure render-time
+>   PENDING/PASS/FAIL from `paper_state.json` (per-trade annualized Sharpe, expectancy, ideas/mo),
+>   on the dashboard + email. Renders `[PENDING] month 0/12, 0/30` today; auto-delivers the verdict.
+> - **Trade-detail page shipped** (`elp/tradeviz.py` + `tradeviz.py`, #11): `site/trades.html`
+>   (linked from the dashboard) with per-trade inline-SVG leg charts + a combined return chart
+>   (solid from entry + dashed hypothetical pre-entry) + sizing/P&L table; reuses `idea_return`/
+>   `bear_put_spread`; runs in `run_paper.sh` after `dashboard.py`. **Tests: now 137.**
+> - **Status: paused, by decision, on Phase 5.** Everything substantive that remains (Phase 6/7
+>   options overlay, Track R) is gated on the forward test clearing the kill rule. Phase 5 has 0
+>   closed OOS trades so far — it just needs time. **Watch:** the scorecard's gate progress
+>   (months / closed-trade count) and, once trades close, whether net Sharpe/expectancy trend toward
+>   the bar. Ungated follow-ups if wanted later: a precise **two-leg net-of-cost** model (track.py
+>   currently charges cost single-leg) and a **Link Verification** QA agent (Phase 2 remainder).
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month

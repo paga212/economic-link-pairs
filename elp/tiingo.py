@@ -78,6 +78,24 @@ def fetch_daily(symbol: str, start: str = "2015-01-01") -> list[tuple[date, floa
     return [(d, px) for d, px, _ in fetch_daily_bars(symbol, start)]
 
 
+def fetch_daily_ohlc(symbol: str, start: str = "2015-01-01") -> list[tuple]:
+    """Daily (date, adjOpen, adjHigh, adjLow, adjClose, adjVolume) series, oldest first — for
+    candlestick charts. Falls back to raw o/h/l/c if an adjusted field is absent."""
+    url = f"https://api.tiingo.com/tiingo/daily/{symbol.lower()}/prices?startDate={start}"
+    out: list[tuple] = []
+    for r in _fetch(url, symbol):
+        d = datetime.fromisoformat(r["date"].replace("Z", "")).date()
+        o = r.get("adjOpen", r.get("open"))
+        h = r.get("adjHigh", r.get("high"))
+        low = r.get("adjLow", r.get("low"))
+        c = r.get("adjClose", r.get("close"))
+        vol = r.get("adjVolume", r.get("volume", 0.0))
+        if None in (o, h, low, c):        # incomplete bar -> skip (candles need full OHLC)
+            continue
+        out.append((d, float(o), float(h), float(low), float(c), float(vol or 0.0)))
+    return out
+
+
 _FUND = "https://api.tiingo.com/tiingo/fundamentals/{sym}/{kind}"
 
 

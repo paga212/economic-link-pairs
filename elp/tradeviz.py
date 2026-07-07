@@ -40,6 +40,26 @@ def _date_ticks(dates, n=5):
     return [(i, dates[i]) for i in idxs]
 
 
+def _axis_svg(X, dates, width, height, pad) -> str:
+    """Bottom x-axis line + up to 5 '%b %d' date ticks. X: index->pixel. Empty dates -> ''."""
+    ticks = _date_ticks(dates or [])
+    if not ticks:
+        return ""
+    out = [f'<line x1={pad} y1={height - pad:.1f} x2={width - pad} y2={height - pad:.1f} class=axis />']
+    for k, (i, d) in enumerate(ticks):
+        x = X(i)
+        anchor = "start" if k == 0 else ("end" if k == len(ticks) - 1 else "middle")
+        out.append(f'<line x1={x:.1f} y1={height - pad:.1f} x2={x:.1f} y2={height - pad + 3:.1f} class=axis />')
+        out.append(f'<text x={x:.1f} y={height - pad + 14:.1f} text-anchor={anchor} '
+                   f'class=legend>{escape(d.strftime("%b %d"))}</text>')
+    return "".join(out)
+
+
+def _legend_svg(labels, pad) -> str:
+    return "".join(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>'
+                   for k, lab in enumerate(labels or []))
+
+
 def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None, dates=None) -> str:
     """One <svg> with a <polyline> per series (shared scale). entry_idx draws a vertical marker;
     labels -> a tiny legend; dates (index->date, aligned with each series' x index) -> a labelled
@@ -60,17 +80,45 @@ def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None,
         pts = " ".join(f"{X(i):.1f},{Y(y):.1f}" for i, y in s["pts"])
         dash = ' stroke-dasharray="4 3"' if s.get("dash") else ""
         parts.append(f'<polyline points="{pts}" class="{s["cls"]}" fill=none{dash} />')
-    ticks = _date_ticks(dates or [])
-    if ticks:
-        parts.append(f'<line x1={pad} y1={height - pad:.1f} x2={width - pad} y2={height - pad:.1f} class=axis />')
-        for k, (i, d) in enumerate(ticks):
-            x = X(i)
-            anchor = "start" if k == 0 else ("end" if k == len(ticks) - 1 else "middle")
-            parts.append(f'<line x1={x:.1f} y1={height - pad:.1f} x2={x:.1f} y2={height - pad + 3:.1f} class=axis />')
-            parts.append(f'<text x={x:.1f} y={height - pad + 14:.1f} text-anchor={anchor} '
-                         f'class=legend>{escape(d.strftime("%b %d"))}</text>')
-    for k, lab in enumerate(labels or []):
-        parts.append(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>')
+    parts.append(_axis_svg(X, dates, width, height, pad))
+    parts.append(_legend_svg(labels, pad))
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def svg_candles(bars, entry_idx=None, width=640, height=160, pad=24, labels=None, dates=None) -> str:
+    """OHLC candlesticks from (date, open, high, low, close, vol) bars: a low->high wick and an
+    open->close body per bar, coloured up/down. Same axis/legend/entry chrome as svg_line."""
+    if not bars:
+        return (f'<svg viewBox="0 0 {width} {height}" class=chart>'
+                f'<text x={width // 2} y={height // 2} text-anchor=middle class=muted>no data</text></svg>')
+    lo = min(b[3] for b in bars)
+    hi = max(b[2] for b in bars)
+    if hi == lo:
+        hi = lo + 1
+    n = len(bars)
+    span = (n - 1) or 1
+
+    def X(i):
+        return pad + i / span * (width - 2 * pad)
+
+    def Y(y):
+        return height - pad - (y - lo) / (hi - lo) * (height - 2 * pad)
+
+    bw = max(1.5, 0.6 * (width - 2 * pad) / n)
+    parts = [f'<svg viewBox="0 0 {width} {height}" class=chart>']
+    if entry_idx is not None:
+        ex = X(entry_idx)
+        parts.append(f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad} class=entry />')
+    for i, (d, o, h, low, c, _v) in enumerate(bars):
+        x = X(i)
+        cls = "up" if c >= o else "down"
+        parts.append(f'<line x1={x:.1f} y1={Y(h):.1f} x2={x:.1f} y2={Y(low):.1f} class=wick />')
+        top, bot = Y(max(o, c)), Y(min(o, c))
+        parts.append(f'<rect x={x - bw / 2:.1f} y={top:.1f} width={bw:.1f} '
+                     f'height={max(bot - top, 1):.1f} class={cls} />')
+    parts.append(_axis_svg(X, dates, width, height, pad))
+    parts.append(_legend_svg(labels, pad))
     parts.append("</svg>")
     return "".join(parts)
 
@@ -128,6 +176,7 @@ PAGE_CSS = (
     ".trade{border-top:1px solid #eee;padding-top:.6rem;margin-top:1.2rem}.chartbox{margin:.4rem 0}"
     "svg.chart{width:100%;height:auto;background:#fafafa;border:1px solid #eee;border-radius:4px}"
     ".leg{stroke:#1155cc;stroke-width:1.5}.pv{stroke:#0a7a3f;stroke-width:1.8}"
+    ".wick{stroke:#888;stroke-width:1}.up{fill:#0a7a3f;stroke:#0a7a3f}.down{fill:#c0392b;stroke:#c0392b}"
     ".axis{stroke:#ddd;stroke-width:1}.entry{stroke:#b02020;stroke-width:1;stroke-dasharray:2 2}"
     ".legend{fill:#666;font-size:11px}table{border-collapse:collapse;width:100%;margin:.3rem 0;"
     "font-size:.9rem}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #eee}")
@@ -141,8 +190,11 @@ def _leg_row(leg: dict, bars: list, expression: str) -> str:
             f'<td>{leg.get("entry_px", 0.0):.2f}</td><td>{latest}</td></tr>')
 
 
-def trade_detail_html(idea: dict, bars_by_ticker: dict) -> str:
-    """One trade block: header + per-leg charts + combined chart + table. Fail-soft per leg."""
+def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = None) -> str:
+    """One trade block: header + per-leg charts + combined chart + table. Fail-soft per leg.
+    Stock legs render as OHLC candlesticks when ohlc_by_ticker has bars for them; spread legs
+    (a modelled mark, no OHLC) stay a line."""
+    ohlc_by_ticker = ohlc_by_ticker or {}
     p, n = idea["primary"], idea["neutralizer"]
     entry = date.fromisoformat(idea["entry"])
     direction = "LONG" if idea["side"] > 0 else "SHORT"
@@ -158,10 +210,15 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict) -> str:
             leg_charts += f'<p class=muted>{escape(leg["ticker"])}: no price data</p>'
             continue
         eidx = next((i for i, b in enumerate(bars) if b[0] >= entry), None)
-        lab = f'{leg["ticker"]} {"spread mark" if leg["instrument"] == "spread" else "price"}'
-        leg_charts += ('<div class=chartbox>'
-                       + svg_line([{"pts": leg_price_series(leg, bars, entry), "cls": "leg", "dash": False}],
-                                  entry_idx=eidx, labels=[lab], dates=[b[0] for b in bars]) + '</div>')
+        ohlc = ohlc_by_ticker.get(leg["ticker"], [])
+        if leg["instrument"] != "spread" and ohlc:
+            chart = svg_candles(ohlc, entry_idx=eidx, labels=[f'{leg["ticker"]} price (OHLC)'],
+                                dates=[b[0] for b in ohlc])
+        else:
+            lab = f'{leg["ticker"]} {"spread mark" if leg["instrument"] == "spread" else "price"}'
+            chart = svg_line([{"pts": leg_price_series(leg, bars, entry), "cls": "leg", "dash": False}],
+                             entry_idx=eidx, labels=[lab], dates=[b[0] for b in bars])
+        leg_charts += '<div class=chartbox>' + chart + '</div>'
 
     cs = combined_series(idea, bars_by_ticker)
     if cs["solid"] or cs["dashed"]:

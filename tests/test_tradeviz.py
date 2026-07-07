@@ -24,6 +24,20 @@ class TestSvg(unittest.TestCase):
     def test_empty_is_placeholder(self):
         self.assertIn("no data", svg_line([{"pts": [], "cls": "x", "dash": False}]))
 
+    def test_candles_draw_up_and_down_bodies_with_wicks(self):
+        from datetime import date
+        from elp.tradeviz import svg_candles
+        # bar 0 up (c>o), bar 1 down (c<o)
+        bars = [(date(2026, 7, 6), 100.0, 105.0, 99.0, 104.0, 1e6),
+                (date(2026, 7, 7), 104.0, 106.0, 98.0, 99.0, 1e6)]
+        svg = svg_candles(bars, entry_idx=0, dates=[b[0] for b in bars])
+        self.assertIn("<rect", svg)              # bodies
+        self.assertIn("class=up", svg)           # up day
+        self.assertIn("class=down", svg)         # down day
+        self.assertIn("class=wick", svg)         # wicks
+        self.assertIn("Jul 07", svg)             # date axis still present
+        self.assertIn("no data", svg_candles([]))  # empty -> placeholder
+
     def test_date_axis_labels_first_and_last_dates(self):
         from datetime import date
         dts = [date(2026, 6, 24), date(2026, 6, 29), date(2026, 7, 1), date(2026, 7, 6)]

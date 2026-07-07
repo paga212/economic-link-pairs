@@ -139,7 +139,7 @@ def build() -> None:
  footer{{color:#999;font-size:.8rem;margin-top:2rem}}
 </style></head><body>
 <h1>Economic Link Pairs — Paper Trade</h1>
-<p class=sub>generated {escape(str(s['generated_utc']))} · paper start {escape(str(s['start']))} · recommendations only, no execution</p>
+<p class=sub>generated {escape(str(s['generated_utc']))} · last bar {escape(str(s.get('last_bar', '—')))} · paper start {escape(str(s['start']))} · recommendations only, no execution</p>
 <p class=sub><a href="trades.html">Trade details (per-trade charts) →</a></p>
 <div class=banner><b>Forward out-of-sample paper-trade,</b> net of costs. Dynamic per-trade
 management (trailing stop + signal exit); shorts as bear-put-spreads (Grade-C, optimistic).

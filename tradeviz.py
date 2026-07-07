@@ -5,26 +5,29 @@ import json
 import os
 from datetime import date, timedelta
 
-from elp.tiingo import fetch_daily_bars
+from elp.tiingo import fetch_daily_ohlc
 from elp.tradeviz import PAGE_CSS, trade_detail_html
 
 STATE, OUT = "paper_state.json", "site/trades.html"
 
 
-def _bars_for(idea: dict) -> dict:
-    out = {}
+def _bars_for(idea: dict):
+    """(close_bars, ohlc_bars) dicts per leg ticker. One OHLC fetch each; close bars derived
+    from it (so the return/spread math and candlesticks share a single request)."""
+    ohlc = {}
     try:
         start = (date.fromisoformat(idea["entry"]) - timedelta(days=35)).isoformat()
     except (ValueError, KeyError):
         start = "2015-01-01"
     for leg in (idea["primary"], idea["neutralizer"]):
         t = leg["ticker"]
-        if t not in out:
+        if t not in ohlc:
             try:
-                out[t] = fetch_daily_bars(t, start=start)
+                ohlc[t] = fetch_daily_ohlc(t, start=start)
             except Exception:
-                out[t] = []
-    return out
+                ohlc[t] = []
+    close = {t: [(d, c, v) for d, _o, _h, _l, c, v in bars] for t, bars in ohlc.items()}
+    return close, ohlc
 
 
 def build() -> None:
@@ -35,7 +38,8 @@ def build() -> None:
     blocks = ""
     for idea in state.get("open", []):
         try:
-            blocks += trade_detail_html(idea, _bars_for(idea))
+            close_bars, ohlc_bars = _bars_for(idea)
+            blocks += trade_detail_html(idea, close_bars, ohlc_bars)
         except Exception as e:                        # one bad trade never kills the page
             blocks += (f'<section class=trade><p class=muted>{idea.get("supplier", "?")}: '
                        f'chart error ({type(e).__name__})</p></section>')

@@ -90,6 +90,7 @@ def main() -> None:
 
     state = {
         "generated_utc": datetime.now(timezone.utc).isoformat(), "start": start.isoformat(),
+        "last_bar": last_date.isoformat(),      # latest EOD bar the run saw (freshness at a glance)
         "open": open_rows,
         "closed": [{"supplier": idea["supplier"], "customer": idea["customer"],
                     "kind": "LONG" if idea["side"] > 0 else "SHORT",

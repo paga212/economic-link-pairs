@@ -24,6 +24,39 @@ class TestSvg(unittest.TestCase):
     def test_empty_is_placeholder(self):
         self.assertIn("no data", svg_line([{"pts": [], "cls": "x", "dash": False}]))
 
+    def test_tags_self_close_polyline_is_direct_svg_child(self):
+        # Regression: unquoted `fill=none/>` / `class=entry/>` swallowed the slash, so tags did
+        # not self-close and the <polyline> nested inside <line> (a non-container -> not rendered).
+        from html.parser import HTMLParser
+
+        class _Tree(HTMLParser):
+            def __init__(self):
+                super().__init__(convert_charrefs=True)
+                self.stack, self.parent_of, self.attrs_of = [], {}, {}
+
+            def handle_starttag(self, tag, attrs):
+                self.parent_of.setdefault(tag, self.stack[-1] if self.stack else None)
+                self.attrs_of.setdefault(tag, dict(attrs))
+                self.stack.append(tag)
+
+            def handle_startendtag(self, tag, attrs):   # properly self-closed -> no nesting
+                self.parent_of.setdefault(tag, self.stack[-1] if self.stack else None)
+                self.attrs_of.setdefault(tag, dict(attrs))
+
+            def handle_endtag(self, tag):
+                while self.stack and self.stack[-1] != tag:
+                    self.stack.pop()
+                if self.stack:
+                    self.stack.pop()
+
+        svg = svg_line([{"pts": [(0, -1.0), (1, 2.0), (2, 1.5)], "cls": "pv", "dash": False}],
+                       entry_idx=1)   # forces both a zero-axis <line> and an entry <line>
+        t = _Tree()
+        t.feed(svg)
+        self.assertEqual(t.parent_of.get("polyline"), "svg")   # sibling of <line>, not its child
+        self.assertEqual(t.attrs_of["polyline"].get("fill"), "none")   # not "none/"
+        self.assertEqual(t.attrs_of["line"].get("class"), "axis")      # not "axis/"
+
 
 from datetime import date  # noqa: E402
 

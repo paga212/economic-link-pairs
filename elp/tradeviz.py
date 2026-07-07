@@ -39,14 +39,14 @@ def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None)
     parts = [f'<svg viewBox="0 0 {width} {height}" class=chart>']
     if ymin <= 0 <= ymax:
         y0 = Y(0)
-        parts.append(f'<line x1={pad} y1={y0:.1f} x2={width - pad} y2={y0:.1f} class=axis/>')
+        parts.append(f'<line x1={pad} y1={y0:.1f} x2={width - pad} y2={y0:.1f} class=axis />')
     if entry_idx is not None:
         ex = X(entry_idx)
-        parts.append(f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad} class=entry/>')
+        parts.append(f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad} class=entry />')
     for s in series:
         pts = " ".join(f"{X(i):.1f},{Y(y):.1f}" for i, y in s["pts"])
         dash = ' stroke-dasharray="4 3"' if s.get("dash") else ""
-        parts.append(f'<polyline points="{pts}" class="{s["cls"]}" fill=none{dash}/>')
+        parts.append(f'<polyline points="{pts}" class="{s["cls"]}" fill=none{dash} />')
     for k, lab in enumerate(labels or []):
         parts.append(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>')
     parts.append("</svg>")

@@ -55,6 +55,20 @@ def _axis_svg(X, dates, width, height, pad) -> str:
     return "".join(out)
 
 
+def _grid_svg(X, dates, height, pad) -> str:
+    """Dashed vertical guide at each date tick (drawn behind the data so it stays recessive)."""
+    return "".join(f'<line x1={X(i):.1f} y1={pad} x2={X(i):.1f} y2={height - pad:.1f} class=grid />'
+                   for i, _ in _date_ticks(dates or []))
+
+
+def _entry_svg(ex, width, height, pad) -> str:
+    """Dashed vertical entry marker plus a small 'entry' label kept inside the plot."""
+    anchor = "end" if ex > width * 0.6 else "start"
+    dx = -3 if anchor == "end" else 3
+    return (f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad:.1f} class=entry />'
+            f'<text x={ex + dx:.1f} y={pad + 9} text-anchor={anchor} class=legend>entry</text>')
+
+
 def _legend_svg(labels, pad) -> str:
     return "".join(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>'
                    for k, lab in enumerate(labels or []))
@@ -70,16 +84,20 @@ def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None,
                 f'<text x={width // 2} y={height // 2} text-anchor=middle class=muted>no data</text></svg>')
     X, Y, ymin, ymax = sc
     parts = [f'<svg viewBox="0 0 {width} {height}" class=chart>']
+    parts.append(_grid_svg(X, dates, height, pad))
     if ymin <= 0 <= ymax:
         y0 = Y(0)
         parts.append(f'<line x1={pad} y1={y0:.1f} x2={width - pad} y2={y0:.1f} class=axis />')
     if entry_idx is not None:
-        ex = X(entry_idx)
-        parts.append(f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad} class=entry />')
+        parts.append(_entry_svg(X(entry_idx), width, height, pad))
     for s in series:
         pts = " ".join(f"{X(i):.1f},{Y(y):.1f}" for i, y in s["pts"])
         dash = ' stroke-dasharray="4 3"' if s.get("dash") else ""
         parts.append(f'<polyline points="{pts}" class="{s["cls"]}" fill=none{dash} />')
+    if series and series[-1]["pts"]:                 # dot the latest value of the topmost series
+        li, ly = series[-1]["pts"][-1]
+        parts.append(f'<circle cx={X(li):.1f} cy={Y(ly):.1f} r=2.6 class="{series[-1]["cls"]}" '
+                     f'style="fill:currentColor" />')
     parts.append(_axis_svg(X, dates, width, height, pad))
     parts.append(_legend_svg(labels, pad))
     parts.append("</svg>")
@@ -107,9 +125,9 @@ def svg_candles(bars, entry_idx=None, width=640, height=160, pad=24, labels=None
 
     bw = max(1.5, 0.6 * (width - 2 * pad) / n)
     parts = [f'<svg viewBox="0 0 {width} {height}" class=chart>']
+    parts.append(_grid_svg(X, dates, height, pad))
     if entry_idx is not None:
-        ex = X(entry_idx)
-        parts.append(f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad} class=entry />')
+        parts.append(_entry_svg(X(entry_idx), width, height, pad))
     for i, (d, o, h, low, c, _v) in enumerate(bars):
         x = X(i)
         cls = "up" if c >= o else "down"
@@ -174,11 +192,13 @@ PAGE_CSS = (
     "padding:0 1rem;color:#1a1a1a}h1{font-size:1.4rem}h2{font-size:1.05rem;margin:1.4rem 0 .3rem}"
     ".sub,.muted{color:#666}.muted{font-style:italic}"
     ".trade{border-top:1px solid #eee;padding-top:.6rem;margin-top:1.2rem}.chartbox{margin:.4rem 0}"
-    "svg.chart{width:100%;height:auto;background:#fafafa;border:1px solid #eee;border-radius:4px}"
-    ".leg{stroke:#1155cc;stroke-width:1.5}.pv{stroke:#0a7a3f;stroke-width:1.8}"
-    ".wick{stroke:#888;stroke-width:1}.up{fill:#0a7a3f;stroke:#0a7a3f}.down{fill:#c0392b;stroke:#c0392b}"
-    ".axis{stroke:#ddd;stroke-width:1}.entry{stroke:#b02020;stroke-width:1;stroke-dasharray:2 2}"
-    ".legend{fill:#666;font-size:11px}table{border-collapse:collapse;width:100%;margin:.3rem 0;"
+    "svg.chart{width:100%;height:auto;background:#fcfcfd;border:1px solid #ececf0;border-radius:6px}"
+    ".leg{stroke:#2563c9;color:#2563c9;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}"
+    ".pv{stroke:#0f9d63;color:#0f9d63;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}"
+    ".wick{stroke:#9aa0a6;stroke-width:1}.up{fill:#0f9d63;stroke:#0f9d63}.down{fill:#e0503a;stroke:#e0503a}"
+    ".grid{stroke:#ededf1;stroke-width:1;stroke-dasharray:3 3}"
+    ".axis{stroke:#d7d7dd;stroke-width:1}.entry{stroke:#c0392b;stroke-width:1;stroke-dasharray:3 3}"
+    ".legend{fill:#8a8f98;font-size:11px}table{border-collapse:collapse;width:100%;margin:.3rem 0;"
     "font-size:.9rem}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #eee}")
 
 

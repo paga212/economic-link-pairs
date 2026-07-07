@@ -38,6 +38,15 @@ class TestSvg(unittest.TestCase):
         self.assertIn("Jul 07", svg)             # date axis still present
         self.assertIn("no data", svg_candles([]))  # empty -> placeholder
 
+    def test_dashed_gridlines_and_end_dot(self):
+        from datetime import date
+        dts = [date(2026, 6, 24), date(2026, 6, 29), date(2026, 7, 6)]
+        svg = svg_line([{"pts": [(0, 1.0), (1, 2.0), (2, 1.5)], "cls": "leg", "dash": False}],
+                       entry_idx=1, dates=dts)
+        self.assertIn("class=grid", svg)          # dashed vertical guides
+        self.assertIn("<circle", svg)             # latest-value dot
+        self.assertIn(">entry<", svg)             # entry marker label
+
     def test_date_axis_labels_first_and_last_dates(self):
         from datetime import date
         dts = [date(2026, 6, 24), date(2026, 6, 29), date(2026, 7, 1), date(2026, 7, 6)]

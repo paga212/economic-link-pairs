@@ -54,6 +54,17 @@ def _pick_counterpart(view: dict, bars: dict, signaling: dict, used: set):
     return cands[0][1]
 
 
+def _px_asof(bars_list: list, day) -> float:
+    """Close on `day`, or the last bar on/before it. The neutralizer must be priced at the
+    trade's entry day (like the primary), not at the last bar of the full history."""
+    px = bars_list[0][1]
+    for d, p, _ in bars_list:
+        if d > day:
+            break
+        px = p
+    return px
+
+
 def build_idea(view: dict, day, bars: dict, signaling: dict, used: set) -> dict:
     """Two-legged idea: primary leg + a pair-counterpart or ETF-hedge neutralizer."""
     primary = _primary_leg(view)
@@ -62,13 +73,13 @@ def build_idea(view: dict, day, bars: dict, signaling: dict, used: set) -> dict:
     if cp is not None:
         neutralizer = {"role": "neutralizer", "ticker": cp, "direction": -view["side"],
                        "instrument": "stock", "notional": notional,        # dollar-neutral
-                       "entry_px": bars[cp][-1][1]}
+                       "entry_px": _px_asof(bars[cp], day)}
         expression = "stock-pair"
     else:
         b = _clamp_beta(beta(bars[view["supplier"]], bars[HEDGE_ETF])) if HEDGE_ETF in bars else 1.0
         neutralizer = {"role": "neutralizer", "ticker": HEDGE_ETF, "direction": -view["side"],
                        "instrument": "stock", "notional": notional * b,    # beta-neutral
-                       "entry_px": bars[HEDGE_ETF][-1][1]}
+                       "entry_px": _px_asof(bars[HEDGE_ETF], day)}
         expression = "stock-hedge"
     return {"supplier": view["supplier"], "customer": view["customer"], "side": view["side"],
             "entry_date": day, "primary": primary, "neutralizer": neutralizer,

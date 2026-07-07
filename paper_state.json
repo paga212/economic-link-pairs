@@ -1,67 +1,60 @@
 {
- "generated_utc": "2026-07-07T02:00:58.642801+00:00",
+ "generated_utc": "2026-07-07T14:48:55.151603+00:00",
  "start": "2026-07-04",
  "open": [
+  {
+   "supplier": "GILD",
+   "customer": "CAH",
+   "side": 1,
+   "kind": "LONG",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-06-09",
+   "days": 27,
+   "ret": 0.032990486643662484,
+   "stop": -0.0010427371317308434,
+   "primary": {
+    "role": "primary",
+    "ticker": "GILD",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 200000.0,
+    "entry_px": 124.6775095908
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": -1,
+    "instrument": "stock",
+    "notional": 60000.0,
+    "entry_px": 735.175961906
+   }
+  },
   {
    "supplier": "MZTI",
    "customer": "WMT",
    "side": -1,
    "kind": "SHORT",
-   "expression": "stock-pair",
+   "expression": "stock-hedge",
    "risk_cap": "soft",
-   "entry": "2026-07-01",
-   "days": 5,
-   "ret": 0.009998363099482318,
-   "stop": -0.04000163690051768,
+   "entry": "2026-06-18",
+   "days": 18,
+   "ret": -0.017638063208507967,
+   "stop": -0.04394643034359286,
    "primary": {
     "role": "primary",
     "ticker": "MZTI",
     "direction": -1,
     "instrument": "spread",
     "notional": 200000.0,
-    "entry_px": 116.15,
-    "S0": 116.15,
-    "k_long": 116.0,
-    "k_short": 105.0,
+    "entry_px": 107.06,
+    "S0": 107.06,
+    "k_long": 107.0,
+    "k_short": 96.0,
     "T0": 0.1232876712328767,
-    "iv": 0.32324064112443734,
+    "iv": 0.30696092640395645,
     "dte": 45,
-    "debit": 3.706424847436132
-   },
-   "neutralizer": {
-    "role": "neutralizer",
-    "ticker": "WWD",
-    "direction": 1,
-    "instrument": "stock",
-    "notional": 200000.0,
-    "entry_px": 423.48
-   }
-  },
-  {
-   "supplier": "PG",
-   "customer": "WMT",
-   "side": -1,
-   "kind": "SHORT",
-   "expression": "stock-hedge",
-   "risk_cap": "soft",
-   "entry": "2026-07-01",
-   "days": 5,
-   "ret": -0.0054595175246996116,
-   "stop": -0.05,
-   "primary": {
-    "role": "primary",
-    "ticker": "PG",
-    "direction": -1,
-    "instrument": "spread",
-    "notional": 200000.0,
-    "entry_px": 147.43,
-    "S0": 147.43,
-    "k_long": 147.0,
-    "k_short": 133.0,
-    "T0": 0.1232876712328767,
-    "iv": 0.22236834047097068,
-    "dte": 45,
-    "debit": 3.6042329402208093
+    "debit": 3.48906102446443
    },
    "neutralizer": {
     "role": "neutralizer",
@@ -69,7 +62,70 @@
     "direction": 1,
     "instrument": "stock",
     "notional": 60000.0,
-    "entry_px": 751.28
+    "entry_px": 746.74
+   }
+  },
+  {
+   "supplier": "VC",
+   "customer": "F",
+   "side": -1,
+   "kind": "SHORT",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-06-24",
+   "days": 12,
+   "ret": 0.0588453372375167,
+   "stop": 0.019345724166182257,
+   "primary": {
+    "role": "primary",
+    "ticker": "VC",
+    "direction": -1,
+    "instrument": "spread",
+    "notional": 200000.0,
+    "entry_px": 118.16,
+    "S0": 118.16,
+    "k_long": 118.0,
+    "k_short": 106.0,
+    "T0": 0.1232876712328767,
+    "iv": 0.4246932059749137,
+    "dte": 45,
+    "debit": 4.499137920368284
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 273915.4417805432,
+    "entry_px": 733.24
+   }
+  },
+  {
+   "supplier": "WWD",
+   "customer": "RTX",
+   "side": 1,
+   "kind": "LONG",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-07-01",
+   "days": 5,
+   "ret": -0.001810305319573659,
+   "stop": -0.05,
+   "primary": {
+    "role": "primary",
+    "ticker": "WWD",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 200000.0,
+    "entry_px": 420.93
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": -1,
+    "instrument": "stock",
+    "notional": 212604.27940590834,
+    "entry_px": 745.76
    }
   },
   {
@@ -81,8 +137,8 @@
    "risk_cap": "soft",
    "entry": "2026-07-02",
    "days": 4,
-   "ret": -0.000675516117287919,
-   "stop": -0.05,
+   "ret": 0.01619489953063388,
+   "stop": -0.03380510046936612,
    "primary": {
     "role": "primary",
     "ticker": "ADSK",
@@ -104,7 +160,7 @@
     "direction": 1,
     "instrument": "stock",
     "notional": 200000.0,
-    "entry_px": 83.18
+    "entry_px": 81.8
    }
   },
   {
@@ -114,9 +170,9 @@
    "kind": "LONG",
    "expression": "stock-pair",
    "risk_cap": "soft",
-   "entry": "2026-07-02",
-   "days": 4,
-   "ret": -0.020606708539355867,
+   "entry": "2026-07-06",
+   "days": 0,
+   "ret": 0.0,
    "stop": -0.05,
    "primary": {
     "role": "primary",
@@ -124,7 +180,7 @@
     "direction": 1,
     "instrument": "stock",
     "notional": 200000.0,
-    "entry_px": 374.15
+    "entry_px": 366.44
    },
    "neutralizer": {
     "role": "neutralizer",
@@ -136,11 +192,11 @@
    }
   },
   {
-   "supplier": "GILD",
-   "customer": "CAH",
-   "side": 1,
-   "kind": "LONG",
-   "expression": "stock-pair",
+   "supplier": "PG",
+   "customer": "WMT",
+   "side": -1,
+   "kind": "SHORT",
+   "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-06",
    "days": 0,
@@ -148,19 +204,26 @@
    "stop": -0.05,
    "primary": {
     "role": "primary",
-    "ticker": "GILD",
-    "direction": 1,
-    "instrument": "stock",
+    "ticker": "PG",
+    "direction": -1,
+    "instrument": "spread",
     "notional": 200000.0,
-    "entry_px": 129.61
+    "entry_px": 149.31,
+    "S0": 149.31,
+    "k_long": 149.0,
+    "k_short": 134.0,
+    "T0": 0.1232876712328767,
+    "iv": 0.22999935692078627,
+    "dte": 45,
+    "debit": 3.871917500545285
    },
    "neutralizer": {
     "role": "neutralizer",
-    "ticker": "VC",
-    "direction": -1,
+    "ticker": "SPY",
+    "direction": 1,
     "instrument": "stock",
-    "notional": 200000.0,
-    "entry_px": 107.85
+    "notional": 60000.0,
+    "entry_px": 751.28
    }
   }
  ],

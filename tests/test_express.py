@@ -57,6 +57,16 @@ class TestExpress(unittest.TestCase):
         idea = build_idea(view, date(2020, 3, 1), self._bars(), {}, set())
         self.assertAlmostEqual(idea["primary"]["notional"], RISK_BUDGET / STOP)
 
+    def test_neutralizer_priced_at_entry_day_not_last_bar(self):
+        # CP rises 50 -> 112 over the window; entry is the middle day. The neutralizer must be
+        # priced at the entry-day close, not the last bar (the historical bug used bars[cp][-1]).
+        cp_bars = [(date(2020, 1, 1) + timedelta(days=i), 50.0 + i, 1_000_000.0) for i in range(63)]
+        entry = date(2020, 1, 1) + timedelta(days=30)          # close that day = 80.0
+        view = {"supplier": "S", "customer": "C", "side": 1, "entry_px": 50.0, "iv": 0.4}
+        idea = build_idea(view, entry, self._bars({"CP": cp_bars}), {"CP": -0.08}, set())
+        self.assertEqual(idea["neutralizer"]["ticker"], "CP")
+        self.assertEqual(idea["neutralizer"]["entry_px"], 80.0)   # entry-day close, not 112.0
+
     def test_short_primary_is_a_snapped_put_spread(self):
         view = {"supplier": "S", "customer": "C", "side": -1, "entry_px": 129.06, "iv": 0.4}
         b = {"S": liquid_bars(129.06), "SPY": liquid_bars(400.0)}

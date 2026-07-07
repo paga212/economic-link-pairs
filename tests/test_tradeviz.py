@@ -24,6 +24,15 @@ class TestSvg(unittest.TestCase):
     def test_empty_is_placeholder(self):
         self.assertIn("no data", svg_line([{"pts": [], "cls": "x", "dash": False}]))
 
+    def test_date_axis_labels_first_and_last_dates(self):
+        from datetime import date
+        dts = [date(2026, 6, 24), date(2026, 6, 29), date(2026, 7, 1), date(2026, 7, 6)]
+        svg = svg_line([{"pts": [(i, float(i)) for i in range(4)], "cls": "leg", "dash": False}],
+                       dates=dts)
+        self.assertIn("Jun 24", svg)          # first tick
+        self.assertIn("Jul 06", svg)          # last tick
+        self.assertNotIn("Jun 24", svg_line([{"pts": [(0, 1.0), (1, 2.0)], "cls": "leg", "dash": False}]))  # no dates -> no axis
+
     def test_tags_self_close_polyline_is_direct_svg_child(self):
         # Regression: unquoted `fill=none/>` / `class=entry/>` swallowed the slash, so tags did
         # not self-close and the <polyline> nested inside <line> (a non-container -> not rendered).

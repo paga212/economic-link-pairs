@@ -28,9 +28,22 @@ def _scale(series, width, height, pad):
     return X, Y, ymin, ymax
 
 
-def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None) -> str:
+def _date_ticks(dates, n=5):
+    """Up to n evenly-spaced (index, date) ticks spanning the series, first and last included."""
+    m = len(dates)
+    if m == 0:
+        return []
+    if m == 1:
+        return [(0, dates[0])]
+    k = min(n, m)
+    idxs = sorted({round(j * (m - 1) / (k - 1)) for j in range(k)})
+    return [(i, dates[i]) for i in idxs]
+
+
+def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None, dates=None) -> str:
     """One <svg> with a <polyline> per series (shared scale). entry_idx draws a vertical marker;
-    labels -> a tiny legend. Empty input -> a 'no data' placeholder."""
+    labels -> a tiny legend; dates (index->date, aligned with each series' x index) -> a labelled
+    x date axis. Empty input -> a 'no data' placeholder."""
     sc = _scale(series, width, height, pad)
     if sc is None:
         return (f'<svg viewBox="0 0 {width} {height}" class=chart>'
@@ -47,6 +60,15 @@ def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None)
         pts = " ".join(f"{X(i):.1f},{Y(y):.1f}" for i, y in s["pts"])
         dash = ' stroke-dasharray="4 3"' if s.get("dash") else ""
         parts.append(f'<polyline points="{pts}" class="{s["cls"]}" fill=none{dash} />')
+    ticks = _date_ticks(dates or [])
+    if ticks:
+        parts.append(f'<line x1={pad} y1={height - pad:.1f} x2={width - pad} y2={height - pad:.1f} class=axis />')
+        for k, (i, d) in enumerate(ticks):
+            x = X(i)
+            anchor = "start" if k == 0 else ("end" if k == len(ticks) - 1 else "middle")
+            parts.append(f'<line x1={x:.1f} y1={height - pad:.1f} x2={x:.1f} y2={height - pad + 3:.1f} class=axis />')
+            parts.append(f'<text x={x:.1f} y={height - pad + 14:.1f} text-anchor={anchor} '
+                         f'class=legend>{escape(d.strftime("%b %d"))}</text>')
     for k, lab in enumerate(labels or []):
         parts.append(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>')
     parts.append("</svg>")
@@ -139,7 +161,7 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict) -> str:
         lab = f'{leg["ticker"]} {"spread mark" if leg["instrument"] == "spread" else "price"}'
         leg_charts += ('<div class=chartbox>'
                        + svg_line([{"pts": leg_price_series(leg, bars, entry), "cls": "leg", "dash": False}],
-                                  entry_idx=eidx, labels=[lab]) + '</div>')
+                                  entry_idx=eidx, labels=[lab], dates=[b[0] for b in bars]) + '</div>')
 
     cs = combined_series(idea, bars_by_ticker)
     if cs["solid"] or cs["dashed"]:
@@ -149,7 +171,7 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict) -> str:
         if cs["solid"]:
             series.append({"pts": cs["solid"], "cls": "pv", "dash": False})
         combined = ('<div class=chartbox>'
-                    + svg_line(series, entry_idx=cs["entry_idx"],
+                    + svg_line(series, entry_idx=cs["entry_idx"], dates=cs["dates"],
                                labels=["combined return % (dashed = hypothetical pre-entry)"]) + '</div>')
         last = cs["solid"][-1][1] if cs["solid"] else cs["dashed"][-1][1]
         pnl = last * p["notional"]

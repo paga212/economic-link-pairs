@@ -1,5 +1,5 @@
 {
- "generated_utc": "2026-07-07T14:48:55.151603+00:00",
+ "generated_utc": "2026-07-07T22:30:43.952950+00:00",
  "start": "2026-07-04",
  "open": [
   {
@@ -10,9 +10,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-09",
-   "days": 27,
-   "ret": 0.032990486643662484,
-   "stop": -0.0010427371317308434,
+   "days": 28,
+   "ret": 0.08858695694922039,
+   "stop": 0.03858695694922039,
    "primary": {
     "role": "primary",
     "ticker": "GILD",
@@ -38,8 +38,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-18",
-   "days": 18,
-   "ret": -0.017638063208507967,
+   "days": 19,
+   "ret": -0.021994334648082887,
    "stop": -0.04394643034359286,
    "primary": {
     "role": "primary",
@@ -73,9 +73,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-24",
-   "days": 12,
-   "ret": 0.0588453372375167,
-   "stop": 0.019345724166182257,
+   "days": 13,
+   "ret": 0.05843665804599936,
+   "stop": 0.019823367191001112,
    "primary": {
     "role": "primary",
     "ticker": "VC",
@@ -96,7 +96,7 @@
     "ticker": "SPY",
     "direction": 1,
     "instrument": "stock",
-    "notional": 273915.4417805432,
+    "notional": 279092.48496632563,
     "entry_px": 733.24
    }
   },
@@ -108,8 +108,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-01",
-   "days": 5,
-   "ret": -0.001810305319573659,
+   "days": 6,
+   "ret": -0.04113176328459994,
    "stop": -0.05,
    "primary": {
     "role": "primary",
@@ -124,7 +124,7 @@
     "ticker": "SPY",
     "direction": -1,
     "instrument": "stock",
-    "notional": 212604.27940590834,
+    "notional": 222342.05570785003,
     "entry_px": 745.76
    }
   },
@@ -136,9 +136,9 @@
    "expression": "stock-pair",
    "risk_cap": "soft",
    "entry": "2026-07-02",
-   "days": 4,
-   "ret": 0.01619489953063388,
-   "stop": -0.03380510046936612,
+   "days": 5,
+   "ret": 0.049536460494737145,
+   "stop": -0.00046353950526285825,
    "primary": {
     "role": "primary",
     "ticker": "ADSK",
@@ -171,9 +171,9 @@
    "expression": "stock-pair",
    "risk_cap": "soft",
    "entry": "2026-07-06",
-   "days": 0,
-   "ret": 0.0,
-   "stop": -0.05,
+   "days": 1,
+   "ret": 0.040901084493611184,
+   "stop": -0.009098915506388819,
    "primary": {
     "role": "primary",
     "ticker": "AMGN",
@@ -199,8 +199,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-06",
-   "days": 0,
-   "ret": 0.0,
+   "days": 1,
+   "ret": -0.009411857198541268,
    "stop": -0.05,
    "primary": {
     "role": "primary",

@@ -166,6 +166,30 @@ class TestDetailHtml(unittest.TestCase):
         html = trade_detail_html(_idea("2026-06-02"), {"GILD": [], "VC": []})
         self.assertIn("no price data", html)        # leg note, no crash
 
+    def test_option_leg_gets_underlying_candles_above_the_line(self):
+        idea = {"supplier": "ADSK", "customer": "SNX", "side": -1, "expression": "stock-pair",
+                "entry": "2026-06-02",
+                "primary": {"role": "primary", "ticker": "ADSK", "direction": -1,
+                            "instrument": "spread", "notional": 2e5, "entry_px": 100.0, "S0": 100.0,
+                            "k_long": 100.0, "k_short": 90.0, "T0": 45 / 365.0, "iv": 0.3,
+                            "dte": 45, "debit": 3.0},
+                "neutralizer": {"role": "neutralizer", "ticker": "IONS", "direction": 1,
+                                "instrument": "stock", "notional": 2e5, "entry_px": 50.0}}
+        ohlc = {"ADSK": [(date(2026, 6, 1), 98., 101., 97., 100., 1e6),
+                         (date(2026, 6, 2), 100., 103., 99., 102., 1e6),
+                         (date(2026, 6, 3), 102., 104., 100., 101., 1e6)],
+                "IONS": [(date(2026, 6, 1), 49., 51., 48., 50., 1e6),
+                         (date(2026, 6, 2), 50., 52., 49., 51., 1e6),
+                         (date(2026, 6, 3), 51., 52., 50., 50., 1e6)]}
+        close = {t: [(d, c, v) for d, o, h, l, c, v in b] for t, b in ohlc.items()}
+        html = trade_detail_html(idea, close, ohlc)
+        self.assertIn("<div class=cap>ADSK price (OHLC)</div>", html)   # underlying candles added
+        self.assertIn("<div class=cap>ADSK spread mark</div>", html)    # option leg (blue line) kept
+        self.assertIn("<div class=cap>IONS price (OHLC)</div>", html)   # neutralizer stays under
+        # underlying candles appear ABOVE the option-leg line
+        self.assertLess(html.index("ADSK price (OHLC)"), html.index("ADSK spread mark"))
+        self.assertIn("<rect", html)                                    # candles actually drawn
+
     def test_entry_labelled_once_and_titles_are_html_captions(self):
         html = trade_detail_html(_idea("2026-06-02"), self._bars())
         self.assertEqual(html.count("entry Jun"), 1)         # dated entry text on the top chart only

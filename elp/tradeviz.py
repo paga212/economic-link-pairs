@@ -302,6 +302,10 @@ def _leg_row(leg: dict, bars: list, expression: str) -> str:
             f'<td>{leg.get("entry_px", 0.0):.2f}</td><td>{latest}</td></tr>')
 
 
+def _chart_block(title: str, svg: str) -> str:
+    return f'<div class=chartbox><div class=cap>{escape(title)}</div>{svg}</div>'
+
+
 def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = None) -> str:
     """One trade block: header + per-leg charts + combined chart + table. Fail-soft per leg.
     Stock legs render as OHLC candlesticks when ohlc_by_ticker has bars for them; spread legs
@@ -324,17 +328,23 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
             continue
         eidx = next((i for i, b in enumerate(bars) if b[0] >= entry), None)
         ohlc = ohlc_by_ticker.get(leg["ticker"], [])
-        if leg["instrument"] != "spread" and ohlc:
-            title = f'{leg["ticker"]} price (OHLC)'
-            chart = svg_candles(ohlc, entry_idx=eidx, dates=[b[0] for b in ohlc],
-                                yfmt=_fmt_price, entry_label=show_entry)
-        else:
-            title = f'{leg["ticker"]} {"spread mark" if leg["instrument"] == "spread" else "price"}'
-            chart = svg_line([{"pts": leg_price_series(leg, bars, entry), "cls": "leg", "dash": False}],
-                             entry_idx=eidx, dates=[b[0] for b in bars], yfmt=_fmt_price,
-                             entry_label=show_entry)
-        leg_charts += f'<div class=chartbox><div class=cap>{escape(title)}</div>{chart}</div>'
-        show_entry = False
+        is_spread = leg["instrument"] == "spread"
+        # Underlying OHLC candles: shown for any leg we have OHLC for. For an option leg this is the
+        # underlying stock's chart, placed just ABOVE the option-leg (blue) line.
+        if ohlc:
+            leg_charts += _chart_block(f'{leg["ticker"]} price (OHLC)',
+                                       svg_candles(ohlc, entry_idx=eidx, dates=[b[0] for b in ohlc],
+                                                   yfmt=_fmt_price, entry_label=show_entry))
+            show_entry = False
+        # The option leg's own mark (distinctive blue line), or a plain price line when we lack OHLC.
+        if is_spread or not ohlc:
+            title = f'{leg["ticker"]} {"spread mark" if is_spread else "price"}'
+            leg_charts += _chart_block(title,
+                                       svg_line([{"pts": leg_price_series(leg, bars, entry),
+                                                  "cls": "leg", "dash": False}],
+                                                entry_idx=eidx, dates=[b[0] for b in bars],
+                                                yfmt=_fmt_price, entry_label=show_entry))
+            show_entry = False
 
     cs = combined_series(idea, bars_by_ticker)
     if cs["solid"] or cs["dashed"]:
@@ -343,10 +353,9 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
             series.append({"pts": cs["dashed"], "cls": "pv", "dash": True})
         if cs["solid"]:
             series.append({"pts": cs["solid"], "cls": "pv", "dash": False})
-        combined = ('<div class=chartbox>'
-                    '<div class=cap>combined return % (dashed = hypothetical pre-entry)</div>'
-                    + svg_line(series, entry_idx=cs["entry_idx"], dates=cs["dates"], yfmt=_fmt_pct,
-                               entry_label=False) + '</div>')
+        combined = _chart_block("combined return % (dashed = hypothetical pre-entry)",
+                                svg_line(series, entry_idx=cs["entry_idx"], dates=cs["dates"],
+                                         yfmt=_fmt_pct, entry_label=False))
         last = cs["solid"][-1][1] if cs["solid"] else cs["dashed"][-1][1]
         pnl = last * p["notional"]
         table = ('<table><tr><th>Leg</th><th>Dir</th><th>Size</th><th>Entry px</th><th>Latest px</th></tr>'

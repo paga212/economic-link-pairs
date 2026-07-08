@@ -166,6 +166,12 @@ class TestDetailHtml(unittest.TestCase):
         html = trade_detail_html(_idea("2026-06-02"), {"GILD": [], "VC": []})
         self.assertIn("no price data", html)        # leg note, no crash
 
+    def test_entry_labelled_once_and_titles_are_html_captions(self):
+        html = trade_detail_html(_idea("2026-06-02"), self._bars())
+        self.assertEqual(html.count("entry Jun"), 1)         # dated entry text on the top chart only
+        self.assertIn("<div class=cap>GILD price", html)     # chart title lives OUTSIDE the svg
+        self.assertIn("<div class=cap>combined return", html)
+
     def test_page_css_is_nonempty_string(self):
         self.assertIsInstance(PAGE_CSS, str)
         self.assertIn("svg.chart", PAGE_CSS)

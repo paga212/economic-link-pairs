@@ -8,7 +8,12 @@ from datetime import date
 from html import escape
 
 
-def _scale(series, width, height, pad):
+# Plot margins (px): left, right (y-value gutter), top, bottom (date row). The y labels live in the
+# right gutter and the date labels in the bottom row, both OUTSIDE the plotted area.
+_ML, _MR, _MT, _MB = 10, 48, 12, 22
+
+
+def _scale(series, width, height):
     xs = [i for s in series for (i, _) in s["pts"]]
     ys = [y for s in series for (_, y) in s["pts"]]
     if not xs or not ys:
@@ -21,10 +26,10 @@ def _scale(series, width, height, pad):
         ymax = ymin + 1
 
     def X(i):
-        return pad + (i - xmin) / (xmax - xmin) * (width - 2 * pad)
+        return _ML + (i - xmin) / (xmax - xmin) * (width - _ML - _MR)
 
     def Y(y):
-        return height - pad - (y - ymin) / (ymax - ymin) * (height - 2 * pad)
+        return (height - _MB) - (y - ymin) / (ymax - ymin) * (height - _MT - _MB)
 
     return X, Y, ymin, ymax
 
@@ -41,24 +46,25 @@ def _date_ticks(dates, n=5):
     return [(i, dates[i]) for i in idxs]
 
 
-def _axis_svg(X, dates, width, height, pad) -> str:
-    """Bottom x-axis line + up to 5 '%b %d' date ticks. X: index->pixel. Empty dates -> ''."""
+def _axis_svg(X, dates, width, height) -> str:
+    """Bottom x-axis line + up to 5 '%b %d' date ticks, in the bottom margin. Empty dates -> ''."""
     ticks = _date_ticks(dates or [])
     if not ticks:
         return ""
-    out = [f'<line x1={pad} y1={height - pad:.1f} x2={width - pad} y2={height - pad:.1f} class=axis />']
+    yb = height - _MB
+    out = [f'<line x1={_ML} y1={yb:.1f} x2={width - _MR} y2={yb:.1f} class=axis />']
     for k, (i, d) in enumerate(ticks):
         x = X(i)
         anchor = "start" if k == 0 else ("end" if k == len(ticks) - 1 else "middle")
-        out.append(f'<line x1={x:.1f} y1={height - pad:.1f} x2={x:.1f} y2={height - pad + 3:.1f} class=axis />')
-        out.append(f'<text x={x:.1f} y={height - pad + 14:.1f} text-anchor={anchor} '
+        out.append(f'<line x1={x:.1f} y1={yb:.1f} x2={x:.1f} y2={yb + 3:.1f} class=axis />')
+        out.append(f'<text x={x:.1f} y={yb + 14:.1f} text-anchor={anchor} '
                    f'class=legend>{escape(d.strftime("%b %d"))}</text>')
     return "".join(out)
 
 
-def _grid_svg(X, dates, height, pad) -> str:
+def _grid_svg(X, dates, height) -> str:
     """Dashed vertical guide at each date tick (drawn behind the data so it stays recessive)."""
-    return "".join(f'<line x1={X(i):.1f} y1={pad} x2={X(i):.1f} y2={height - pad:.1f} class=grid />'
+    return "".join(f'<line x1={X(i):.1f} y1={_MT} x2={X(i):.1f} y2={height - _MB:.1f} class=grid />'
                    for i, _ in _date_ticks(dates or []))
 
 
@@ -77,23 +83,27 @@ def _nice_ticks(lo, hi, n=4):
     return out
 
 
-def _hgrid_svg(Y, ticks, yfmt, width, pad) -> str:
-    """Horizontal dashed guide + a right-aligned value label at each y tick (behind the data)."""
+def _hgrid_svg(Y, ticks, yfmt, width) -> str:
+    """Horizontal dashed guide across the plot + a value label in the RIGHT gutter (outside the
+    plot) at each y tick. Drawn behind the data."""
     out = []
     for v in ticks:
         y = Y(v)
-        out.append(f'<line x1={pad} y1={y:.1f} x2={width - pad} y2={y:.1f} class=grid />')
-        out.append(f'<text x={width - pad - 2} y={y - 2:.1f} text-anchor=end '
+        out.append(f'<line x1={_ML} y1={y:.1f} x2={width - _MR} y2={y:.1f} class=grid />')
+        out.append(f'<text x={width - _MR + 4} y={y + 3:.1f} text-anchor=start '
                    f'class=legend>{escape(yfmt(v))}</text>')
     return "".join(out)
 
 
-def _entry_svg(ex, width, height, pad, label="entry") -> str:
-    """Dashed vertical entry marker plus a small label (e.g. 'entry Jul 01') kept inside the plot."""
-    anchor = "end" if ex > width * 0.6 else "start"
+def _entry_svg(ex, width, height, label) -> str:
+    """Vertical entry marker. label='' draws just the line (used on all but the top chart)."""
+    line = f'<line x1={ex:.1f} y1={_MT} x2={ex:.1f} y2={height - _MB:.1f} class=entry />'
+    if not label:
+        return line
+    anchor = "end" if ex > (width - _MR) * 0.6 else "start"
     dx = -3 if anchor == "end" else 3
-    return (f'<line x1={ex:.1f} y1={pad} x2={ex:.1f} y2={height - pad:.1f} class=entry />'
-            f'<text x={ex + dx:.1f} y={pad + 9} text-anchor={anchor} class=legend>{escape(label)}</text>')
+    return line + (f'<text x={ex + dx:.1f} y={_MT + 9} text-anchor={anchor} '
+                   f'class=legend>{escape(label)}</text>')
 
 
 def _entry_label(dates, entry_idx) -> str:
@@ -102,31 +112,27 @@ def _entry_label(dates, entry_idx) -> str:
     return "entry"
 
 
-def _legend_svg(labels, pad) -> str:
-    return "".join(f'<text x={pad + 2} y={pad + 12 + 14 * k} class=legend>{escape(lab)}</text>'
-                   for k, lab in enumerate(labels or []))
-
-
-def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None, dates=None,
-             yfmt=None) -> str:
-    """One <svg> with a <polyline> per series (shared scale). entry_idx draws a vertical marker;
-    labels -> a tiny legend; dates (index->date, aligned with each series' x index) -> a labelled
-    x date axis; yfmt (value->str) -> horizontal gridlines with y value labels. Empty input -> a
-    'no data' placeholder."""
-    sc = _scale(series, width, height, pad)
+def svg_line(series, entry_idx=None, width=640, height=160, dates=None, yfmt=None,
+             entry_label=True) -> str:
+    """One <svg> with a <polyline> per series (shared scale). entry_idx draws a vertical marker
+    (with a dated label when entry_label is set); dates (index->date) -> a bottom date axis;
+    yfmt (value->str) -> horizontal gridlines with y value labels in the right gutter. Empty
+    input -> a 'no data' placeholder."""
+    sc = _scale(series, width, height)
     if sc is None:
         return (f'<svg viewBox="0 0 {width} {height}" class=chart>'
                 f'<text x={width // 2} y={height // 2} text-anchor=middle class=muted>no data</text></svg>')
     X, Y, ymin, ymax = sc
     parts = [f'<svg viewBox="0 0 {width} {height}" class=chart>']
-    parts.append(_grid_svg(X, dates, height, pad))
+    parts.append(_grid_svg(X, dates, height))
     if yfmt:
-        parts.append(_hgrid_svg(Y, _nice_ticks(ymin, ymax), yfmt, width, pad))
+        parts.append(_hgrid_svg(Y, _nice_ticks(ymin, ymax), yfmt, width))
     if ymin <= 0 <= ymax:
         y0 = Y(0)
-        parts.append(f'<line x1={pad} y1={y0:.1f} x2={width - pad} y2={y0:.1f} class=axis />')
+        parts.append(f'<line x1={_ML} y1={y0:.1f} x2={width - _MR} y2={y0:.1f} class=axis />')
     if entry_idx is not None:
-        parts.append(_entry_svg(X(entry_idx), width, height, pad, _entry_label(dates, entry_idx)))
+        parts.append(_entry_svg(X(entry_idx), width, height,
+                                _entry_label(dates, entry_idx) if entry_label else ""))
     for s in series:
         pts = " ".join(f"{X(i):.1f},{Y(y):.1f}" for i, y in s["pts"])
         dash = ' stroke-dasharray="4 3"' if s.get("dash") else ""
@@ -135,16 +141,15 @@ def svg_line(series, entry_idx=None, width=640, height=160, pad=24, labels=None,
         li, ly = series[-1]["pts"][-1]
         parts.append(f'<circle cx={X(li):.1f} cy={Y(ly):.1f} r=2.6 class="{series[-1]["cls"]}" '
                      f'style="fill:currentColor" />')
-    parts.append(_axis_svg(X, dates, width, height, pad))
-    parts.append(_legend_svg(labels, pad))
+    parts.append(_axis_svg(X, dates, width, height))
     parts.append("</svg>")
     return "".join(parts)
 
 
-def svg_candles(bars, entry_idx=None, width=640, height=160, pad=24, labels=None, dates=None,
-                yfmt=None) -> str:
+def svg_candles(bars, entry_idx=None, width=640, height=160, dates=None, yfmt=None,
+                entry_label=True) -> str:
     """OHLC candlesticks from (date, open, high, low, close, vol) bars: a low->high wick and an
-    open->close body per bar, coloured up/down. Same grid/axis/legend/entry chrome as svg_line."""
+    open->close body per bar, coloured up/down. Same grid/axis/entry chrome as svg_line."""
     if not bars:
         return (f'<svg viewBox="0 0 {width} {height}" class=chart>'
                 f'<text x={width // 2} y={height // 2} text-anchor=middle class=muted>no data</text></svg>')
@@ -156,18 +161,19 @@ def svg_candles(bars, entry_idx=None, width=640, height=160, pad=24, labels=None
     span = (n - 1) or 1
 
     def X(i):
-        return pad + i / span * (width - 2 * pad)
+        return _ML + i / span * (width - _ML - _MR)
 
     def Y(y):
-        return height - pad - (y - lo) / (hi - lo) * (height - 2 * pad)
+        return (height - _MB) - (y - lo) / (hi - lo) * (height - _MT - _MB)
 
-    bw = max(1.5, 0.6 * (width - 2 * pad) / n)
+    bw = max(1.5, 0.6 * (width - _ML - _MR) / n)
     parts = [f'<svg viewBox="0 0 {width} {height}" class=chart>']
-    parts.append(_grid_svg(X, dates, height, pad))
+    parts.append(_grid_svg(X, dates, height))
     if yfmt:
-        parts.append(_hgrid_svg(Y, _nice_ticks(lo, hi), yfmt, width, pad))
+        parts.append(_hgrid_svg(Y, _nice_ticks(lo, hi), yfmt, width))
     if entry_idx is not None:
-        parts.append(_entry_svg(X(entry_idx), width, height, pad, _entry_label(dates, entry_idx)))
+        parts.append(_entry_svg(X(entry_idx), width, height,
+                                _entry_label(dates, entry_idx) if entry_label else ""))
     for i, (d, o, h, low, c, _v) in enumerate(bars):
         x = X(i)
         cls = "up" if c >= o else "down"
@@ -175,8 +181,7 @@ def svg_candles(bars, entry_idx=None, width=640, height=160, pad=24, labels=None
         top, bot = Y(max(o, c)), Y(min(o, c))
         parts.append(f'<rect x={x - bw / 2:.1f} y={top:.1f} width={bw:.1f} '
                      f'height={max(bot - top, 1):.1f} class={cls} />')
-    parts.append(_axis_svg(X, dates, width, height, pad))
-    parts.append(_legend_svg(labels, pad))
+    parts.append(_axis_svg(X, dates, width, height))
     parts.append("</svg>")
     return "".join(parts)
 
@@ -250,7 +255,8 @@ PAGE_CSS = (
     "body{font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:820px;margin:2rem auto;"
     "padding:0 1rem;color:#1a1a1a}h1{font-size:1.4rem}h2{font-size:1.05rem;margin:1.4rem 0 .3rem}"
     ".sub,.muted{color:#666}.muted{font-style:italic;fill:#666}"
-    ".trade{border-top:1px solid #eee;padding-top:.6rem;margin-top:1.2rem}.chartbox{margin:.4rem 0}"
+    ".trade{border-top:1px solid #eee;padding-top:.6rem;margin-top:1.2rem}.chartbox{margin:.6rem 0}"
+    ".cap{font-size:.82rem;color:#555;margin:.1rem 0 .15rem}"
     "svg.chart{width:100%;height:auto;background:#fcfcfd;border:1px solid #ececf0;border-radius:6px}"
     ".leg{stroke:#2563c9;color:#2563c9;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}"
     ".pv{stroke:#0f9d63;color:#0f9d63;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}"
@@ -263,6 +269,7 @@ PAGE_CSS = (
     + THEME_BTN_CSS +
     ":root[data-theme=dark] body{background:#14161a;color:#e6e6e9}"
     ":root[data-theme=dark] .sub,:root[data-theme=dark] .muted{color:#9aa0a6}"
+    ":root[data-theme=dark] .cap{color:#b6bcc4}"
     ":root[data-theme=dark] .muted{fill:#9aa0a6}"
     ":root[data-theme=dark] a{color:#7fb0ff}"
     ":root[data-theme=dark] svg.chart{background:#1b1e24;border-color:#2c2f37}"
@@ -309,6 +316,7 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
             f'neutralizer: {escape(describe_leg(n, idea["expression"]))}</p>')
 
     leg_charts = ""
+    show_entry = True                                 # label the entry marker on the top chart only
     for leg in (p, n):
         bars = bars_by_ticker.get(leg["ticker"], [])
         if not bars:
@@ -317,13 +325,16 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
         eidx = next((i for i, b in enumerate(bars) if b[0] >= entry), None)
         ohlc = ohlc_by_ticker.get(leg["ticker"], [])
         if leg["instrument"] != "spread" and ohlc:
-            chart = svg_candles(ohlc, entry_idx=eidx, labels=[f'{leg["ticker"]} price (OHLC)'],
-                                dates=[b[0] for b in ohlc], yfmt=_fmt_price)
+            title = f'{leg["ticker"]} price (OHLC)'
+            chart = svg_candles(ohlc, entry_idx=eidx, dates=[b[0] for b in ohlc],
+                                yfmt=_fmt_price, entry_label=show_entry)
         else:
-            lab = f'{leg["ticker"]} {"spread mark" if leg["instrument"] == "spread" else "price"}'
+            title = f'{leg["ticker"]} {"spread mark" if leg["instrument"] == "spread" else "price"}'
             chart = svg_line([{"pts": leg_price_series(leg, bars, entry), "cls": "leg", "dash": False}],
-                             entry_idx=eidx, labels=[lab], dates=[b[0] for b in bars], yfmt=_fmt_price)
-        leg_charts += '<div class=chartbox>' + chart + '</div>'
+                             entry_idx=eidx, dates=[b[0] for b in bars], yfmt=_fmt_price,
+                             entry_label=show_entry)
+        leg_charts += f'<div class=chartbox><div class=cap>{escape(title)}</div>{chart}</div>'
+        show_entry = False
 
     cs = combined_series(idea, bars_by_ticker)
     if cs["solid"] or cs["dashed"]:
@@ -333,8 +344,9 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
         if cs["solid"]:
             series.append({"pts": cs["solid"], "cls": "pv", "dash": False})
         combined = ('<div class=chartbox>'
+                    '<div class=cap>combined return % (dashed = hypothetical pre-entry)</div>'
                     + svg_line(series, entry_idx=cs["entry_idx"], dates=cs["dates"], yfmt=_fmt_pct,
-                               labels=["combined return % (dashed = hypothetical pre-entry)"]) + '</div>')
+                               entry_label=False) + '</div>')
         last = cs["solid"][-1][1] if cs["solid"] else cs["dashed"][-1][1]
         pnl = last * p["notional"]
         table = ('<table><tr><th>Leg</th><th>Dir</th><th>Size</th><th>Entry px</th><th>Latest px</th></tr>'

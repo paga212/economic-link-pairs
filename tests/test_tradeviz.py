@@ -5,7 +5,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.tradeviz import svg_line  # noqa: E402
+from elp.tradeviz import _fmt_pct, _fmt_price, svg_line  # noqa: E402
 
 
 class TestSvg(unittest.TestCase):
@@ -45,7 +45,19 @@ class TestSvg(unittest.TestCase):
                        entry_idx=1, dates=dts)
         self.assertIn("class=grid", svg)          # dashed vertical guides
         self.assertIn("<circle", svg)             # latest-value dot
-        self.assertIn(">entry<", svg)             # entry marker label
+
+    def test_entry_date_and_y_value_axis(self):
+        from datetime import date
+        dts = [date(2026, 7, 1), date(2026, 7, 2), date(2026, 7, 6)]
+        # price y-axis (leg): nice round values, entry label carries the date
+        price = svg_line([{"pts": [(0, 100.0), (1, 110.0), (2, 105.0)], "cls": "leg", "dash": False}],
+                         entry_idx=1, dates=dts, yfmt=_fmt_price)
+        self.assertIn(">entry Jul 02<", price)    # entry marker names the entry date
+        self.assertIn(">105<", price)             # a nice round price level on the y axis
+        # percent y-axis (combined return): labels formatted as %
+        pct = svg_line([{"pts": [(0, -0.02), (1, 0.0), (2, 0.05)], "cls": "pv", "dash": False}],
+                       dates=dts, yfmt=_fmt_pct)
+        self.assertRegex(pct, r">[+-]?\d+\.\d%<")  # e.g. "+4.0%"
 
     def test_date_axis_labels_first_and_last_dates(self):
         from datetime import date

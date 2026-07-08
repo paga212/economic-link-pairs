@@ -257,6 +257,8 @@ PAGE_CSS = (
     ".sub,.muted{color:#666}.muted{font-style:italic;fill:#666}"
     ".trade{border-top:1px solid #eee;padding-top:.6rem;margin-top:1.2rem}.chartbox{margin:.6rem 0}"
     ".cap{font-size:.82rem;color:#555;margin:.1rem 0 .15rem}"
+    ".optgroup{border-left:3px solid #c3d0ef;border-radius:3px;padding-left:.5rem;margin:.6rem 0}"
+    ".optgroup .chartbox{margin:.3rem 0}"
     "svg.chart{width:100%;height:auto;background:#fcfcfd;border:1px solid #ececf0;border-radius:6px}"
     ".leg{stroke:#2563c9;color:#2563c9;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}"
     ".pv{stroke:#0f9d63;color:#0f9d63;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}"
@@ -270,6 +272,7 @@ PAGE_CSS = (
     ":root[data-theme=dark] body{background:#14161a;color:#e6e6e9}"
     ":root[data-theme=dark] .sub,:root[data-theme=dark] .muted{color:#9aa0a6}"
     ":root[data-theme=dark] .cap{color:#b6bcc4}"
+    ":root[data-theme=dark] .optgroup{border-left-color:#3a4a6a}"
     ":root[data-theme=dark] .muted{fill:#9aa0a6}"
     ":root[data-theme=dark] a{color:#7fb0ff}"
     ":root[data-theme=dark] svg.chart{background:#1b1e24;border-color:#2c2f37}"
@@ -329,22 +332,28 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
         eidx = next((i for i, b in enumerate(bars) if b[0] >= entry), None)
         ohlc = ohlc_by_ticker.get(leg["ticker"], [])
         is_spread = leg["instrument"] == "spread"
+        blocks = []
         # Underlying OHLC candles: shown for any leg we have OHLC for. For an option leg this is the
         # underlying stock's chart, placed just ABOVE the option-leg (blue) line.
         if ohlc:
-            leg_charts += _chart_block(f'{leg["ticker"]} price (OHLC)',
+            blocks.append(_chart_block(f'{leg["ticker"]} price (OHLC)',
                                        svg_candles(ohlc, entry_idx=eidx, dates=[b[0] for b in ohlc],
-                                                   yfmt=_fmt_price, entry_label=show_entry))
+                                                   yfmt=_fmt_price, entry_label=show_entry)))
             show_entry = False
         # The option leg's own mark (distinctive blue line), or a plain price line when we lack OHLC.
         if is_spread or not ohlc:
             title = f'{leg["ticker"]} {"spread mark" if is_spread else "price"}'
-            leg_charts += _chart_block(title,
+            blocks.append(_chart_block(title,
                                        svg_line([{"pts": leg_price_series(leg, bars, entry),
                                                   "cls": "leg", "dash": False}],
                                                 entry_idx=eidx, dates=[b[0] for b in bars],
-                                                yfmt=_fmt_price, entry_label=show_entry))
+                                                yfmt=_fmt_price, entry_label=show_entry)))
             show_entry = False
+        # An option leg + its underlying are one story: tie them with a subtle blue accent group.
+        if is_spread and len(blocks) > 1:
+            leg_charts += f'<div class=optgroup>{"".join(blocks)}</div>'
+        else:
+            leg_charts += "".join(blocks)
 
     cs = combined_series(idea, bars_by_ticker)
     if cs["solid"] or cs["dashed"]:

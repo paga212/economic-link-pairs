@@ -189,6 +189,11 @@ class TestDetailHtml(unittest.TestCase):
         # underlying candles appear ABOVE the option-leg line
         self.assertLess(html.index("ADSK price (OHLC)"), html.index("ADSK spread mark"))
         self.assertIn("<rect", html)                                    # candles actually drawn
+        # the two are visually grouped: the optgroup opens just before the underlying candles,
+        # wraps both, and the neutralizer follows outside it
+        self.assertIn("<div class=optgroup>", html)
+        self.assertLess(html.index("<div class=optgroup>"), html.index("ADSK price (OHLC)"))
+        self.assertLess(html.index("ADSK spread mark"), html.index("IONS price (OHLC)"))
 
     def test_entry_labelled_once_and_titles_are_html_captions(self):
         html = trade_detail_html(_idea("2026-06-02"), self._bars())

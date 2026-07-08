@@ -6,7 +6,7 @@ import os
 from datetime import date, timedelta
 
 from elp.tiingo import fetch_daily_ohlc
-from elp.tradeviz import PAGE_CSS, trade_detail_html
+from elp.tradeviz import PAGE_CSS, THEME_BUTTON, THEME_INIT, trade_detail_html
 
 STATE, OUT = "paper_state.json", "site/trades.html"
 
@@ -46,7 +46,7 @@ def build() -> None:
     if not blocks:
         blocks = '<p class=muted>No open trades.</p>'
     doc = (f'<!doctype html><html><head><meta charset=utf-8><title>Trade details</title>'
-           f'<style>{PAGE_CSS}</style></head><body><h1>Trade details</h1>'
+           f'<style>{PAGE_CSS}</style>{THEME_INIT}</head><body>{THEME_BUTTON}<h1>Trade details</h1>'
            f'<p class=sub><a href="index.html">← dashboard</a></p>{blocks}</body></html>')
     os.makedirs("site", exist_ok=True)
     open(OUT, "w").write(doc)

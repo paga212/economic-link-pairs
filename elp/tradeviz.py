@@ -187,6 +187,25 @@ def leg_price_series(leg: dict, bars: list, entry: date) -> list:
 
 from elp.express import describe_leg              # noqa: E402
 
+# Shared light/dark toggle: a <head> script (sets the theme from localStorage before paint, so no
+# flash) + a fixed button. Dark styling keys off :root[data-theme=dark] (set by the toggle), not
+# the OS. Reused by dashboard.py so the two pages stay in sync.
+THEME_INIT = (
+    '<script>document.documentElement.dataset.theme=localStorage.getItem("theme")||"light";'
+    'function toggleTheme(){var d=document.documentElement;'
+    'd.dataset.theme=d.dataset.theme==="dark"?"light":"dark";'
+    'localStorage.setItem("theme",d.dataset.theme);paintThemeBtn();}'
+    'function paintThemeBtn(){var b=document.getElementById("themebtn");if(b){'
+    'b.textContent=document.documentElement.dataset.theme==="dark"'
+    '?"☀️ Light":"\U0001f319 Dark";}}</script>')
+THEME_BUTTON = ('<button id=themebtn class=themebtn onclick="toggleTheme()"></button>'
+                '<script>paintThemeBtn()</script>')
+THEME_BTN_CSS = (
+    ".themebtn{position:fixed;top:.6rem;right:.6rem;z-index:9;font:inherit;font-size:.8rem;"
+    "padding:.3rem .7rem;border:1px solid #d0d0d6;border-radius:6px;background:#fff;color:#333;"
+    "cursor:pointer}"
+    ":root[data-theme=dark] .themebtn{background:#1b1e24;color:#e6e6e9;border-color:#3a3d45}")
+
 PAGE_CSS = (
     "body{font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:820px;margin:2rem auto;"
     "padding:0 1rem;color:#1a1a1a}h1{font-size:1.4rem}h2{font-size:1.05rem;margin:1.4rem 0 .3rem}"
@@ -201,14 +220,23 @@ PAGE_CSS = (
     ".legend{fill:#8a8f98;font-size:11px}table{border-collapse:collapse;width:100%;margin:.3rem 0;"
     "font-size:.9rem}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #eee}"
     "a{color:#2563c9}"
-    "@media(prefers-color-scheme:dark){"
-    "body{background:#14161a;color:#e6e6e9}.sub,.muted{color:#9aa0a6}.muted{fill:#9aa0a6}"
-    "a{color:#7fb0ff}"
-    "svg.chart{background:#1b1e24;border-color:#2c2f37}"
-    ".grid{stroke:#3c3f47}.axis{stroke:#50535c}.legend{fill:#9aa0a6}"
-    ".leg{stroke:#5b9bff;color:#5b9bff}.pv{stroke:#35c98a;color:#35c98a}.wick{stroke:#8b9096}"
-    ".up{fill:#35c98a;stroke:#35c98a}.down{fill:#ff6b52;stroke:#ff6b52}.entry{stroke:#ff6b6b}"
-    ".trade{border-top-color:#2c2f37}th,td{border-bottom-color:#2c2f37}}")
+    + THEME_BTN_CSS +
+    ":root[data-theme=dark] body{background:#14161a;color:#e6e6e9}"
+    ":root[data-theme=dark] .sub,:root[data-theme=dark] .muted{color:#9aa0a6}"
+    ":root[data-theme=dark] .muted{fill:#9aa0a6}"
+    ":root[data-theme=dark] a{color:#7fb0ff}"
+    ":root[data-theme=dark] svg.chart{background:#1b1e24;border-color:#2c2f37}"
+    ":root[data-theme=dark] .grid{stroke:#3c3f47}"
+    ":root[data-theme=dark] .axis{stroke:#50535c}"
+    ":root[data-theme=dark] .legend{fill:#9aa0a6}"
+    ":root[data-theme=dark] .leg{stroke:#5b9bff;color:#5b9bff}"
+    ":root[data-theme=dark] .pv{stroke:#35c98a;color:#35c98a}"
+    ":root[data-theme=dark] .wick{stroke:#8b9096}"
+    ":root[data-theme=dark] .up{fill:#35c98a;stroke:#35c98a}"
+    ":root[data-theme=dark] .down{fill:#ff6b52;stroke:#ff6b52}"
+    ":root[data-theme=dark] .entry{stroke:#ff6b6b}"
+    ":root[data-theme=dark] .trade{border-top-color:#2c2f37}"
+    ":root[data-theme=dark] th,:root[data-theme=dark] td{border-bottom-color:#2c2f37}")
 
 
 def _leg_row(leg: dict, bars: list, expression: str) -> str:

@@ -137,6 +137,15 @@ def build() -> None:
  .pos{{color:#0a7a3f;font-weight:600}} .neg{{color:#b02020;font-weight:600}}
  .banner{{background:#fff8e1;border:1px solid #f0d98a;border-radius:6px;padding:.6rem .8rem;font-size:.88rem;color:#664d03}}
  footer{{color:#999;font-size:.8rem;margin-top:2rem}}
+ a{{color:#1155cc}}
+ @media(prefers-color-scheme:dark){{
+  body{{background:#14161a;color:#e6e6e9}}
+  h2{{border-bottom-color:#2c2f37}} .sub,.muted{{color:#9aa0a6}} a{{color:#7fb0ff}}
+  th,td{{border-bottom-color:#2c2f37}} th{{color:#9aa0a6}}
+  .pos{{color:#35c98a}} .neg{{color:#ff6b6b}}
+  .banner{{background:#2a2410;border-color:#5c4d1a;color:#e8cf8a}}
+  footer{{color:#777}}
+ }}
 </style></head><body>
 <h1>Economic Link Pairs — Paper Trade</h1>
 <p class=sub>generated {escape(str(s['generated_utc']))} · last bar {escape(str(s.get('last_bar', '—')))} · paper start {escape(str(s['start']))} · recommendations only, no execution</p>

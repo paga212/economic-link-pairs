@@ -190,16 +190,25 @@ from elp.express import describe_leg              # noqa: E402
 PAGE_CSS = (
     "body{font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:820px;margin:2rem auto;"
     "padding:0 1rem;color:#1a1a1a}h1{font-size:1.4rem}h2{font-size:1.05rem;margin:1.4rem 0 .3rem}"
-    ".sub,.muted{color:#666}.muted{font-style:italic}"
+    ".sub,.muted{color:#666}.muted{font-style:italic;fill:#666}"
     ".trade{border-top:1px solid #eee;padding-top:.6rem;margin-top:1.2rem}.chartbox{margin:.4rem 0}"
     "svg.chart{width:100%;height:auto;background:#fcfcfd;border:1px solid #ececf0;border-radius:6px}"
     ".leg{stroke:#2563c9;color:#2563c9;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}"
     ".pv{stroke:#0f9d63;color:#0f9d63;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}"
     ".wick{stroke:#9aa0a6;stroke-width:1}.up{fill:#0f9d63;stroke:#0f9d63}.down{fill:#e0503a;stroke:#e0503a}"
-    ".grid{stroke:#ededf1;stroke-width:1;stroke-dasharray:3 3}"
-    ".axis{stroke:#d7d7dd;stroke-width:1}.entry{stroke:#c0392b;stroke-width:1;stroke-dasharray:3 3}"
+    ".grid{stroke:#d3d4dc;stroke-width:1;stroke-dasharray:3 3}"
+    ".axis{stroke:#c4c5cd;stroke-width:1}.entry{stroke:#c0392b;stroke-width:1;stroke-dasharray:3 3}"
     ".legend{fill:#8a8f98;font-size:11px}table{border-collapse:collapse;width:100%;margin:.3rem 0;"
-    "font-size:.9rem}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #eee}")
+    "font-size:.9rem}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #eee}"
+    "a{color:#2563c9}"
+    "@media(prefers-color-scheme:dark){"
+    "body{background:#14161a;color:#e6e6e9}.sub,.muted{color:#9aa0a6}.muted{fill:#9aa0a6}"
+    "a{color:#7fb0ff}"
+    "svg.chart{background:#1b1e24;border-color:#2c2f37}"
+    ".grid{stroke:#3c3f47}.axis{stroke:#50535c}.legend{fill:#9aa0a6}"
+    ".leg{stroke:#5b9bff;color:#5b9bff}.pv{stroke:#35c98a;color:#35c98a}.wick{stroke:#8b9096}"
+    ".up{fill:#35c98a;stroke:#35c98a}.down{fill:#ff6b52;stroke:#ff6b52}.entry{stroke:#ff6b6b}"
+    ".trade{border-top-color:#2c2f37}th,td{border-bottom-color:#2c2f37}}")
 
 
 def _leg_row(leg: dict, bars: list, expression: str) -> str:

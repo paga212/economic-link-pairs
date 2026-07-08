@@ -157,6 +157,7 @@ class TestDetailHtml(unittest.TestCase):
     def test_page_css_is_nonempty_string(self):
         self.assertIsInstance(PAGE_CSS, str)
         self.assertIn("svg.chart", PAGE_CSS)
+        self.assertIn("prefers-color-scheme:dark", PAGE_CSS)   # dark mode wired up
 
     def test_pair_neutralizer_size_not_mislabeled(self):
         html = trade_detail_html(_idea("2026-06-02"), self._bars())

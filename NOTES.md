@@ -111,6 +111,26 @@ Full plan in `PLAN.md`; literature/data research in `research/`.
 >   the bar. Ungated follow-ups if wanted later: a precise **two-leg net-of-cost** model (track.py
 >   currently charges cost single-leg) and a **Link Verification** QA agent (Phase 2 remainder).
 
+> **Update 2026-07-07 (trade-detail charts fixed + heavily enhanced; docs synced).**
+> - **Two real bug fixes.** (1) The trade-detail charts rendered blank: unquoted SVG
+>   attributes before `/>` (e.g. `fill=none/>`) never self-closed, so each `<polyline>`
+>   nested inside `<line>` (a non-container) and was not drawn — fixed by self-closing the
+>   tags. (2) The neutralizer `entry_px` was taken from the last bar of full history instead
+>   of the entry-day price (`build_idea` used `bars[cp][-1]`); now priced as-of the entry day,
+>   which also corrects `idea_return` for the neutralizer leg. Both have regression tests.
+> - **Chart enhancements** (`elp/tradeviz.py`): OHLC candlesticks for stock legs (new
+>   `fetch_daily_ohlc`); the option (spread) leg keeps its distinctive blue mark line with the
+>   underlying's candles grouped just above it (subtle blue accent group); labelled date x-axis;
+>   nice-round horizontal gridlines with a y-value axis outside the plot (prices / percentages);
+>   dated entry marker shown once on the top chart; last-bar date on the dashboard header;
+>   explicit light/dark **toggle** (localStorage, replaces OS auto-detect) on both pages.
+> - **Confirmed dynamic.** The trade set is not static: `track.py` re-simulates each tick and
+>   `tradeviz.py`/`dashboard.py` rebuild from the current open list with fresh Tiingo data.
+> - **Docs synced**: `CLAUDE.md` (Run/architecture/chain, `tradeviz`/`catalyst`/`risk`/`killrule`,
+>   test count) and this log. **Tests: now 145.** Repo clean; `main` == `origin/main`. Stale local
+>   branches `beta-clamp`, `link-validation`, `worktree-phase3-fable5-digest` are already
+>   squash-merged into `main` (their deliverables are present) — safe to delete.
+
 ## Built and verified this session
 - **Phase 0** (`phase0.py`, `elp/signal.py`, `elp/prices.py`): stdlib data spine +
   signal-direction check. Finding: on heavily-covered Apple/AMAT suppliers the same-month
@@ -190,11 +210,14 @@ expansion is what diversifies it.
 
 ## How to run
 ```
-python3 -m unittest discover -s tests   # 71 offline tests
+python3 -m unittest discover -s tests   # 145 offline tests
 python3 track.py                         # daily tick → paper_state.json (Tiingo token)
+python3 catalyst.py                      # news/catalyst ensemble → catalyst.json (Anthropic key)
+python3 risk.py                          # risk/borrow facts → risk.json (Anthropic key)
 python3 digest.py                        # Fable-5 daily digest → digest.json (Anthropic key)
 python3 dashboard.py                     # → site/index.html (served by serve.sh)
+python3 tradeviz.py                      # per-trade detail charts → site/trades.html (Tiingo token)
 EMAIL_DRYRUN=1 python3 email_report.py   # render weekly email → email_report.eml (no send)
 python3 linkcheck.py                     # validate the link universe → rejected_links.json
-# earlier phase drivers: phase0.py, phase1.py, phase2a.py, phase2a_build.py 30
+# earlier phase drivers: phase0.py, phase1.py, phase2a.py, phase2a_build.py
 ```

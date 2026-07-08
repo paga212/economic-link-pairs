@@ -14,20 +14,27 @@ only — it never executes, connects to a broker, or moves money.** See
 Built so far: Phase 0 (data spine + signal check), Phase 1 (backtest engine),
 Phase 2a (EDGAR extractor), Phase D (dynamic per-trade engine), Phase B
 (LLM-diversified link universe), Phase 3 (Fable-5 daily digest), the paired
-long/short expression engine, link validation, and Phase 4 delivery (dashboard +
-weekly email). Deliberately **stdlib-only — no third-party deps** (no
-pandas/numpy); Tiingo is the production price source.
+long/short expression engine, link validation, Phase 4 delivery (dashboard +
+per-trade detail charts + weekly email), the news/catalyst and risk/borrow LLM
+ensembles, and the Phase-5 kill-rule scorecard. Deliberately **stdlib-only — no
+third-party deps** (no pandas/numpy); Tiingo is the production price source.
 
 ### Run
 ```
-python3 -m unittest discover -s tests   # 71 offline logic tests
+python3 -m unittest discover -s tests   # 145 offline logic tests
 python3 track.py                         # daily tick → paper_state.json (needs Tiingo token)
+python3 catalyst.py                      # news/catalyst ensemble → catalyst.json (needs Anthropic key)
+python3 risk.py                          # risk/borrow facts → risk.json (needs Anthropic key)
 python3 digest.py                        # Fable-5 daily digest → digest.json (needs Anthropic key)
-python3 dashboard.py                     # paper_state.json (+ digest.json) → site/index.html
+python3 dashboard.py                     # paper_state.json (+ digest/catalyst/risk) → site/index.html
+python3 tradeviz.py                      # per-trade detail charts → site/trades.html (needs Tiingo token)
 EMAIL_DRYRUN=1 python3 email_report.py   # render the weekly email → email_report.eml (no send)
 ```
-`run_paper.sh` chains track → digest → dashboard → serve → commit/push (cron `0 22 * * 1-5`).
-The weekly email is delivered from the cloud by GitHub Actions
+`run_paper.sh` chains track → catalyst → risk → digest → dashboard → tradeviz → serve →
+commit/push (cron `0 22 * * 1-5`). The set of open trades is **not static**: each tick
+re-simulates from history, so `paper_state.json` (and every page built from it) reflects
+whatever ideas are currently open — trades enter and exit on their own, and the charts and
+tables regenerate to match. The weekly email is delivered from the cloud by GitHub Actions
 (`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC), independent of this machine.
 
 ### Architecture (deterministic core; LLM owns orchestration/parsing only)
@@ -38,13 +45,17 @@ The weekly email is delivered from the cloud by GitHub Actions
 - `elp/options.py` — Black-Scholes bear-put-spread pricer (defined-risk short leg, Grade-C IV)
 - `elp/signal.py` — prior-month customer return → supplier signal
 - `elp/digest.py` — Fable-5 Master/Orchestrator daily digest (ranks/narrates open trades; never emits a number)
+- `elp/tradeviz.py` — per-trade detail charts (pure inline SVG, no JS deps): OHLC candlesticks for stock legs, a blue line for the option (spread) mark with the underlying's candles grouped above it, a combined-return chart, date x-axis + y-value axis, and a light/dark toggle; rebuilt from the current open list every tick
+- `elp/catalyst.py`, `elp/news.py` — LLM news/catalyst ensemble → `catalyst.json` (fail-soft; feeds the digest and dashboard flags)
+- `elp/risk.py` — LLM risk/borrow facts → `risk.json` (fail-soft; short-borrow / hard-to-borrow flags)
+- `elp/killrule.py` — Phase-5 kill-rule scorecard (Sharpe / expectancy / dealflow gate)
 - `elp/backtest.py` — monthly cross-sectional long/short engine (engine validation)
 - `elp/links.py` — `load_universe()` over the diversified link table (`universe_links.json`)
 - `elp/llm.py` — LLM link extraction + `complete_fallback` (Fable-5 → Opus-4.8) (Phase B / Phase 3)
-- `elp/tiingo.py` — production prices (`fetch_daily`); `elp/prices.py` — keyless Yahoo prototype
+- `elp/tiingo.py` — production prices (`fetch_daily`, `fetch_daily_ohlc`); `elp/prices.py` — keyless Yahoo prototype
 - `elp/edgar.py`, `elp/cf_links.py` — SEC EDGAR extractor; free Cohen-Frazzini link-file parser
-- Entry scripts: `track.py`, `digest.py`, `dashboard.py`, `email_report.py`, `linkcheck.py`, and the `phase0/1/2a/2a_build/b_build/c_backtest/c_coverage/d_dynamic.py` phase drivers
-- Delivery: `dashboard.py` → `site/index.html` (served by `serve.sh`); `email_report.py` (stdlib `smtplib` weekly report, self-only recipient) sent from the cloud by `.github/workflows/weekly-email.yml`
+- Entry scripts: `track.py`, `catalyst.py`, `risk.py`, `digest.py`, `dashboard.py`, `tradeviz.py`, `email_report.py`, `linkcheck.py`, and the `phase0/1/2a/2a_build/b_build/c_backtest/c_coverage/d_dynamic.py` phase drivers
+- Delivery: `dashboard.py` → `site/index.html` and `tradeviz.py` → `site/trades.html` (both served by `serve.sh`); `email_report.py` (stdlib `smtplib` weekly report, self-only recipient) sent from the cloud by `.github/workflows/weekly-email.yml`
 
 ## What this project is about
 

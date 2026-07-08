@@ -33,3 +33,6 @@ site/
 # Weekly email report: Gmail App Password (secret) + dry-run artifact
 .gmail_app_password
 email_report.eml
+
+# Screenshots dropped in for review — local scratch, not source
+Screenshot*.png

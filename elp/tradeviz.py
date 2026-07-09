@@ -373,7 +373,13 @@ def trade_detail_html(idea: dict, bars_by_ticker: dict, ohlc_by_ticker: dict = N
                  + f'<tr><td colspan=5 class=sub>combined: return <b>{last * 100:+.2f}%</b> · '
                    f'P&amp;L <b>{pnl / 1000:+.1f}k</b> on ${p["notional"] / 1000:.0f}k primary notional</td></tr></table>')
     else:
-        combined = '<p class=muted>not enough overlapping price history to chart this trade.</p>'
+        # Distinguish a vendor failure from a real data gap: an empty leg series means the fetch
+        # failed (see tradeviz.py `_bars_for`), NOT that the history is short. Saying the latter
+        # blames the data for a network error.
+        missing = [leg["ticker"] for leg in (p, n) if not bars_by_ticker.get(leg["ticker"])]
+        combined = ('<p class=muted>price fetch failed for '
+                    f'{escape(", ".join(missing))}; chart unavailable.</p>' if missing else
+                    '<p class=muted>not enough overlapping price history to chart this trade.</p>')
         table = ""
 
     caveat = ('<p class=muted>Spread marks are Grade-C (flat IV). The pre-entry dashed line is a '

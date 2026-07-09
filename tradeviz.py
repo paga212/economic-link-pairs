@@ -24,7 +24,9 @@ def _bars_for(idea: dict):
         if t not in ohlc:
             try:
                 ohlc[t] = fetch_daily_ohlc(t, start=start)
-            except Exception:
+            except Exception as e:      # fail-soft, but never silently: an empty series here is
+                                        # a fetch failure, not an absence of price history
+                print(f"  warn {t}: price fetch failed ({type(e).__name__}); chart degraded")
                 ohlc[t] = []
     close = {t: [(d, c, v) for d, _o, _h, _l, c, v in bars] for t, bars in ohlc.items()}
     return close, ohlc

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from datetime import date, datetime
@@ -16,6 +17,11 @@ from datetime import date, datetime
 _TOKEN_FILE = ".tiingo_token"
 _URL = ("https://api.tiingo.com/tiingo/daily/{sym}/prices"
         "?startDate={start}&resampleFreq=monthly")
+
+# A single transient failure used to be swallowed by callers into an empty series, which then
+# rendered as a *data* claim ("no price data") rather than a fetch error. Retry the transient
+# classes only; a 4xx is our bug (bad symbol, bad token) and must surface immediately.
+_RETRIES, _BACKOFF_S = 3, 1.0
 
 
 def _token() -> str:
@@ -40,11 +46,17 @@ def _fetch(url: str, symbol: str) -> list:
         "Content-Type": "application/json",
         "Authorization": f"Token {_token()}",  # token in header, not URL
     })
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.load(resp)
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(f"Tiingo HTTP {e.code} for {symbol}") from None  # never surface the token
+    for attempt in range(1, _RETRIES + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.load(resp)
+        except urllib.error.HTTPError as e:
+            if e.code < 500 or attempt == _RETRIES:
+                raise RuntimeError(f"Tiingo HTTP {e.code} for {symbol}") from None  # no token
+        except (urllib.error.URLError, TimeoutError):     # DNS, reset, read timeout
+            if attempt == _RETRIES:
+                raise
+        time.sleep(_BACKOFF_S * attempt)
 
 
 def _parse_bars(rows: list) -> list[tuple[date, float, float]]:

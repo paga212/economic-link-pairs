@@ -3,6 +3,74 @@
 Autonomous build session. Everything below is committed and pushed to `main`.
 Full plan in `PLAN.md`; literature/data research in `research/`.
 
+> **Update 2026-07-09 — the placebo test says the link universe carries no edge.**
+>
+> Triggered by diving into the first dashboard pair, GILD vs CAH. That dive found the live
+> system had drifted a long way from the paper, and that its reporting overstated what it knew.
+> Decision: go back to the paper's actual claim (customer month-M return predicts supplier
+> month-M+1 return) and test it honestly *before* rebuilding anything. See
+> `elp/pairtest.py` + `python3 pairtest.py`.
+>
+> **Result (197 months, 2010-2026, live Tiingo):**
+> ```
+> real screened long/short sharpe  +0.11
+> null (random rewiring, same screen)  mean +0.32  sd 0.23
+> p = 0.828   -> the real wiring is indistinguishable from a random one
+> ```
+> The real customer-supplier wiring performs *worse* than the average random rewiring of the
+> same tickers. Supporting evidence: of the 15 economically-admissible links, only **4 have a
+> positive lagged correlation** (a real effect predicts clearly more than half), and 12 of 15
+> have a negative up-minus-down spread.
+>
+> **But the test also has almost no power.** After screening, the cross-section is **3 suppliers
+> per formation month** — a 1-long / 1-short book, 35.8% annualized vol, market beta −0.38. The
+> paper ranked thousands of links. This universe cannot reject anything, so `p = 0.828` should
+> be read as *"no evidence, and no ability to find any"* rather than *"the effect is dead."*
+>
+> **Why the placebo, and why the screen is inside it.** Pairs are screened on `lagged_corr > 0`
+> over the same history the backtest runs on. Alone that is data snooping. The fix is not to
+> drop the screen but to apply it *identically to the null*: each of the 1000 rewirings gets the
+> same screen. 919/1000 survived it, and the null Sharpe mean is **+0.32, not zero** — the
+> screen manufactures a positive Sharpe out of pure noise. That bias is why the real Sharpe is
+> compared to this null and never to zero. `tests/test_pairtest.py` locks this in with a test
+> that asserts the null mean is positive under i.i.d. noise, and a power check that a planted
+> link still beats its own placebo (p ≤ 0.05).
+>
+> **What the GILD/CAH dive established** (all reproduced from live data, not read off JSON):
+> - The trade was never a pair: `stock-hedge` = long $200k GILD, short $60k SPY. CAH is not in
+>   the position. The +8.52% was unhedged GILD beta (GILD +8.94%, SPY +1.39%).
+> - The `ENTER = ±5%` absolute threshold replaced the paper's *rank* with a *market bet*:
+>   `corr(net long/short tilt of the book, SPY trailing 21d) = +0.709` over 2018-2026.
+> - **Lookahead bug**, unfixed by design: `elp/express.py:79` sizes the hedge with `beta()` over
+>   the *full* bar history (the 63 days ending at the **last bar**, not at entry). GILD's beta
+>   was 0.5467 at entry and 0.0833 at the last bar (clamped to the 0.30 floor), so the hedge
+>   shipped at $60k where entry-day beta implies $109k. `_px_asof` already fixed this bug class
+>   for the neutralizer *price*; beta was missed. `is_tradeable` has the same lookahead.
+> - Open ideas display in-sample return as if forward: GILD entered 2026-06-09, paper start is
+>   2026-07-04, so +4.90% of that +8.52% predates the forward test.
+>
+> Those three are **deliberately not fixed** — `trades.py` / `express.py` / `options.py` and the
+> LLM overlays are candidates for retirement, and polishing code we intend to delete is waste.
+>
+> **Pass-through links are now excluded on economics.** `PASS_THROUGH = {CAH, MCK, COR, ARW,
+> SNX}`. SFAS 131 forces every pharma manufacturer to name the big three drug wholesalers as
+> >10% customers; the disclosure is real but the economic link is not, because a distributor is
+> a pass-through with no demand news to transmit. This screen runs before any return is read,
+> so it cannot overfit. It drops 8 of 23 links, including GILD←CAH.
+>
+> **Also fixed (Phase 0, commit `27bcf41`).** "not enough overlapping price history to chart
+> this trade" was a lie: a transient Tiingo failure on GILD was swallowed by `tradeviz.py`'s
+> bare `except Exception: ohlc[t] = []` and reported as absent data. Nothing was logged.
+> `elp/tiingo._fetch` now retries the transient classes (3 attempts, 1s/2s backoff; 4xx still
+> raises immediately), the swallow now prints the ticker and exception type, and an empty leg
+> series renders "price fetch failed for {ticker}".
+>
+> **Open decision.** Either expand the universe until the test has power, or conclude that a
+> free-data replication of Cohen-Frazzini is not reachable and stop. The free C-F link file has
+> 26,339 link-years across 4,725 suppliers, but only ~2 dozen resolve to current tickers
+> (`research/09`), and those are survivors. Nothing should be rebuilt on the current 3-name
+> cross-section.
+
 > **Update 2026-07-05 (correction to the record below).**
 > - **Phase B shipped.** The LLM-diversified link universe is built and live (commits
 >   `3ac4afa`, `95575c0`, `9b37f19`); the forward clock was restarted on it. Items in
@@ -210,7 +278,8 @@ expansion is what diversifies it.
 
 ## How to run
 ```
-python3 -m unittest discover -s tests   # 145 offline tests
+python3 -m unittest discover -s tests   # 164 offline tests
+python3 pairtest.py                      # C-F test battery: screen → pooled → L/S → placebo
 python3 track.py                         # daily tick → paper_state.json (Tiingo token)
 python3 catalyst.py                      # news/catalyst ensemble → catalyst.json (Anthropic key)
 python3 risk.py                          # risk/borrow facts → risk.json (Anthropic key)

@@ -1,7 +1,7 @@
 {
- "generated_utc": "2026-07-08T02:00:54.218889+00:00",
+ "generated_utc": "2026-07-09T02:01:01.300801+00:00",
  "start": "2026-07-04",
- "last_bar": "2026-07-07",
+ "last_bar": "2026-07-08",
  "open": [
   {
    "supplier": "GILD",
@@ -11,8 +11,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-09",
-   "days": 28,
-   "ret": 0.08858695694922039,
+   "days": 29,
+   "ret": 0.0851984143255212,
    "stop": 0.03858695694922039,
    "primary": {
     "role": "primary",
@@ -39,8 +39,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-18",
-   "days": 19,
-   "ret": -0.021994334648082887,
+   "days": 20,
+   "ret": -0.02043203726791107,
    "stop": -0.04394643034359286,
    "primary": {
     "role": "primary",
@@ -74,9 +74,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-24",
-   "days": 13,
-   "ret": 0.05843665804599936,
-   "stop": 0.019823367191001112,
+   "days": 14,
+   "ret": 0.058422651514440774,
+   "stop": 0.020148317174198155,
    "primary": {
     "role": "primary",
     "ticker": "VC",
@@ -97,36 +97,8 @@
     "ticker": "SPY",
     "direction": 1,
     "instrument": "stock",
-    "notional": 279092.48496632563,
+    "notional": 282614.5296918156,
     "entry_px": 733.24
-   }
-  },
-  {
-   "supplier": "WWD",
-   "customer": "RTX",
-   "side": 1,
-   "kind": "LONG",
-   "expression": "stock-hedge",
-   "risk_cap": "soft",
-   "entry": "2026-07-01",
-   "days": 6,
-   "ret": -0.04113176328459994,
-   "stop": -0.05,
-   "primary": {
-    "role": "primary",
-    "ticker": "WWD",
-    "direction": 1,
-    "instrument": "stock",
-    "notional": 200000.0,
-    "entry_px": 420.93
-   },
-   "neutralizer": {
-    "role": "neutralizer",
-    "ticker": "SPY",
-    "direction": -1,
-    "instrument": "stock",
-    "notional": 222342.05570785003,
-    "entry_px": 745.76
    }
   },
   {
@@ -137,8 +109,8 @@
    "expression": "stock-pair",
    "risk_cap": "soft",
    "entry": "2026-07-02",
-   "days": 5,
-   "ret": 0.049536460494737145,
+   "days": 6,
+   "ret": 0.033163320191262224,
    "stop": -0.00046353950526285825,
    "primary": {
     "role": "primary",
@@ -172,8 +144,8 @@
    "expression": "stock-pair",
    "risk_cap": "soft",
    "entry": "2026-07-06",
-   "days": 1,
-   "ret": 0.040901084493611184,
+   "days": 2,
+   "ret": 0.021806956252635623,
    "stop": -0.009098915506388819,
    "primary": {
     "role": "primary",
@@ -200,8 +172,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-06",
-   "days": 1,
-   "ret": -0.009411857198541268,
+   "days": 2,
+   "ret": -0.00035521568821619137,
    "stop": -0.05,
    "primary": {
     "role": "primary",
@@ -225,6 +197,62 @@
     "instrument": "stock",
     "notional": 60000.0,
     "entry_px": 751.28
+   }
+  },
+  {
+   "supplier": "LRCX",
+   "customer": "TSM",
+   "side": 1,
+   "kind": "LONG",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-07-08",
+   "days": 0,
+   "ret": 0.0,
+   "stop": -0.05,
+   "primary": {
+    "role": "primary",
+    "ticker": "LRCX",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 200000.0,
+    "entry_px": 333.15
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": -1,
+    "instrument": "stock",
+    "notional": 600000.0,
+    "entry_px": 745.4
+   }
+  },
+  {
+   "supplier": "WWD",
+   "customer": "RTX",
+   "side": 1,
+   "kind": "LONG",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-07-08",
+   "days": 0,
+   "ret": 0.0,
+   "stop": -0.05,
+   "primary": {
+    "role": "primary",
+    "ticker": "WWD",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 200000.0,
+    "entry_px": 399.58
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": -1,
+    "instrument": "stock",
+    "notional": 223577.76944651167,
+    "entry_px": 745.4
    }
   }
  ],

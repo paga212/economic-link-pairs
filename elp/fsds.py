@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import csv
 import io
+import shutil
 import urllib.request
 import zipfile
 from datetime import date
@@ -40,7 +41,7 @@ def fetch_quarter(quarter: str, dest: str) -> str:
     """Download one quarterly zip to `dest`. The caller deletes it."""
     req = urllib.request.Request(URL_TEMPLATE.format(q=quarter), headers=UA)
     with urllib.request.urlopen(req, timeout=300) as r, open(dest, "wb") as f:
-        f.write(r.read())
+        shutil.copyfileobj(r, f)
     return dest
 
 
@@ -51,22 +52,29 @@ def _rows(z: zipfile.ZipFile, name: str):
 
 def major_customers(zip_path: str) -> list[dict]:
     """[{cik, member, filed, value}] for every MajorCustomers-tagged fact in the quarter."""
-    z = zipfile.ZipFile(zip_path)
-    sub = {r["adsh"]: r for r in _rows(z, "sub.txt")}
-    out = []
-    for r in _rows(z, "num.txt"):
-        seg = r.get("segments") or ""
-        if _AXIS not in seg:
-            continue
-        meta = sub.get(r["adsh"])
-        if not meta:
-            continue
-        filed = meta["filed"]
-        for part in seg.split(";"):
-            if not part.startswith(_AXIS):
+    with zipfile.ZipFile(zip_path) as z:
+        sub = {r["adsh"]: r for r in _rows(z, "sub.txt")}
+        out = []
+        skipped = 0
+        for r in _rows(z, "num.txt"):
+            seg = r.get("segments") or ""
+            if _AXIS not in seg:
                 continue
-            raw = r.get("value") or ""
-            out.append({"cik": int(meta["cik"]), "member": part[len(_AXIS):],
-                        "filed": date(int(filed[:4]), int(filed[4:6]), int(filed[6:8])),
-                        "value": float(raw) if raw else None})
+            meta = sub.get(r["adsh"])
+            if not meta:
+                continue
+            try:
+                filed = meta["filed"]
+                for part in seg.split(";"):
+                    if not part.startswith(_AXIS):
+                        continue
+                    # XBRL member identifiers (NCName) cannot contain ';' or '=', so split/startswith is safe.
+                    raw = r.get("value") or ""
+                    out.append({"cik": int(meta["cik"]), "member": part[len(_AXIS):],
+                                "filed": date(int(filed[:4]), int(filed[4:6]), int(filed[6:8])),
+                                "value": float(raw) if raw else None})
+            except (ValueError, KeyError, TypeError):
+                skipped += 1
+        if skipped:
+            print(f"  warn {zip_path}: skipped {skipped} unparseable rows")
     return out

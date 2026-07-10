@@ -1,5 +1,4 @@
 """Offline unit tests for the SEC Financial Statement Data Sets reader (no network)."""
-import io
 import os
 import sys
 import tempfile
@@ -63,6 +62,31 @@ class TestMajorCustomers(unittest.TestCase):
 
     def test_drops_rows_whose_filing_is_absent_from_sub(self):
         self.assertFalse([r for r in major_customers(self.zip) if r["member"] == "GhostMember"])
+
+    def test_skips_unparseable_rows_and_continues(self):
+        """Malformed filed dates or non-numeric values must be skipped without crashing."""
+        tmp = tempfile.mkdtemp()
+        zip_path = os.path.join(tmp, "unparseable.zip")
+
+        # One good filing, one with malformed filed date (dashes instead of YYYYMMDD)
+        sub = "\t".join(["adsh", "cik", "filed"]) + "\n" + \
+              "0000-24-1\t320193\t20240201\n" + \
+              "0000-24-2\t789019\t2024-03-15\n"
+
+        # One good row, one with non-numeric value
+        num = "\t".join(["adsh", "tag", "segments", "value"]) + "\n" + \
+              "0000-24-1\tConcentrationRiskPercentage1\tMajorCustomers=AppleIncMember;\t0.21\n" + \
+              "0000-24-2\tConcentrationRiskPercentage1\tMajorCustomers=CustomerAMember;\tN/A\n"
+
+        with zipfile.ZipFile(zip_path, "w") as z:
+            z.writestr("sub.txt", sub)
+            z.writestr("num.txt", num)
+
+        # Should not raise; should return only the well-formed row
+        rows = major_customers(zip_path)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["member"], "AppleIncMember")
+        self.assertEqual(rows[0]["value"], 0.21)
 
 
 if __name__ == "__main__":

@@ -40,7 +40,22 @@
 - Customer axis renders as `MajorCustomers=<Member>` inside the semicolon-separated `segments`.
 - `sub.txt` has `filed` (YYYYMMDD) — the date the disclosure became public. **Use it.** There is no need for a filing-lag constant.
 - `norm()` in `elp/edgar.py` already strips corporate suffixes (`inc`, `corp`, `company`, `ltd`, `holdings`, `group`, `the`, ...). Do not add a second suffix stripper.
-- `company_tickers.json` has multiple tickers per CIK (Ford: `F`, `F-PB`, `F-PC`, `F-PD`). Last-wins picks a preferred share. Canonicalize.
+- `company_tickers.json` has multiple tickers per CIK (Ford: `F`, `F-PB`, `F-PC`, `F-PD`). Last-wins picks a
+  preferred share. Canonicalize by taking the **first ticker in file order with no `-` or `.`**, else the first
+  overall. **Do NOT sort by length/alphabet** (an earlier draft did): that picks undashed baby bonds over the
+  common, corrupting 204 of 8004 CIKs (`DTE`→`DTB`, `CMCSA`→`CCZ`, `GOOGL`→`GOOG`, `BRK-B`→`BRK-A`). The SEC
+  file already lists the primary common first; sorting destroys that information.
+- Unique-prefix matching must require **at least 2 normalized tokens**. Single-token members are bare
+  nouns (end markets, segments, categories) or a first word shared with an unrelated listed company, and
+  they produced every false link observed: `EPR`←`RRX` ("Regal" = Regal Cinemas, not Regal Rexnord),
+  `POLA`←`MARPS` ("Marine"), `OPTX`←`DTII` ("Defense"). A fourth, `LX`←`INTR`, is a single-token EXACT
+  collision: `norm()` strips "Group" from "InterGroup", leaving `inter`, which matches "Inter & Co".
+  So `CATEGORY` must also carry `marine`, `defense`, `intergroup`.
+- Measured on 2024q1: tightening takes the quarter from 49 links / 31 suppliers to 41 / 30. The only
+  supplier lost entirely is `EPR`, the false one. Power depends on suppliers per month, not on link
+  count, so precision here is nearly free. The cost is that common single-token customers (Ford, Amazon,
+  Stellantis, ASML, Jazz) become unresolvable. That is a selection on the filer's **tagging style**, not
+  on returns. Disclose it; do not chase it with a growing blocklist.
 - Exact-norm resolution yields 43 customer members per quarter. Adding a CATEGORY blocklist + unique-prefix matching + ticker canonicalization yields **53**, and all 10 additions were verified correct by inspection (`Amazon→AMZN`, `Ford→F`, `BankOfMontreal→BMO`, `ASML→ASML`, `AppliedMaterials→AMAT`, `Jazz→JAZZ`, `Regal→RRX`, `Stellantis→STLA`, `ValeroEnergyCorporation→VLO`, `VertexPharmaceuticals→VRTX`).
 - FY2024 with the exact matcher alone: 53 links, 37 suppliers, 41 customers.
 
@@ -451,7 +466,30 @@ git commit -m "feat: precision-gated resolution of XBRL customer members to tick
 
 **Interfaces:**
 - Consumes: `elp.fsds.quarters/fetch_quarter/major_customers`; `elp.edgar.load_ticker_map/title_index/resolve_member`.
-- Produces: `xbrl_links.json` — `[{"supplier": str, "customer": str, "filed": "YYYY-MM-DD", "pct": float | None}]`, sorted, deduplicated on `(supplier, customer, filed)`.
+- Produces: `xbrl_links.json` — `[{"supplier": str, "customer": str, "filed": "YYYY-MM-DD"}]`, sorted, deduplicated on `(supplier, customer, filed)`.
+
+**Correction, verified against `2024q1/num.txt` after Task 1 (supersedes the spec):** facts on the
+`MajorCustomers` axis are overwhelmingly **dollar revenue**, not percentages —
+`RevenueFromContractWithCustomerExcludingAssessedTax` (3,162 rows), `Revenues` (1,151), and
+6,176 of 6,353 rows carry `uom=USD`. `ConcentrationRiskPercentage1` is not in the top eight tags.
+Therefore:
+- Accepting **every** tag on the axis (what `elp/fsds.py` does) is correct. Filtering to
+  `ConcentrationRiskPercentage1` would cut 480 filings to 10.
+- **Do NOT emit a `pct` field.** An earlier draft of this task wrote `"pct": r["value"]`, which
+  would put dollar revenue into a field named `pct`. `fsds.major_customers` keeps `value`, which
+  is an honest name for a tagged fact's value.
+- **Use `value` to pick the principal customer.** The paper's signal is the customer representing
+  the largest share of a supplier's sales. Within a single filing, the disclosed dollar revenues
+  across a filer's customers are directly comparable, and their ranking IS that ordering. So
+  `xbrl_build.py` must emit, for each `(supplier, filed)`, only the **argmax-revenue** customer.
+  Rank only over rows whose `tag` contains "revenue" (case-insensitive) and whose `uom` is `USD`;
+  `elp/fsds.py` must therefore also return `tag` and `uom`. Ties, or a filing with no rankable
+  row, fall back to alphabetical, and that fallback must be documented.
+  **Why this matters:** on real 2024q1, 7 of 30 filings (23%) disclose more than one customer, and
+  taking the alphabetically-first customer picks the wrong principal in 4 of those 7 (`ICHR`:
+  AMAT $396M over the true LRCX $616M; `MGA`: F $5.3B over the true GM $6.2B; `DY`: CMCSA $474M
+  over the true T $958M). Leaving it to sort order reintroduces exactly the arbitrariness the
+  original engine had, where `cust_of.setdefault` let file position choose the signal.
 
 - [ ] **Step 1: Write the driver**
 
@@ -506,7 +544,7 @@ def main(start: str = "2013q1", end: str = "2025q4") -> None:
                 continue
             seen.add(key)
             links.append({"supplier": supplier, "customer": customer,
-                          "filed": r["filed"].isoformat(), "pct": r["value"]})
+                          "filed": r["filed"].isoformat()})
             added += 1
         print(f"{q}: {len(rows):>6} tagged rows | +{added:>4} links | "
               f"total {len(links):>5} | suppliers {len({x['supplier'] for x in links}):>4}")
@@ -1313,3 +1351,27 @@ git commit -m "feat: calibration gate, and the powered answer"
 - **The full sweep is ~50 downloads of ~100MB.** Run it once, commit `xbrl_links.json`, and never
   download again. The zips are deleted after parsing; do not cache them.
 - Existing suite before this work: `Ran 164 tests` / `OK`. Never let it go red.
+
+---
+
+## Corrections found during execution (measured, not reasoned)
+
+**`links_asof` must return at most ONE link per supplier per month, from the most recent `filed`.**
+`LIFE_MONTHS = 15` exceeds the roughly 12-month refiling cadence, and 10-Qs file quarterly, so a
+supplier's filings overlap. Returning every live link let `_cust_of` take the sorted-first pair, i.e. the
+alphabetically-first customer, silently undoing `xbrl_build.py`'s principal-customer selection one layer
+downstream. Measured on the real link table: 160 of 162 formation months (99%) contained a supplier with
+more than one live customer, up to 5 at once; across 1,303 incidents the alphabetically-first customer
+differed from the most-recent-filing customer in 428 (33%); and 29 of 109 suppliers genuinely change
+principal customer over time. A newer disclosure supersedes an older one. That is what point-in-time means.
+
+**`elp/pairtest.py::placebo` must rewire per PAIR, not per supplier.** It built `mapping = dict(rewired)`,
+which collapses the 29 suppliers appearing in more than one union pair. `screen()` then kept pairs the
+rewired table could never trade: the real path preserved both, the null path did not. That asymmetry
+corrupts the p-value. Build `{(s, c_old): (s, c_new)}` and pass `list(pair_map.values())` as the rewired
+union, so the screen and the table always agree on which pairs exist.
+
+**Vacuous tests are a recurring failure mode here.** Reviewers have now caught three: a `CATEGORY`
+regression test whose fixture contained no colliding company; a sort assertion whose fixture was already
+sorted; and four point-in-time tests that passed with the `pit` argument ignored entirely. Every new test
+guarding a behaviour must be proved to fail when that behaviour is removed.

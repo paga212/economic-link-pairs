@@ -37,16 +37,113 @@ def norm(name: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+# XBRL customer members that are NOT companies. Filers tag categories and anonymized
+# placeholders on the same axis as real names, so these must be rejected before any
+# matching is attempted -- a fuzzy matcher will happily bind "Customers" to CUBB and
+# "Business" to BFST. Keys are the member string with punctuation removed, lowercased,
+# and a trailing "member" stripped. Measured against 2024q1 (883 distinct members).
+CATEGORY = frozenset("""
+other others customer customers client clients external externalcustomer externalcustomers
+othercustomer othercustomers twocustomers intersegment intersegmentsales residential commercial
+industrial wholesale retail government usgovernment nonusgovernment departmentofdefense consumer
+business direct distribution transportation telecom military affiliated unaffiliated national
+nationalaccounts thirdparty thirdpartynet toolanddie major domestic international foreign
+segment segments product products service services corporate
+customera customerb customerc customerd customere customerf
+customerone customertwo customerthree customerfour customerfive customersix
+marine defense intergroup
+""".split())
+# marine/defense: genuine end-market categories (e.g. "Marine" and "Defense" segments),
+# already blocked by the >=2-token prefix guard below but listed to document the observed
+# false links (POLA<-MARPS via "Marine", OPTX<-DTII via "Defense"). intergroup is
+# load-bearing: "InterGroupMember" demembers to "Inter Group", and norm() strips the
+# "Group" suffix, leaving the single token "inter" -- which EXACTLY matched "Inter & Co,
+# Inc." (LX<-INTR). That is an exact match, not a prefix match, so the token-count guard
+# cannot catch it; only this CATEGORY entry does.
+
+
+def _canonical(rows: dict) -> dict:
+    """{cik: {'ticker','title'}} keeping ONE ticker per CIK. company_tickers.json lists every
+    share class (Ford: F, F-PB, F-PC, F-PD) for a CIK, with the primary common share FIRST --
+    that file order, not sorting, is what tells us which one is common. Take the first ticker
+    in file order that has no '-' or '.' (a share-class marker); if every class has one, take
+    the first overall."""
+    by_cik: dict[int, list] = {}
+    for row in rows.values():
+        by_cik.setdefault(int(row["cik_str"]), []).append((row["ticker"], row["title"]))
+    out = {}
+    for cik, tks in by_cik.items():
+        tk, title = next((t for t in tks if "-" not in t[0] and "." not in t[0]), tks[0])
+        out[cik] = {"ticker": tk, "title": title}
+    return out
+
+
+def title_index(by_cik: dict) -> dict:
+    """{normalized title token tuple: {ticker}} — the index unique-prefix matching walks."""
+    idx: dict[tuple, set] = {}
+    for row in by_cik.values():
+        toks = tuple(norm(row["title"]).split())
+        if toks:
+            idx.setdefault(toks, set()).add(row["ticker"])
+    return idx
+
+
+def _member_key(member: str) -> str:
+    return re.sub(r"member$", "", re.sub(r"[^a-z0-9]", "", member.lower()))
+
+
+def _demember(member: str) -> str:
+    """'AppleIncMember' -> 'Apple Inc'."""
+    return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", re.sub(r"Member$", "", member))
+
+
+def _prefix_unique(toks: tuple, titles: dict) -> str | None:
+    """The single ticker whose normalized title STARTS WITH `toks`, or None if 0 or >1."""
+    hits = {tk for t, tks in titles.items() if t[:len(toks)] == toks for tk in tks}
+    return next(iter(hits)) if len(hits) == 1 else None
+
+
+def resolve_member(member: str, by_name: dict, titles: dict) -> str | None:
+    """Resolve an XBRL MajorCustomers member to a ticker, precision first.
+
+    Three gates, in order: reject known non-companies; exact normalized match (only if
+    unambiguous -- two different CIKs can normalize to the same title); then a UNIQUE prefix
+    match on a MULTI-token name (so 'BankOfMontreal' finds 'bank of montreal financial' but
+    'Delta' finds nothing, because Delta Air Lines and Delta Apparel both start with it). A
+    leading token shorter than 4 characters is rejected outright -- it matches too much.
+
+    Prefix matching requires at least 2 normalized tokens. A single-token member is usually
+    a bare noun -- an end market, a segment, a category -- or just a first word shared with
+    an unrelated listed company: the member "Regal" (EPR's tenant Regal Cinemas) uniquely
+    prefix-matches "Regal Rexnord Corp" and produced a false EPR<-RRX link. Multi-token
+    members carry enough signal to be safe.
+    """
+    if _member_key(member) in CATEGORY:
+        return None
+    name = _demember(member)
+    toks = tuple(norm(name).split())
+    if not toks:
+        return None
+    tk = resolve(name, by_name)
+    if tk:
+        # by_name is built with setdefault, so an exact hit can hide a second CIK whose
+        # title normalizes the same way. Confirm via titles (a set) before trusting it.
+        return tk if len(titles.get(toks, ())) <= 1 else None
+    if len(toks) < 2 or len(toks[0]) < 4:
+        return None
+    return _prefix_unique(toks, titles)
+
+
 def load_ticker_map() -> tuple[dict, dict]:
     """(by_cik: {int: {'ticker','title'}}, by_name: {norm(title): ticker}).
 
-    by_name is also indexed by the space-stripped norm so name variants like
-    "Wal-Mart" (norm 'wal mart') match "Walmart" (norm 'walmart'). Use resolve().
+    One canonical ticker per CIK (the common share class, not a preferred). by_name is also
+    indexed by the space-stripped norm so "Wal-Mart" (norm 'wal mart') matches "Walmart".
+    Use resolve() for a name, resolve_member() for an XBRL member string.
     """
-    data = json.loads(_get("https://www.sec.gov/files/company_tickers.json"))
-    by_cik, by_name = {}, {}
-    for row in data.values():
-        by_cik[int(row["cik_str"])] = {"ticker": row["ticker"], "title": row["title"]}
+    by_cik = _canonical(json.loads(_get("https://www.sec.gov/files/company_tickers.json")))
+    by_name = {}
+    for row in by_cik.values():
         n = norm(row["title"])
         by_name.setdefault(n, row["ticker"])
         by_name.setdefault(n.replace(" ", ""), row["ticker"])

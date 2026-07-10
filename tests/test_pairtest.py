@@ -11,8 +11,10 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from elp.pairtest import (market_beta, null_summary, placebo, placebo_pvalue,  # noqa: E402
-                          pooled_stats, screen, screened_sharpe, suppliers_per_month)
+from elp.pairtest import (_rewire_pit, market_beta, null_summary, placebo,  # noqa: E402
+                          placebo_pvalue, pooled_stats, restrict_pit, screen,
+                          screened_sharpe, suppliers_per_month)
+from elp.pit import links_asof            # noqa: E402
 
 
 def _months(n: int, y0: int = 2015):
@@ -154,6 +156,91 @@ class TestScreenedSharpe(unittest.TestCase):
     def test_none_when_a_single_link_survives(self):
         links, returns = _universe(n_pairs=1, lag_beta=0.8)
         self.assertIsNone(screened_sharpe(links, returns))   # no cross-section to rank
+
+
+class TestPointInTime(unittest.TestCase):
+    def test_a_full_pit_table_matches_the_static_result(self):
+        """If every month carries every link, PIT must equal static."""
+        links, returns = _universe(n_pairs=6, lag_beta=0.6, seed=11)
+        ms = _months(120)
+        pit = {m: list(links) for m in ms}
+        self.assertAlmostEqual(screened_sharpe(links, returns),
+                               screened_sharpe(links, returns, pit=pit), places=9)
+
+    def test_pit_filters_to_screened_pairs(self):
+        """A pair dropped by screen() must not appear in any month the engine trades; a pair
+        it kept must appear in at least one."""
+        links, returns = _universe(n_pairs=6, lag_beta=0.6, seed=12)
+        returns["CAH"] = returns.pop("C0")                    # make one customer pass-through
+        links = [("S0", "CAH")] + links[1:]
+        ms = _months(120)
+        pit = {m: list(links) for m in ms}
+        kept, _ = screen(links, returns)
+        self.assertNotIn(("S0", "CAH"), kept)
+        self.assertGreaterEqual(len(kept), 1)
+        restricted = restrict_pit(pit, kept)
+        for pairs in restricted.values():
+            self.assertNotIn(("S0", "CAH"), pairs)
+        survivor = kept[0]
+        self.assertTrue(any(survivor in pairs for pairs in restricted.values()))
+        self.assertIsNotNone(screened_sharpe(links, returns, pit=pit))
+
+    def test_a_partial_pit_table_differs_from_the_static_result(self):
+        """A pit table that omits links in some months must move the Sharpe away from the
+        static (every-month) result -- a `pit` argument silently ignored by `screened_sharpe`
+        would make this fail."""
+        links, returns = _universe(n_pairs=6, lag_beta=0.6, seed=16)
+        ms = _months(120)
+        pit = {m: (list(links) if i % 2 == 0 else []) for i, m in enumerate(ms)}
+        static = screened_sharpe(links, returns)
+        partial = screened_sharpe(links, returns, pit=pit)
+        self.assertIsNotNone(static)
+        self.assertIsNotNone(partial)
+        self.assertNotAlmostEqual(static, partial, places=6)
+
+    def test_placebo_is_deterministic_under_pit(self):
+        links, returns = _universe(n_pairs=6, lag_beta=0.4, seed=13)
+        pit = {m: list(links) for m in _months(120)}
+        a = placebo(links, returns, n=30, seed=5, pit=pit)
+        b = placebo(links, returns, n=30, seed=5, pit=pit)
+        self.assertEqual(a, b)
+
+    def test_suppliers_per_month_uses_the_pit_table(self):
+        links, returns = _universe(n_pairs=4, n_months=40, seed=14)
+        ms = _months(40)
+        pit = {m: (list(links) if i >= 20 else []) for i, m in enumerate(ms)}
+        counts = suppliers_per_month(links, returns, pit=pit)
+        self.assertEqual(counts[ms[5]], 0)
+        self.assertEqual(counts[ms[30]], 4)
+
+
+class TestRewirePit(unittest.TestCase):
+    def test_rewiring_preserves_both_pairs_when_a_supplier_appears_twice(self):
+        """The real universe can carry two live pairs for the same supplier across different
+        months (its principal customer changed over time, 29 of 109 suppliers in the real
+        data). A rewiring keyed by supplier alone -- as the old `dict(rewired)` mapping was --
+        collapses both months onto whichever customer happened to be listed last, silently
+        dropping one pair's identity. Rewiring per (supplier, old customer) pair must not."""
+        pair_map = {("S0", "C0"): ("S0", "X0"), ("S0", "C1"): ("S0", "X1")}
+        pit = {(2015, 1): [("S0", "C0")], (2015, 2): [("S0", "C1")]}
+        rewired = _rewire_pit(pit, pair_map)
+        self.assertEqual(rewired[(2015, 1)], [("S0", "X0")])
+        self.assertEqual(rewired[(2015, 2)], [("S0", "X1")])
+        table_pairs = {p for pairs in rewired.values() for p in pairs}
+        self.assertEqual(table_pairs, set(pair_map.values()))
+
+    def test_pairs_with_no_image_are_dropped(self):
+        pit = {(2015, 1): [("S0", "C0"), ("S1", "C1")]}
+        rewired = _rewire_pit(pit, {("S0", "C0"): ("S0", "X0")})
+        self.assertEqual(rewired[(2015, 1)], [("S0", "X0")])
+
+
+class TestLinksAsofIntegration(unittest.TestCase):
+    def test_dated_links_become_a_month_table_the_engine_accepts(self):
+        links, returns = _universe(n_pairs=3, n_months=60, lag_beta=0.7, seed=15)
+        dated = [{"supplier": s, "customer": c, "filed": "2015-01-10"} for s, c in links]
+        pit = links_asof(dated, _months(60))
+        self.assertIsNotNone(screened_sharpe(links, returns, pit=pit))
 
 
 if __name__ == "__main__":

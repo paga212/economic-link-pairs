@@ -3,6 +3,94 @@
 Autonomous build session. Everything below is committed and pushed to `main`.
 Full plan in `PLAN.md`; literature/data research in `research/`.
 
+> **Update 2026-07-10 — the universe was expanded, the test has power, and the effect is not there.**
+>
+> Follows the 2026-07-09 entry below, which found `p = 0.828` on a 3-supplier cross-section and
+> could not tell "no edge" from "no power". The open decision was: expand the universe until the
+> test has power, or stop. We expanded. See `xbrl_build.py`, `elp/fsds.py`, `elp/pit.py`,
+> `calibrate.py`.
+>
+> **The universe.** SEC Financial Statement Data Sets, 2013q1 to 2025q4, 52 of 52 quarters parsed,
+> zero skipped. Facts tagged on `srt:MajorCustomersAxis`, filer CIK resolved to the supplier
+> ticker, the member string resolved to the customer ticker. Deterministic, stdlib only, no LLM.
+> ```
+> 938 dated links | 109 suppliers | 102 customers | filed 2013-01-07 .. 2025-12-12
+> suppliers per formation month: median 40 (was 3)
+> ```
+> Links are **point-in-time**: `sub.txt` carries `filed`, the day the disclosure became public, so
+> a link is live from the following month and lapses `LIFE_MONTHS = 15` later. A newer disclosure
+> supersedes an older one, so a supplier holds exactly one customer in any month.
+>
+> **The gate, run before the answer was computed.**
+> ```
+> $ python3 calibrate.py 40 600 100 0
+> false-positive rate at alpha=0.05: 4.8%  (target 5.0%, 1 SE = 0.89pp)
+> CALIBRATED -- GATE PASSED
+> ```
+> The 15%-at-N=60 reading that motivated the gate was noise on 20 trials. An early 200-trial run
+> printed 1.0% and FAILED; a pooled 600-trial run over three master seeds gave 5.33% +/- 0.89%.
+> The gate now defaults to 600 trials, refuses to PASS below `MIN_DONE = 200`, takes a `seed`
+> argument, and fails only an ANTI-conservative test. A conservative test cannot manufacture a
+> false positive; it only loses power.
+>
+> **The answer.**
+> ```
+> $ python3 pairtest.py
+> keep 42 links, 36 suppliers   (84 of 135 pairs dropped for lagged_corr <= 0)
+>   0 bps | months 160 | ann_ret +28.8% | ann_vol 45.4% | sharpe +0.63 | hit 58.1%
+>  25 bps |            | ann_ret +22.8% |               | sharpe +0.50 | hit 54.4%
+>   market beta vs SPY: -0.094
+> null sharpe (1000 rewirings, same screen): mean +0.44  sd 0.26  [p05 -0.01, p95 +0.87]
+> real sharpe: +0.63
+> >>> p = 0.234
+> ```
+> Stable across placebo seeds: p = 0.234, 0.239, 0.258, 0.242, 0.245 (mean 0.243).
+>
+> **A random rewiring of the same 135 links earns a mean Sharpe of +0.44.** Against zero, +28.8%
+> annualized with a 58% hit rate and a -0.09 market beta looks like a discovery. Against the
+> honest null it is a 77th-percentile draw. That gap is the entire value of the placebo.
+>
+> **And this time it is a real null, not an absence of power.** Injecting a known lead-lag loading
+> `d` into the REAL returns (real vols, real point-in-time cross-section, same screen and placebo):
+> ```
+>       d  real sharpe  null mean       p   reject at 5%?
+>   0.000         0.63       0.41   0.209   no      <- the observed data
+>   0.050         0.86       0.43   0.047   YES
+>   0.075         0.93       0.42   0.033   YES     <- the paper's ~150bp/mo implies d ~ 0.075
+>   0.100         0.94       0.41   0.030   YES
+>   0.150         1.20       0.40   0.007   YES
+> ```
+> At the paper's effect size the test detects it in 5 of 5 placebo seeds (p = 0.019 to 0.037).
+> **We would have seen it. It is not there.**
+>
+> Note `pairtest.py`'s POWER line prints suppliers per formation month AFTER the screen (median 12)
+> and compares it to a target (~25) derived BEFORE the screen. That comparison is apples to oranges.
+> The injection test above is the real power measurement and supersedes it.
+>
+> ### What this result does and does not license
+> - **Survivorship is understated by the report.** `PRICE COVERAGE` says 1 of 210 tickers lacked
+>   Tiingo history, but we resolve each CIK through SEC's CURRENT ticker table, so firms delisted
+>   before today never enter the universe at all. This inflates the +28.8%. It does NOT contaminate
+>   the p-value: the placebo rewires within the same survivor set, lifting real and null together.
+> - **Era.** 2013-2025, not the paper's 1980-2004. A null here is consistent with the effect having
+>   been real and since arbitraged away. This test cannot separate that from its never existing.
+> - **Tagging selection.** Only links whose customer is NAMED in XBRL survive; ~830 of 883 distinct
+>   member strings per quarter are anonymized (`CustomerAMember`) or categorical (`Other`).
+>   Single-token names (Ford, Amazon, Stellantis, ASML, Jazz) are excluded for precision, since they
+>   produced every false link we found. That is a selection on filers' tagging habits.
+> - **Ticker reuse.** A ticker can mean two companies over time (`B` was Barnes Group, now Barrick;
+>   `GOLD` was Barrick, now Gold.com). Point-in-time links mostly defuse this, since a link only
+>   trades in the 15 months after its filing.
+> - **Principal customer.** Chosen by largest disclosed USD revenue per filing (678 groups), falling
+>   back to alphabetical where no revenue row is rankable (260 groups). Sampling six quarters, only
+>   1 of 135 filings took the fallback while actually having more than one customer to choose from.
+>
+> ### Bottom line
+> The Cohen-Frazzini customer-supplier lead-lag does not survive an honest, powered, point-in-time
+> test on free modern data. The deliberately-unfixed bugs in `trades.py` / `express.py` /
+> `options.py` (lookahead beta, in-sample display) should now be resolved by RETIRING that code,
+> not by fixing it. There is no edge here to trade.
+
 > **Update 2026-07-09 — the placebo test says the link universe carries no edge.**
 >
 > Triggered by diving into the first dashboard pair, GILD vs CAH. That dive found the live
@@ -278,7 +366,9 @@ expansion is what diversifies it.
 
 ## How to run
 ```
-python3 -m unittest discover -s tests   # 164 offline tests
+python3 -m unittest discover -s tests   # 231 offline tests
+python3 xbrl_build.py                    # SEC XBRL sweep → xbrl_links.json (point-in-time links)
+python3 calibrate.py 40 600 100 0        # calibration gate: run BEFORE quoting a p-value
 python3 pairtest.py                      # C-F test battery: screen → pooled → L/S → placebo
 python3 track.py                         # daily tick → paper_state.json (Tiingo token)
 python3 catalyst.py                      # news/catalyst ensemble → catalyst.json (Anthropic key)

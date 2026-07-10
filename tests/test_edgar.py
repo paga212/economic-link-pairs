@@ -6,6 +6,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from elp.edgar import concentration_snippets, extract_disclosures, norm  # noqa: E402
+from elp.edgar import CATEGORY, _canonical, resolve_member, title_index  # noqa: E402
 
 
 class TestEdgar(unittest.TestCase):
@@ -45,6 +46,149 @@ class TestEdgar(unittest.TestCase):
 
     def test_no_snippets_when_no_concentration_language(self):
         self.assertEqual(concentration_snippets("nothing relevant here " * 20), [])
+
+
+class TestResolveMember(unittest.TestCase):
+    """Customer members come from XBRL tags: 'AppleIncMember', 'CustomerAMember', 'OtherMember'."""
+
+    def setUp(self):
+        self.by_cik = {
+            320193: {"ticker": "AAPL", "title": "Apple Inc."},
+            1018724: {"ticker": "AMZN", "title": "AMAZON COM INC"},
+            37996: {"ticker": "F", "title": "Ford Motor Co"},
+            6951: {"ticker": "AMAT", "title": "APPLIED MATERIALS INC"},
+            104169: {"ticker": "WMT", "title": "Walmart Inc."},
+            # Real companies whose names start with the two bare category words the
+            # CATEGORY blocklist exists to catch (see module docstring: "Customers"
+            # -> CUBB, "Business" -> BFST). Included so test_rejects_category_members
+            # actually fails if a future edit drops either word from CATEGORY, instead
+            # of vacuously passing because no fixture title happens to start with it.
+            1616533: {"ticker": "CUBB", "title": "Customers Bancorp Inc"},
+            1701051: {"ticker": "BFST", "title": "Business First Bancshares Inc"},
+            # Real companies whose names start with the two new end-market CATEGORY
+            # words, so test_rejects_category_members fails if "marine"/"defense" are
+            # ever dropped from CATEGORY, instead of vacuously passing.
+            1080347: {"ticker": "MARPS", "title": "Marine Petroleum Trust"},
+            1084577: {"ticker": "DTII", "title": "Defense Technologies International Corp"},
+        }
+        self.by_name = {}
+        for row in self.by_cik.values():
+            n = norm(row["title"])
+            self.by_name.setdefault(n, row["ticker"])
+            self.by_name.setdefault(n.replace(" ", ""), row["ticker"])
+        self.titles = title_index(self.by_cik)
+
+    def _r(self, m):
+        return resolve_member(m, self.by_name, self.titles)
+
+    def test_exact_match_after_stripping_member_suffix(self):
+        self.assertEqual(self._r("WalmartInc"), "WMT")
+
+    def test_exact_match_wins_before_any_widening(self):
+        self.assertEqual(self._r("AppliedMaterials"), "AMAT")   # norm == 'applied materials'
+
+    def test_rejects_single_token_prefix_matches(self):
+        """Prefix matching on a single normalized token is unsafe: a bare leading word is
+        often a first name shared with an unrelated listed company. Real example that
+        motivated this: an XBRL member "Regal" (meaning Regal Cinemas, EPR's tenant) uniquely
+        prefix-matched "Regal Rexnord Corp" and produced a false EPR<-RRX link. 'Amazon' and
+        'Ford' are single tokens too ('amazon com', 'ford motor'), so they must now also be
+        rejected even though each uniquely prefixes a real title."""
+        self.assertIsNone(self._r("Amazon"))
+        self.assertIsNone(self._r("Ford"))
+
+    def test_rejects_anonymized_members(self):
+        for m in ("CustomerAMember", "CustomerOneMember", "CustomerMember"):
+            self.assertIsNone(self._r(m), m)
+
+    def test_rejects_category_members(self):
+        for m in ("OtherMember", "ExternalCustomersMember", "IntersegmentMember",
+                  "ResidentialMember", "USGovernmentMember", "DistributionMember",
+                  "BusinessMember", "CustomersMember", "MarineMember", "DefenseMember"):
+            self.assertIsNone(self._r(m), m)
+
+    def test_rejects_a_short_or_ambiguous_leading_token(self):
+        self.assertIsNone(self._r("AbcMember"))          # leading token < 4 chars
+        self.assertIsNone(self._r("ZzzzUnknownCoMember"))  # no title starts with it
+
+    def test_multi_token_prefix_match_still_works(self):
+        """Prefix matching on >=2 tokens is safe and must keep working: 'BankOfMontreal'
+        normalizes to ('bank', 'of', 'montreal'), a strict prefix of the sole title 'Bank of
+        Montreal Financial Group' -> 'bank of montreal financial' (norm strips 'Group')."""
+        by_cik = {1: {"ticker": "BMO", "title": "Bank of Montreal Financial Group"}}
+        by_name = {norm(v["title"]): v["ticker"] for v in by_cik.values()}
+        self.assertEqual(resolve_member("BankOfMontreal", by_name, title_index(by_cik)), "BMO")
+
+    def test_rejects_single_token_prefix_collision_regal_rexnord(self):
+        """Real false link this guards against: member 'Regal' (EPR's tenant Regal Cinemas)
+        uniquely prefix-matched 'Regal Rexnord Corp' and produced a false EPR<-RRX link.
+        Single-token prefix matching must be rejected outright, regardless of uniqueness."""
+        by_cik = {1: {"ticker": "RRX", "title": "Regal Rexnord Corp"}}
+        by_name = {norm(v["title"]): v["ticker"] for v in by_cik.values()}
+        self.assertIsNone(resolve_member("RegalMember", by_name, title_index(by_cik)))
+
+    def test_rejects_intergroup_exact_match_collision(self):
+        """Real false link this guards against: member 'InterGroupMember' (a VIE intercompany
+        elimination line) demembers to 'Inter Group', and norm() strips the 'Group' suffix,
+        leaving the single token 'inter' -- which EXACTLY matches 'Inter & Co, Inc.' (norm also
+        strips 'Co'/'Inc', leaving 'inter'). This is an EXACT match, not a prefix match, so the
+        >=2-token prefix guard alone cannot catch it; only the CATEGORY entry 'intergroup' does."""
+        by_cik = {1: {"ticker": "INTR", "title": "Inter & Co, Inc."}}
+        by_name = {norm(v["title"]): v["ticker"] for v in by_cik.values()}
+        self.assertIsNone(resolve_member("InterGroupMember", by_name, title_index(by_cik)))
+
+    def test_ambiguous_prefix_is_rejected_not_guessed(self):
+        by_cik = {1: {"ticker": "AAA", "title": "Delta Air Lines"},
+                  2: {"ticker": "BBB", "title": "Delta Apparel"}}
+        by_name = {norm(v["title"]): v["ticker"] for v in by_cik.values()}
+        self.assertIsNone(resolve_member("Delta", by_name, title_index(by_cik)))
+
+    def test_ambiguous_exact_match_is_rejected_not_guessed(self):
+        # Two different CIKs whose titles both normalize to "delta air lines". by_name
+        # (built with setdefault) would silently keep whichever was inserted first --
+        # resolve_member must instead consult titles (a set) and refuse to guess.
+        by_cik = {1: {"ticker": "AAA", "title": "Delta Air Lines Inc"},
+                  2: {"ticker": "BBB", "title": "Delta Air Lines Corp"}}
+        by_name = {}
+        for row in by_cik.values():
+            by_name.setdefault(norm(row["title"]), row["ticker"])
+        self.assertIsNone(resolve_member("DeltaAirLinesMember", by_name, title_index(by_cik)))
+
+    def test_empty_normalized_name_is_rejected(self):
+        # If a title fully normalizes to "", by_name[""] must not swallow the bare "Member" tag.
+        by_cik = {1: {"ticker": "ZZZ", "title": "The Co Inc"}}  # norm() -> ""
+        by_name = {norm(v["title"]): v["ticker"] for v in by_cik.values()}
+        self.assertIsNone(resolve_member("Member", by_name, title_index(by_cik)))
+
+
+class TestCanonicalTicker(unittest.TestCase):
+    def test_prefers_the_common_share_class(self):
+        rows = {"0": {"cik_str": 37996, "ticker": "F-PD", "title": "Ford Motor Co"},
+                "1": {"cik_str": 37996, "ticker": "F", "title": "Ford Motor Co"},
+                "2": {"cik_str": 37996, "ticker": "F-PB", "title": "Ford Motor Co"}}
+        self.assertEqual(_canonical(rows)[37996]["ticker"], "F")
+
+    def _rows(self, cik, tickers):
+        return {str(i): {"cik_str": cik, "ticker": tk, "title": "X"}
+                for i, tk in enumerate(tickers)}
+
+    def test_dte_energy_undashed_preferreds_do_not_win(self):
+        # company_tickers.json lists the common share first; sorting (the old rule)
+        # picked DTB because it was alphabetically/length-smallest among undashed tickers.
+        rows = self._rows(1, ["DTE", "DTW", "DTK", "DTG", "DTB"])
+        self.assertEqual(_canonical(rows)[1]["ticker"], "DTE")
+
+    def test_comcast_file_order_wins(self):
+        rows = self._rows(2, ["CMCSA", "CCZ"])
+        self.assertEqual(_canonical(rows)[2]["ticker"], "CMCSA")
+
+    def test_alphabet_googl_before_goog(self):
+        rows = self._rows(3, ["GOOGL", "GOOG"])
+        self.assertEqual(_canonical(rows)[3]["ticker"], "GOOGL")
+
+    def test_berkshire_all_dashed_takes_first_overall(self):
+        rows = self._rows(4, ["BRK-B", "BRK-A"])
+        self.assertEqual(_canonical(rows)[4]["ticker"], "BRK-B")
 
 
 if __name__ == "__main__":

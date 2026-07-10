@@ -6,6 +6,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from elp.edgar import concentration_snippets, extract_disclosures, norm  # noqa: E402
+from elp.edgar import CATEGORY, _canonical, resolve_member, title_index  # noqa: E402
 
 
 class TestEdgar(unittest.TestCase):
@@ -45,6 +46,67 @@ class TestEdgar(unittest.TestCase):
 
     def test_no_snippets_when_no_concentration_language(self):
         self.assertEqual(concentration_snippets("nothing relevant here " * 20), [])
+
+
+class TestResolveMember(unittest.TestCase):
+    """Customer members come from XBRL tags: 'AppleIncMember', 'CustomerAMember', 'OtherMember'."""
+
+    def setUp(self):
+        self.by_cik = {
+            320193: {"ticker": "AAPL", "title": "Apple Inc."},
+            1018724: {"ticker": "AMZN", "title": "AMAZON COM INC"},
+            37996: {"ticker": "F", "title": "Ford Motor Co"},
+            6951: {"ticker": "AMAT", "title": "APPLIED MATERIALS INC"},
+            104169: {"ticker": "WMT", "title": "Walmart Inc."},
+        }
+        self.by_name = {}
+        for row in self.by_cik.values():
+            n = norm(row["title"])
+            self.by_name.setdefault(n, row["ticker"])
+            self.by_name.setdefault(n.replace(" ", ""), row["ticker"])
+        self.titles = title_index(self.by_cik)
+
+    def _r(self, m):
+        return resolve_member(m, self.by_name, self.titles)
+
+    def test_exact_match_after_stripping_member_suffix(self):
+        self.assertEqual(self._r("WalmartInc"), "WMT")
+
+    def test_exact_match_wins_before_any_widening(self):
+        self.assertEqual(self._r("AppliedMaterials"), "AMAT")   # norm == 'applied materials'
+
+    def test_unique_prefix_match_recovers_shortened_names(self):
+        """'Amazon' is a strict prefix of the normalized title 'amazon com', and unique.
+        'Ford' likewise prefixes 'ford motor'. Neither resolves by exact norm."""
+        self.assertEqual(self._r("Amazon"), "AMZN")
+        self.assertEqual(self._r("Ford"), "F")
+
+    def test_rejects_anonymized_members(self):
+        for m in ("CustomerAMember", "CustomerOneMember", "CustomerMember"):
+            self.assertIsNone(self._r(m), m)
+
+    def test_rejects_category_members(self):
+        for m in ("OtherMember", "ExternalCustomersMember", "IntersegmentMember",
+                  "ResidentialMember", "USGovernmentMember", "DistributionMember"):
+            self.assertIsNone(self._r(m), m)
+
+    def test_rejects_a_short_or_ambiguous_leading_token(self):
+        self.assertIsNone(self._r("AbcMember"))          # leading token < 4 chars
+        self.assertIsNone(self._r("ZzzzUnknownCoMember"))  # no title starts with it
+
+    def test_ambiguous_prefix_is_rejected_not_guessed(self):
+        by_cik = {1: {"ticker": "AAA", "title": "Delta Air Lines"},
+                  2: {"ticker": "BBB", "title": "Delta Apparel"}}
+        by_name = {norm(v["title"]): v["ticker"] for v in by_cik.values()}
+        self.assertIsNone(resolve_member("Delta", by_name, title_index(by_cik)))
+
+
+class TestCanonicalTicker(unittest.TestCase):
+    def test_prefers_the_common_share_class(self):
+        rows = {"0": {"cik_str": 37996, "ticker": "F-PD", "title": "Ford Motor Co"},
+                "1": {"cik_str": 37996, "ticker": "F", "title": "Ford Motor Co"},
+                "2": {"cik_str": 37996, "ticker": "F-PB", "title": "Ford Motor Co"}}
+        self.assertEqual(_canonical(rows)[37996]["ticker"], "F")
 
 
 if __name__ == "__main__":

@@ -37,16 +37,92 @@ def norm(name: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+# XBRL customer members that are NOT companies. Filers tag categories and anonymized
+# placeholders on the same axis as real names, so these must be rejected before any
+# matching is attempted -- a fuzzy matcher will happily bind "Customers" to CUBB and
+# "Business" to BFST. Keys are the member string with punctuation removed, lowercased,
+# and a trailing "member" stripped. Measured against 2024q1 (883 distinct members).
+CATEGORY = frozenset("""
+other others customer customers client clients external externalcustomer externalcustomers
+othercustomer othercustomers twocustomers intersegment intersegmentsales residential commercial
+industrial wholesale retail government usgovernment nonusgovernment departmentofdefense consumer
+business direct distribution transportation telecom military affiliated unaffiliated national
+nationalaccounts thirdparty thirdpartynet toolanddie major domestic international foreign
+segment segments product products service services corporate
+customera customerb customerc customerd customere customerf
+customerone customertwo customerthree customerfour customerfive customersix
+""".split())
+
+
+def _canonical(rows: dict) -> dict:
+    """{cik: {'ticker','title'}} keeping ONE ticker per CIK. company_tickers.json lists every
+    share class (Ford: F, F-PB, F-PC, F-PD) and last-wins would pick a preferred. Prefer a
+    plain ticker, then the shortest, then alphabetical."""
+    by_cik: dict[int, list] = {}
+    for row in rows.values():
+        by_cik.setdefault(int(row["cik_str"]), []).append((row["ticker"], row["title"]))
+    out = {}
+    for cik, tks in by_cik.items():
+        tk, title = sorted(tks, key=lambda t: ("-" in t[0] or "." in t[0], len(t[0]), t[0]))[0]
+        out[cik] = {"ticker": tk, "title": title}
+    return out
+
+
+def title_index(by_cik: dict) -> dict:
+    """{normalized title token tuple: {ticker}} — the index unique-prefix matching walks."""
+    idx: dict[tuple, set] = {}
+    for row in by_cik.values():
+        toks = tuple(norm(row["title"]).split())
+        if toks:
+            idx.setdefault(toks, set()).add(row["ticker"])
+    return idx
+
+
+def _member_key(member: str) -> str:
+    return re.sub(r"member$", "", re.sub(r"[^a-z0-9]", "", member.lower()))
+
+
+def _demember(member: str) -> str:
+    """'AppleIncMember' -> 'Apple Inc'."""
+    return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", re.sub(r"Member$", "", member))
+
+
+def _prefix_unique(toks: tuple, titles: dict) -> str | None:
+    """The single ticker whose normalized title STARTS WITH `toks`, or None if 0 or >1."""
+    hits = {tk for t, tks in titles.items() if t[:len(toks)] == toks for tk in tks}
+    return next(iter(hits)) if len(hits) == 1 else None
+
+
+def resolve_member(member: str, by_name: dict, titles: dict) -> str | None:
+    """Resolve an XBRL MajorCustomers member to a ticker, precision first.
+
+    Three gates, in order: reject known non-companies; exact normalized match; then a
+    UNIQUE prefix match (so 'Amazon' finds 'amazon com' but 'Delta' finds nothing, because
+    Delta Air Lines and Delta Apparel both start with it). A leading token shorter than 4
+    characters is rejected outright -- it matches too much.
+    """
+    if _member_key(member) in CATEGORY:
+        return None
+    name = _demember(member)
+    tk = resolve(name, by_name)
+    if tk:
+        return tk
+    toks = tuple(norm(name).split())
+    if not toks or len(toks[0]) < 4:
+        return None
+    return _prefix_unique(toks, titles)
+
+
 def load_ticker_map() -> tuple[dict, dict]:
     """(by_cik: {int: {'ticker','title'}}, by_name: {norm(title): ticker}).
 
-    by_name is also indexed by the space-stripped norm so name variants like
-    "Wal-Mart" (norm 'wal mart') match "Walmart" (norm 'walmart'). Use resolve().
+    One canonical ticker per CIK (the common share class, not a preferred). by_name is also
+    indexed by the space-stripped norm so "Wal-Mart" (norm 'wal mart') matches "Walmart".
+    Use resolve() for a name, resolve_member() for an XBRL member string.
     """
-    data = json.loads(_get("https://www.sec.gov/files/company_tickers.json"))
-    by_cik, by_name = {}, {}
-    for row in data.values():
-        by_cik[int(row["cik_str"])] = {"ticker": row["ticker"], "title": row["title"]}
+    by_cik = _canonical(json.loads(_get("https://www.sec.gov/files/company_tickers.json")))
+    by_name = {}
+    for row in by_cik.values():
         n = norm(row["title"])
         by_name.setdefault(n, row["ticker"])
         by_name.setdefault(n.replace(" ", ""), row["ticker"])

@@ -28,6 +28,49 @@ The implementation plan is in [PLAN.md](PLAN.md) and the supporting literature/d
 
 Implementation notes live in [CLAUDE.md](CLAUDE.md).
 
+## Executive summary (plain language)
+
+**Bottom line: the idea was tested properly and it does not work on today's data. The project
+is closed. Nothing is running, nothing trades, nothing is at risk.**
+
+**The original idea.** A well-known 2008 finance study says the market is slow to react. When a
+big customer's stock does well, its suppliers' stocks tend to rise a bit later. In theory you
+could buy the suppliers early and profit. We set out to see if that still works.
+
+**The original plan.** Rebuild that strategy using free, public company filing data. Each month,
+buy the suppliers whose main customer did well last month, and bet against those whose customer
+did poorly. Then measure whether it makes money.
+
+**How it evolved.**
+1. *First build.* We got the strategy working, plus a lot of extra machinery: a daily
+   paper-trading engine, an options overlay, charts, a dashboard, and a weekly email, all aiming
+   to run it live.
+2. *A hard question surfaced.* An early test looked positive, but we only had a handful of
+   companies. That is too few to trust. We could not tell "this works" from "we don't have
+   enough data to know."
+3. *We chose to expand, not guess.* We pulled thirteen years of official filings (2013 to 2025)
+   to get a much larger, fairer sample. This gave the test real statistical power.
+4. *We tested honestly.* Before looking at the answer, we ran a calibration check to make sure
+   the test wasn't rigged to find success. It passed.
+
+**What was discarded.** Once the honest test gave its verdict, we removed everything built for
+going live: the daily engine, the options piece, the dashboard, the emails, and the automated
+jobs. There was no reason to maintain tools for a strategy that doesn't work. Nothing was ever
+connected to a broker. No money ever moved.
+
+**The conclusion.** The strategy shows an apparent +29% a year. That looks impressive against
+nothing. But when we compare it to a fair benchmark, randomly scrambling the customer-supplier
+connections, the random version earns almost as much. The real edge is basically noise. The
+formal result is a p-value of **0.234**: roughly a 1-in-4 chance of seeing a result this good
+purely by luck. That is far from convincing. Crucially, this is a genuine "no effect," not a
+weak test. We confirmed the test can detect the effect when we deliberately plant it in the
+data. It just isn't there on its own.
+
+**What this means.** The effect may have been real in the 1980s-2000s and since been traded
+away, or it may never have held for this data. Our test cannot tell those two apart. Either way,
+on modern free data, there is no edge to trade. The repository is now a clean, reproducible
+record of that finding, and nothing more.
+
 ## Status: research complete, and the answer is a null
 
 Tested on free modern data (SEC XBRL customer disclosures, 2013-2025) with a point-in-time link

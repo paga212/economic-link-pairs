@@ -40,7 +40,14 @@
 - Customer axis renders as `MajorCustomers=<Member>` inside the semicolon-separated `segments`.
 - `sub.txt` has `filed` (YYYYMMDD) — the date the disclosure became public. **Use it.** There is no need for a filing-lag constant.
 - `norm()` in `elp/edgar.py` already strips corporate suffixes (`inc`, `corp`, `company`, `ltd`, `holdings`, `group`, `the`, ...). Do not add a second suffix stripper.
-- `company_tickers.json` has multiple tickers per CIK (Ford: `F`, `F-PB`, `F-PC`, `F-PD`). Last-wins picks a preferred share. Canonicalize.
+- `company_tickers.json` has multiple tickers per CIK (Ford: `F`, `F-PB`, `F-PC`, `F-PD`). Last-wins picks a
+  preferred share. Canonicalize by taking the **first ticker in file order with no `-` or `.`**, else the first
+  overall. **Do NOT sort by length/alphabet** (an earlier draft did): that picks undashed baby bonds over the
+  common, corrupting 204 of 8004 CIKs (`DTE`→`DTB`, `CMCSA`→`CCZ`, `GOOGL`→`GOOG`, `BRK-B`→`BRK-A`). The SEC
+  file already lists the primary common first; sorting destroys that information.
+- Unique-prefix matching adds 11 links on 2024q1, of which 10 are true and one is false (`EPR`←`RRX`: EPR's
+  tenant tagged "Regal" is Regal Cinemas, not Regal Rexnord). Regal Cinemas is not SEC-listed, so the
+  ambiguity is irreducible from name data. Keep the rule; **disclose the rate** rather than hide it.
 - Exact-norm resolution yields 43 customer members per quarter. Adding a CATEGORY blocklist + unique-prefix matching + ticker canonicalization yields **53**, and all 10 additions were verified correct by inspection (`Amazon→AMZN`, `Ford→F`, `BankOfMontreal→BMO`, `ASML→ASML`, `AppliedMaterials→AMAT`, `Jazz→JAZZ`, `Regal→RRX`, `Stellantis→STLA`, `ValeroEnergyCorporation→VLO`, `VertexPharmaceuticals→VRTX`).
 - FY2024 with the exact matcher alone: 53 links, 37 suppliers, 41 customers.
 

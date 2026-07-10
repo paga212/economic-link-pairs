@@ -25,7 +25,9 @@ BY_CIK = {1: {"ticker": "ICHR", "title": "Ichor Holdings"},
           7: {"ticker": "RANK", "title": "Rank Corp"},
           8: {"ticker": "DECOY1", "title": "Decoy1 Corp"},
           9: {"ticker": "DECOY2", "title": "Decoy2 Corp"},
-          10: {"ticker": "FBK", "title": "Fallback Corp"}}
+          10: {"ticker": "FBK", "title": "Fallback Corp"},
+          11: {"ticker": "TAGSUP", "title": "Tag Supplier Corp"},
+          12: {"ticker": "MAXSUP", "title": "Max Supplier Corp"}}
 BY_NAME = {}
 TITLES = {}
 
@@ -73,6 +75,23 @@ ROWS_BY_Q = {
         # alphabetically-first customer (BbbMember -> BBB) and is still emitted.
         _row(10, "YyyMember", date(1999, 3, 1), None, "", ""),
         _row(10, "BbbMember", date(1999, 3, 1), None, "", ""),
+
+        # TAGSUP: pre-ASC 606 revenue-tag coverage (Bug 1). ZZZ is tagged SalesRevenueNet
+        # ($900), AAA is tagged Revenues ($100). ZZZ must win. Under the old
+        # startswith("revenue") predicate, "salesrevenuenet" does not start with
+        # "revenue", so ZZZ's row would not rank and AAA (the only rankable row) would
+        # wrongly win.
+        _row(11, "ZzzSalesMember", date(1999, 4, 1), 900, "SalesRevenueNet", "USD"),
+        _row(11, "AaaRevMember", date(1999, 4, 1), 100, "Revenues", "USD"),
+
+        # MAXSUP: MAX not SUM (Bug 2). AAA has three rankable rows of 100 each (same
+        # member, repeated tagging across contexts -- sum 300, max 100). ZZZ has one
+        # rankable row of 200 (max 200). ZZZ must win: 200 > 100. Under a SUM
+        # aggregation AAA would wrongly win with 300.
+        _row(12, "AaaMaxMember", date(1999, 4, 5), 100, REVENUE_TAG, "USD"),
+        _row(12, "AaaMaxMember", date(1999, 4, 5), 100, REVENUE_TAG, "USD"),
+        _row(12, "AaaMaxMember", date(1999, 4, 5), 100, REVENUE_TAG, "USD"),
+        _row(12, "ZzzMaxMember", date(1999, 4, 5), 200, REVENUE_TAG, "USD"),
     ],
     "1999q2": [
         # a second, later disclosure of the same DAN link
@@ -106,6 +125,10 @@ def fake_resolve_member(member, by_name, titles):
         "SmallUsdMember": "SMALLUSD",
         "YyyMember": "YYY",
         "BbbMember": "BBB",
+        "ZzzSalesMember": "ZZZ",
+        "AaaRevMember": "AAA",
+        "AaaMaxMember": "AAA",
+        "ZzzMaxMember": "ZZZ",
     }.get(member)
 
 
@@ -149,7 +172,9 @@ class TestEntry(unittest.TestCase):
                            ("DECOY2", "SMALLUSD", "1999-02-25"),
                            ("FBK", "BBB", "1999-03-01"),
                            ("ICHR", "LRCX", "1999-02-01"),
+                           ("MAXSUP", "ZZZ", "1999-04-05"),
                            ("RANK", "ZZZCORP", "1999-02-15"),
+                           ("TAGSUP", "ZZZ", "1999-04-01"),
                            ("ZOO", "LRCX", "1999-02-01")])
 
         # sorted by (filed, supplier, customer) -- NOT vacuous: the 1999q1 fixture rows
@@ -190,6 +215,28 @@ class TestEntry(unittest.TestCase):
         entry.main("1999q1", "1999q1", out=out)
         links = [x for x in json.load(open(out)) if x["supplier"] == "FBK"]
         self.assertEqual(links, [{"supplier": "FBK", "customer": "BBB", "filed": "1999-03-01"}])
+
+    def test_pre_asc606_tag_salesrevenuenet_is_rankable(self):
+        """TAGSUP discloses ZZZ tagged SalesRevenueNet ($900) and AAA tagged Revenues
+        ($100). ZZZ -- the larger revenue -- must be emitted. Before the ASC 606
+        transition, SalesRevenueNet (and siblings) were the dominant revenue tags; a
+        predicate of startswith("revenue") alone does not match "salesrevenuenet", so
+        under the bug only AAA's row would rank and AAA would wrongly win."""
+        out = "xbrl_links_tagsup.json"
+        entry.main("1999q1", "1999q1", out=out)
+        links = [x for x in json.load(open(out)) if x["supplier"] == "TAGSUP"]
+        self.assertEqual(links, [{"supplier": "TAGSUP", "customer": "ZZZ", "filed": "1999-04-01"}])
+
+    def test_principal_customer_is_max_not_sum_of_rankable_rows(self):
+        """MAXSUP discloses AAA with three rankable rows of 100 each (sum 300, max 100)
+        and ZZZ with one rankable row of 200 (sum 200, max 200). The correct principal
+        is ZZZ: 200 > 100. Under a SUM aggregation AAA would wrongly win with 300; the
+        alphabetical fallback would also (coincidentally) pick AAA, so this test catches
+        a regression to either sum or to the fallback path."""
+        out = "xbrl_links_maxsup.json"
+        entry.main("1999q1", "1999q1", out=out)
+        links = [x for x in json.load(open(out)) if x["supplier"] == "MAXSUP"]
+        self.assertEqual(links, [{"supplier": "MAXSUP", "customer": "ZZZ", "filed": "1999-04-05"}])
 
 
 if __name__ == "__main__":

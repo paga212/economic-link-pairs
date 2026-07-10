@@ -21,26 +21,38 @@ OUT = "xbrl_links.json"
 def _principal(rows_in_group: list[tuple[str, float | None, str, str]]) -> tuple[str, bool]:
     """Pick the ONE principal customer for a (supplier, filed) group.
 
-    Rankable path: sum the disclosed USD revenue per customer (a filing can tag a
-    customer's revenue more than once, e.g. across contexts within the same fact
-    group; summing captures the customer's total attributed revenue rather than an
-    arbitrary single line -- and is a no-op when there's only one line) and take the
-    customer with the largest total. A tag counts as revenue only if its name STARTS
-    WITH "revenue" (case-insensitive) -- a plain substring check would also match
-    e.g. "CostOfRevenue", which is a cost figure, not customer revenue, and must not
-    be used for ranking.
+    Rankable path: take the MAX disclosed USD revenue row per customer, not the sum.
+    A filing tags a customer's revenue more than once -- different fiscal periods
+    (`ddate`) and different durations (`qtrs`, e.g. quarterly vs annual) all land as
+    separate rows -- and how many times a customer got tagged is an artifact of the
+    filer's tagging, not a measure of how much they bought. Summing would also add a
+    quarterly figure to an annual one, which is not a meaningful total. All customers
+    in one filing share the same set of reporting periods, so each customer's MAX row
+    (typically its annual figure) is the one comparable across customers; take the
+    customer whose max is largest.
+
+    A tag counts as revenue only if its name STARTS WITH "revenue" or "salesrevenue"
+    (case-insensitive). Both prefixes are needed because of the ASC 606 transition
+    (effective ~2018): pre-2018 filings predominantly used SalesRevenueNet and its
+    siblings (SalesRevenueGoodsNet, SalesRevenueServicesNet, ...), while post-2018
+    filings predominantly use RevenueFromContractWithCustomer* / Revenues. A plain
+    "revenue" prefix alone misses the pre-2018 tags entirely; a plain substring check
+    would also match e.g. "CostOfRevenue", which is a cost figure, not customer
+    revenue, and must not be used for ranking.
 
     Fallback path: if no row in the group is a USD revenue row, fall back to the
     alphabetically-first customer so the group is still emitted, not silently dropped.
 
     Returns (customer, used_fallback).
     """
-    totals: dict[str, float] = {}
+    maxima: dict[str, float] = {}
     for customer, value, tag, uom in rows_in_group:
-        if uom == "USD" and tag.lower().startswith("revenue") and value is not None:
-            totals[customer] = totals.get(customer, 0.0) + value
-    if totals:
-        return max(totals, key=totals.get), False
+        tag_lower = tag.lower()
+        if uom == "USD" and tag_lower.startswith(("revenue", "salesrevenue")) and value is not None:
+            if value > maxima.get(customer, float("-inf")):
+                maxima[customer] = value
+    if maxima:
+        return max(maxima, key=maxima.get), False
     return min(customer for customer, _, _, _ in rows_in_group), True
 
 

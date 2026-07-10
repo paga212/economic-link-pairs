@@ -45,9 +45,17 @@
   overall. **Do NOT sort by length/alphabet** (an earlier draft did): that picks undashed baby bonds over the
   common, corrupting 204 of 8004 CIKs (`DTE`→`DTB`, `CMCSA`→`CCZ`, `GOOGL`→`GOOG`, `BRK-B`→`BRK-A`). The SEC
   file already lists the primary common first; sorting destroys that information.
-- Unique-prefix matching adds 11 links on 2024q1, of which 10 are true and one is false (`EPR`←`RRX`: EPR's
-  tenant tagged "Regal" is Regal Cinemas, not Regal Rexnord). Regal Cinemas is not SEC-listed, so the
-  ambiguity is irreducible from name data. Keep the rule; **disclose the rate** rather than hide it.
+- Unique-prefix matching must require **at least 2 normalized tokens**. Single-token members are bare
+  nouns (end markets, segments, categories) or a first word shared with an unrelated listed company, and
+  they produced every false link observed: `EPR`←`RRX` ("Regal" = Regal Cinemas, not Regal Rexnord),
+  `POLA`←`MARPS` ("Marine"), `OPTX`←`DTII` ("Defense"). A fourth, `LX`←`INTR`, is a single-token EXACT
+  collision: `norm()` strips "Group" from "InterGroup", leaving `inter`, which matches "Inter & Co".
+  So `CATEGORY` must also carry `marine`, `defense`, `intergroup`.
+- Measured on 2024q1: tightening takes the quarter from 49 links / 31 suppliers to 41 / 30. The only
+  supplier lost entirely is `EPR`, the false one. Power depends on suppliers per month, not on link
+  count, so precision here is nearly free. The cost is that common single-token customers (Ford, Amazon,
+  Stellantis, ASML, Jazz) become unresolvable. That is a selection on the filer's **tagging style**, not
+  on returns. Disclose it; do not chase it with a growing blocklist.
 - Exact-norm resolution yields 43 customer members per quarter. Adding a CATEGORY blocklist + unique-prefix matching + ticker canonicalization yields **53**, and all 10 additions were verified correct by inspection (`Amazon→AMZN`, `Ford→F`, `BankOfMontreal→BMO`, `ASML→ASML`, `AppliedMaterials→AMAT`, `Jazz→JAZZ`, `Regal→RRX`, `Stellantis→STLA`, `ValeroEnergyCorporation→VLO`, `VertexPharmaceuticals→VRTX`).
 - FY2024 with the exact matcher alone: 53 links, 37 suppliers, 41 customers.
 

@@ -1,7 +1,7 @@
 {
- "generated_utc": "2026-07-09T02:01:01.300801+00:00",
+ "generated_utc": "2026-07-10T02:00:57.456492+00:00",
  "start": "2026-07-04",
- "last_bar": "2026-07-08",
+ "last_bar": "2026-07-09",
  "open": [
   {
    "supplier": "GILD",
@@ -11,8 +11,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-09",
-   "days": 29,
-   "ret": 0.0851984143255212,
+   "days": 30,
+   "ret": 0.07476324164467377,
    "stop": 0.03858695694922039,
    "primary": {
     "role": "primary",
@@ -39,8 +39,8 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-18",
-   "days": 20,
-   "ret": -0.02043203726791107,
+   "days": 21,
+   "ret": -0.01819620099502146,
    "stop": -0.04394643034359286,
    "primary": {
     "role": "primary",
@@ -74,9 +74,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-06-24",
-   "days": 14,
-   "ret": 0.058422651514440774,
-   "stop": 0.020148317174198155,
+   "days": 15,
+   "ret": 0.06311906737448414,
+   "stop": 0.019485836123362577,
    "primary": {
     "role": "primary",
     "ticker": "VC",
@@ -97,71 +97,8 @@
     "ticker": "SPY",
     "direction": 1,
     "instrument": "stock",
-    "notional": 282614.5296918156,
+    "notional": 275434.07727918174,
     "entry_px": 733.24
-   }
-  },
-  {
-   "supplier": "ADSK",
-   "customer": "SNX",
-   "side": -1,
-   "kind": "SHORT",
-   "expression": "stock-pair",
-   "risk_cap": "soft",
-   "entry": "2026-07-02",
-   "days": 6,
-   "ret": 0.033163320191262224,
-   "stop": -0.00046353950526285825,
-   "primary": {
-    "role": "primary",
-    "ticker": "ADSK",
-    "direction": -1,
-    "instrument": "spread",
-    "notional": 200000.0,
-    "entry_px": 207.48,
-    "S0": 207.48,
-    "k_long": 205.0,
-    "k_short": 187.0,
-    "T0": 0.1232876712328767,
-    "iv": 0.4275950046107574,
-    "dte": 45,
-    "debit": 6.612768409438694
-   },
-   "neutralizer": {
-    "role": "neutralizer",
-    "ticker": "IONS",
-    "direction": 1,
-    "instrument": "stock",
-    "notional": 200000.0,
-    "entry_px": 81.8
-   }
-  },
-  {
-   "supplier": "AMGN",
-   "customer": "MCK",
-   "side": 1,
-   "kind": "LONG",
-   "expression": "stock-pair",
-   "risk_cap": "soft",
-   "entry": "2026-07-06",
-   "days": 2,
-   "ret": 0.021806956252635623,
-   "stop": -0.009098915506388819,
-   "primary": {
-    "role": "primary",
-    "ticker": "AMGN",
-    "direction": 1,
-    "instrument": "stock",
-    "notional": 200000.0,
-    "entry_px": 366.44
-   },
-   "neutralizer": {
-    "role": "neutralizer",
-    "ticker": "MCHPP",
-    "direction": -1,
-    "instrument": "stock",
-    "notional": 200000.0,
-    "entry_px": 73.96
    }
   },
   {
@@ -172,9 +109,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-06",
-   "days": 2,
-   "ret": -0.00035521568821619137,
-   "stop": -0.05,
+   "days": 3,
+   "ret": 0.006321174518946556,
+   "stop": -0.043678825481053445,
    "primary": {
     "role": "primary",
     "ticker": "PG",
@@ -207,9 +144,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-08",
-   "days": 0,
-   "ret": 0.0,
-   "stop": -0.05,
+   "days": 1,
+   "ret": 0.034697290512733625,
+   "stop": -0.015302709487266378,
    "primary": {
     "role": "primary",
     "ticker": "LRCX",
@@ -235,9 +172,9 @@
    "expression": "stock-hedge",
    "risk_cap": "soft",
    "entry": "2026-07-08",
-   "days": 0,
-   "ret": 0.0,
-   "stop": -0.05,
+   "days": 1,
+   "ret": 0.0014815393841528177,
+   "stop": -0.048518460615847185,
    "primary": {
     "role": "primary",
     "ticker": "WWD",
@@ -251,15 +188,96 @@
     "ticker": "SPY",
     "direction": -1,
     "instrument": "stock",
-    "notional": 223577.76944651167,
+    "notional": 195592.69719679057,
     "entry_px": 745.4
+   }
+  },
+  {
+   "supplier": "ADSK",
+   "customer": "SNX",
+   "side": -1,
+   "kind": "SHORT",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-07-09",
+   "days": 0,
+   "ret": 0.0,
+   "stop": -0.05,
+   "primary": {
+    "role": "primary",
+    "ticker": "ADSK",
+    "direction": -1,
+    "instrument": "spread",
+    "notional": 200000.0,
+    "entry_px": 208.58,
+    "S0": 208.58,
+    "k_long": 210.0,
+    "k_short": 188.0,
+    "T0": 0.1232876712328767,
+    "iv": 0.4345277951641898,
+    "dte": 45,
+    "debit": 8.685763029902319
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 60000.0,
+    "entry_px": 751.71
+   }
+  },
+  {
+   "supplier": "MCHPP",
+   "customer": "ARW",
+   "side": -1,
+   "kind": "SHORT",
+   "expression": "stock-hedge",
+   "risk_cap": "soft",
+   "entry": "2026-07-09",
+   "days": 0,
+   "ret": 0.0,
+   "stop": -0.05,
+   "primary": {
+    "role": "primary",
+    "ticker": "MCHPP",
+    "direction": -1,
+    "instrument": "spread",
+    "notional": 200000.0,
+    "entry_px": 74.47,
+    "S0": 74.47,
+    "k_long": 74.0,
+    "k_short": 67.0,
+    "T0": 0.1232876712328767,
+    "iv": 0.5043670065556852,
+    "dte": 45,
+    "debit": 2.801454843590083
+   },
+   "neutralizer": {
+    "role": "neutralizer",
+    "ticker": "SPY",
+    "direction": 1,
+    "instrument": "stock",
+    "notional": 467368.74509249616,
+    "entry_px": 751.71
    }
   }
  ],
- "closed": [],
+ "closed": [
+  {
+   "supplier": "AMGN",
+   "customer": "MCK",
+   "kind": "LONG",
+   "entry": "2026-07-06",
+   "exit": "2026-07-09",
+   "days": 3,
+   "reason": "trail_stop",
+   "ret_net": -0.019591285665614407
+  }
+ ],
  "stats": {
-  "n": 0,
-  "win_rate": null,
-  "mean_ret": null
+  "n": 1,
+  "win_rate": 0.0,
+  "mean_ret": -0.019591285665614407
  }
 }

@@ -3,16 +3,15 @@
 Signal = the paper's, unchanged: rank suppliers by their principal customer's prior-month
 return, long the top slice, short the bottom, equal weight, hold one month (elp/backtest.py).
 
-Prefers the point-in-time XBRL universe (xbrl_links.json, built by xbrl_build.py) and falls
-back to the legacy static universe. Reads the placebo percentile as the headline -- but only
-after calibrate.py has passed. Run: python3 pairtest.py
+Reads the point-in-time XBRL universe (xbrl_links.json, built by xbrl_build.py) and reports the
+placebo percentile as the headline -- but only after calibrate.py has passed.
+Run: python3 xbrl_build.py first (writes xbrl_links.json), then python3 pairtest.py
 """
 import json
 import os
 from statistics import median
 
 from elp.backtest import long_short_returns, performance
-from elp.links import load_universe
 from elp.pairtest import (PASS_THROUGH, restrict_pit, market_beta, null_summary, placebo,
                           placebo_pvalue, pooled_stats, screen, screened_sharpe,
                           suppliers_per_month)
@@ -27,15 +26,14 @@ LINKS_JSON = "xbrl_links.json"
 
 
 def _load_dated():
-    """(dated links, from_xbrl). The legacy static universe is modelled as filed long ago."""
-    if os.path.exists(LINKS_JSON):
-        return json.load(open(LINKS_JSON)), True
-    return ([{"supplier": s, "customer": c, "filed": "2000-01-01"}
-             for s, c, _ in load_universe()], False)
+    """The dated point-in-time links from xbrl_links.json. Build it with xbrl_build.py."""
+    if not os.path.exists(LINKS_JSON):
+        raise SystemExit(f"{LINKS_JSON} not found -- run `python3 xbrl_build.py` first.")
+    return json.load(open(LINKS_JSON))
 
 
 def main() -> None:
-    dated, from_xbrl = _load_dated()
+    dated = _load_dated()
     pairs = sorted({(r["supplier"], r["customer"]) for r in dated})
     tickers = sorted({t for pair in pairs for t in pair} | {MARKET})
 
@@ -50,8 +48,8 @@ def main() -> None:
     keep = set(links)
     dated = [r for r in dated if (r["supplier"], r["customer"]) in keep]
 
-    src = "xbrl_links.json (point-in-time)" if from_xbrl else "static universe"
-    print(f"\nuniverse: {src} | {len(links)} links, {len({s for s, _ in links})} suppliers")
+    print(f"\nuniverse: xbrl_links.json (point-in-time) | "
+          f"{len(links)} links, {len({s for s, _ in links})} suppliers")
     print(f"\nPRICE COVERAGE  {len(no_price)} of {len(tickers)} tickers had no Tiingo history; "
           f"{lost} of {len(pairs)} links dropped.")
     print("        Residual SURVIVORSHIP bias, measured rather than hidden: point-in-time links")
@@ -62,7 +60,7 @@ def main() -> None:
         return
 
     all_months = sorted({m for t in returns for m in returns[t]})
-    pit = links_asof(dated, all_months) if from_xbrl else None
+    pit = links_asof(dated, all_months)
 
     # ---- screen -------------------------------------------------------------------------
     kept, rejected = screen(links, returns)

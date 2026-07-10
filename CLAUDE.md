@@ -29,14 +29,15 @@ nothing was ever executed or connected to a broker.
 
 ### Run
 ```
-python3 -m unittest discover -s tests   # 123 offline tests, no network
+python3 -m unittest discover -s tests   # 108 offline tests, no network
 python3 xbrl_build.py                    # SEC XBRL sweep 2013q1-2025q4 -> xbrl_links.json
 python3 calibrate.py 40 600 100 0        # calibration gate; run BEFORE quoting any p-value
 python3 pairtest.py                      # the test battery: screen -> pooled -> L/S -> placebo
-# historical phase drivers: phase0/1/2a/2a_build/c_backtest/c_coverage.py
 ```
 `xbrl_build.py` downloads ~5GB of SEC quarterly zips one at a time, parsing and deleting each.
-It is already run: `xbrl_links.json` is committed and is the reproducible artifact.
+It is already run: `xbrl_links.json` is committed and is the reproducible artifact. The repo is
+trimmed to exactly this path; the historical phase drivers and their support modules were
+removed on 2026-07-10.
 
 ### Architecture
 - `elp/fsds.py` — SEC Financial Statement Data Sets reader: streams a quarterly zip, yields
@@ -54,12 +55,14 @@ It is already run: `xbrl_links.json` is committed and is the reproducible artifa
 - `elp/pairtest.py` — the test battery: `screen()`, `screened_sharpe()`, `placebo()`,
   `placebo_pvalue()`, `market_beta()`, `suppliers_per_month()`
 - `calibrate.py` — the gate: the false-positive rate of screen+placebo under a no-effect null
-- `elp/signal.py` — lagged vs contemporaneous pair statistics
-- `elp/tiingo.py` — production prices (with retry); `elp/prices.py` — keyless Yahoo prototype
-- `elp/links.py`, `elp/cf_links.py` — legacy link universes (a hand-curated fallback set and the
-  free Cohen-Frazzini file). Superseded by `xbrl_links.json`; kept for the phase drivers. The LLM
-  extraction path (`elp/llm.py`, `phase_b_build.py`, `universe_links.json`) was removed 2026-07-10:
-  the XBRL universe is deterministic, so the pipeline has no LLM in it at all
+- `elp/signal.py` — `evaluate_pair()`: lagged + contemporaneous pair statistics (the screen)
+- `elp/prices.py` — `monthly_returns()`: adjusted-close series -> monthly returns
+- `elp/tiingo.py` — `fetch_monthly()` production prices (with retry)
+
+Eight `elp` modules and three scripts, all on the XBRL-to-p-value path; every module has a real
+importer. The pipeline is stdlib-only and has no LLM in it. The daily paper-trade engine, the
+LLM extraction path, the link validator and the historical phase drivers were all removed
+2026-07-10 once the result came in; see `NOTES.md` for what each was and why it went.
 
 ## The two invariants that make the result mean anything
 

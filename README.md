@@ -54,35 +54,36 @@ selection) are in `NOTES.md`.
 Stdlib-only (no third-party deps, no LLM in the pipeline). Run:
 
 ```
-python3 -m unittest discover -s tests   # 123 offline logic tests, no network
+python3 -m unittest discover -s tests   # 108 offline logic tests, no network
 python3 xbrl_build.py                    # SEC XBRL sweep 2013-2025 -> xbrl_links.json (committed)
 python3 calibrate.py 40 600 100 0        # calibration gate; run BEFORE quoting a p-value
 python3 pairtest.py                      # screen -> pooled stats -> long/short -> placebo
-python3 phase0.py / phase1.py            # earlier signal-direction check / engine on curated set
-python3 phase_c_backtest.py              # directional historical check on resolvable C-F links
 ```
 
 `pairtest.py` and `xbrl_build.py` need a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`) plus
-SEC's free bulk data.
+SEC's free bulk data. Prices come from **Tiingo** (`elp/tiingo.py`).
 
-**Nothing runs on a schedule.** The daily paper-trade engine, the options overlay, the LLM
-narration layer, the dashboard and the weekly email were retired on 2026-07-10 once the result
-came in. No cron, no server, no email. Nothing was ever executed or connected to a broker.
+**The repo is exactly this path and nothing else.** The daily paper-trade engine, the options
+overlay, the LLM narration and extraction layers, the dashboard, the weekly email, the link
+validator and the historical phase drivers were all removed on 2026-07-10 once the result came
+in. No cron, no server, no email, no LLM. Nothing was ever executed or connected to a broker.
+`NOTES.md` records what each removed piece was and why it went.
 
-Production prices come from **Tiingo** (`elp/tiingo.py`, per
-[research/08](research/08-data-procurement.md)); keyless Yahoo (`elp/prices.py`) survives
-only as the `phase0.py` prototype and is survivorship-biased.
+## The pipeline
 
-- **Phase 0** (`phase0.py`, `elp/signal.py`): on the built-in Apple/AMAT-supplier
-  pairs the same-month link is strong (corr ~+0.5) but the one-month *lag* is absent
-  — the link is real and efficiently priced on these heavily-covered names.
-  Consistent with the paper: the effect lives in small, *neglected* suppliers.
-- **Phase 1** (`phase1.py`, `elp/backtest.py`): a data-source-agnostic monthly
-  cross-sectional long/short engine (rank suppliers by customer's prior-month return,
-  long top / short bottom, hold one month, with a cost hook). Verified by unit tests;
-  exercised on a small still-listed curated set. Any number it prints off that set is
-  **engine validation, not a valid alpha** (tiny, survivorship-biased, not point-in-time).
-- **Ground truth** (`elp/cf_links.py`): parses the free Cohen-Frazzini link file
-  (1980-2005; permno-keyed suppliers). Using it for a real backtest needs a
-  permno→ticker crosswalk + delisted prices — that's Phase 2 (entity resolution) plus
-  a real data feed.
+```
+xbrl_build.py  ->  xbrl_links.json  ->  elp/pit.py  ->  elp/backtest.py  ->  pairtest.py
+                   (938 dated links)    (point-in-time    (rank / long-short   (screen +
+                                         link table)       hold one month)      placebo)
+                                                                               calibrate.py
+                                                                               (the gate)
+```
+
+- `xbrl_build.py` sweeps SEC Financial Statement Data Sets, resolves each filer to its supplier
+  ticker (`elp/edgar.py`) and picks the principal customer by largest disclosed USD revenue.
+- `elp/pit.py` makes the links point-in-time: live the month after a filing, superseded by the
+  next, lapsing after 15 months.
+- `elp/backtest.py` is the paper's monthly cross-sectional long/short; `elp/signal.py` is the
+  lagged-correlation screen.
+- `elp/pairtest.py` runs the screen and the placebo null; `calibrate.py` certifies the test's
+  false-positive rate before any p-value is quoted.

@@ -451,7 +451,19 @@ git commit -m "feat: precision-gated resolution of XBRL customer members to tick
 
 **Interfaces:**
 - Consumes: `elp.fsds.quarters/fetch_quarter/major_customers`; `elp.edgar.load_ticker_map/title_index/resolve_member`.
-- Produces: `xbrl_links.json` — `[{"supplier": str, "customer": str, "filed": "YYYY-MM-DD", "pct": float | None}]`, sorted, deduplicated on `(supplier, customer, filed)`.
+- Produces: `xbrl_links.json` — `[{"supplier": str, "customer": str, "filed": "YYYY-MM-DD"}]`, sorted, deduplicated on `(supplier, customer, filed)`.
+
+**Correction, verified against `2024q1/num.txt` after Task 1 (supersedes the spec):** facts on the
+`MajorCustomers` axis are overwhelmingly **dollar revenue**, not percentages —
+`RevenueFromContractWithCustomerExcludingAssessedTax` (3,162 rows), `Revenues` (1,151), and
+6,176 of 6,353 rows carry `uom=USD`. `ConcentrationRiskPercentage1` is not in the top eight tags.
+Therefore:
+- Accepting **every** tag on the axis (what `elp/fsds.py` does) is correct. Filtering to
+  `ConcentrationRiskPercentage1` would cut 480 filings to 10.
+- **Do NOT emit a `pct` field.** An earlier draft of this task wrote `"pct": r["value"]`, which
+  would put dollar revenue into a field named `pct`. Nothing consumes it (the screen does not use
+  concentration), so drop it rather than mislabel it. `fsds.major_customers` keeps `value`, which
+  is an honest name for a tagged fact's value.
 
 - [ ] **Step 1: Write the driver**
 
@@ -506,7 +518,7 @@ def main(start: str = "2013q1", end: str = "2025q4") -> None:
                 continue
             seen.add(key)
             links.append({"supplier": supplier, "customer": customer,
-                          "filed": r["filed"].isoformat(), "pct": r["value"]})
+                          "filed": r["filed"].isoformat()})
             added += 1
         print(f"{q}: {len(rows):>6} tagged rows | +{added:>4} links | "
               f"total {len(links):>5} | suppliers {len({x['supplier'] for x in links}):>4}")

@@ -86,5 +86,35 @@ class TestBacktest(unittest.TestCase):
         self.assertEqual(long_short_returns([("S1", "C1")], returns), {})
 
 
+class TestPointInTimeLinks(unittest.TestCase):
+    def _returns(self):
+        ms = _months(6)
+        return {"S1": {m: 0.01 * i for i, m in enumerate(ms)},
+                "S2": {m: -0.01 * i for i, m in enumerate(ms)},
+                "C1": {m: 0.05 for m in ms},
+                "C2": {m: -0.05 for m in ms}}
+
+    def test_a_repeated_mapping_equals_the_static_list(self):
+        """A per-month table that repeats the same links must reproduce the static result."""
+        R = self._returns()
+        static = [("S1", "C1"), ("S2", "C2")]
+        pit = {m: list(static) for m in _months(6)}
+        self.assertEqual(long_short_returns(static, R), long_short_returns(pit, R))
+
+    def test_a_month_with_no_links_is_skipped(self):
+        R = self._returns()
+        pit = {m: [] for m in _months(6)}
+        self.assertEqual(long_short_returns(pit, R), {})
+
+    def test_links_absent_in_a_formation_month_do_not_trade_it(self):
+        R = self._returns()
+        ms = _months(6)
+        pit = {m: ([("S1", "C1"), ("S2", "C2")] if i >= 3 else []) for i, m in enumerate(ms)}
+        out = long_short_returns(pit, R)
+        # formation month ms[i] drives holding month ms[i+1]
+        self.assertNotIn(ms[1], out)
+        self.assertIn(ms[4], out)
+
+
 if __name__ == "__main__":
     unittest.main()

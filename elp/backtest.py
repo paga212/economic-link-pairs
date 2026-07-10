@@ -23,29 +23,47 @@ def _prev(key: tuple[int, int]) -> tuple[int, int]:
     return (y, m - 1) if m > 1 else (y - 1, 12)
 
 
-def long_short_returns(links: Links, returns: Returns,
+def _next(key: tuple[int, int]) -> tuple[int, int]:
+    y, m = key
+    return (y, m + 1) if m < 12 else (y + 1, 1)
+
+
+def _cust_of(pairs: Links) -> dict[str, str]:
+    """{supplier: principal customer}. First listed wins, matching the paper's 'principal'."""
+    out: dict[str, str] = {}
+    for s, c in pairs:
+        out.setdefault(s, c)
+    return out
+
+
+def long_short_returns(links, returns: Returns,
                        cost_bps: float = 0.0, side_frac: float = 0.34) -> dict:
     """{(year, month): long-short holding-month return}. Formation = holding month - 1.
+
+    `links` is either a static [(supplier, customer)] list, or a point-in-time
+    {formation month: [(supplier, customer)]} mapping (see elp/pit.py) so each month
+    ranks only the links disclosed by then.
 
     cost_bps: round-trip cost per leg in basis points, charged on both legs each month
     (full monthly turnover assumed). side_frac: fraction of names in each of long/short.
     """
-    cust_of: dict[str, str] = {}
-    for s, c in links:
-        cust_of.setdefault(s, c)  # principal customer = first link listed for the supplier
-    suppliers = list(cust_of)
-
-    holding_months: set = set()
-    for s in suppliers:
-        holding_months |= set(returns.get(s, {}))
+    pit = isinstance(links, dict)
+    if pit:
+        holding_months = {_next(M) for M in links}
+    else:
+        cust_of = _cust_of(links)
+        holding_months = set()
+        for s in cust_of:
+            holding_months |= set(returns.get(s, {}))
 
     out: dict = {}
     for H in sorted(holding_months):
         M = _prev(H)
+        cust_of_M = _cust_of(links[M]) if pit else cust_of
         sig: dict[str, tuple[float, float]] = {}
-        for s in suppliers:
-            rc = returns.get(cust_of[s], {}).get(M)   # customer prior-month return = signal
-            rh = returns.get(s, {}).get(H)            # supplier holding-month return
+        for s, c in cust_of_M.items():
+            rc = returns.get(c, {}).get(M)   # customer prior-month return = signal
+            rh = returns.get(s, {}).get(H)   # supplier holding-month return
             if rc is not None and rh is not None:
                 sig[s] = (rc, rh)
         n = len(sig)
@@ -64,9 +82,7 @@ def long_short_returns(links: Links, returns: Returns,
 def signal_ranking(links: Links, returns: Returns, month: tuple[int, int]) -> list:
     """[(supplier, customer, signal)] for a single formation month, sorted desc by signal
     (signal = the supplier's principal customer's return in `month`)."""
-    cust_of: dict[str, str] = {}
-    for s, c in links:
-        cust_of.setdefault(s, c)
+    cust_of = _cust_of(links)
     rows = []
     for s, c in cust_of.items():
         rc = returns.get(c, {}).get(month)

@@ -1351,3 +1351,27 @@ git commit -m "feat: calibration gate, and the powered answer"
 - **The full sweep is ~50 downloads of ~100MB.** Run it once, commit `xbrl_links.json`, and never
   download again. The zips are deleted after parsing; do not cache them.
 - Existing suite before this work: `Ran 164 tests` / `OK`. Never let it go red.
+
+---
+
+## Corrections found during execution (measured, not reasoned)
+
+**`links_asof` must return at most ONE link per supplier per month, from the most recent `filed`.**
+`LIFE_MONTHS = 15` exceeds the roughly 12-month refiling cadence, and 10-Qs file quarterly, so a
+supplier's filings overlap. Returning every live link let `_cust_of` take the sorted-first pair, i.e. the
+alphabetically-first customer, silently undoing `xbrl_build.py`'s principal-customer selection one layer
+downstream. Measured on the real link table: 160 of 162 formation months (99%) contained a supplier with
+more than one live customer, up to 5 at once; across 1,303 incidents the alphabetically-first customer
+differed from the most-recent-filing customer in 428 (33%); and 29 of 109 suppliers genuinely change
+principal customer over time. A newer disclosure supersedes an older one. That is what point-in-time means.
+
+**`elp/pairtest.py::placebo` must rewire per PAIR, not per supplier.** It built `mapping = dict(rewired)`,
+which collapses the 29 suppliers appearing in more than one union pair. `screen()` then kept pairs the
+rewired table could never trade: the real path preserved both, the null path did not. That asymmetry
+corrupts the p-value. Build `{(s, c_old): (s, c_new)}` and pass `list(pair_map.values())` as the rewired
+union, so the screen and the table always agree on which pairs exist.
+
+**Vacuous tests are a recurring failure mode here.** Reviewers have now caught three: a `CATEGORY`
+regression test whose fixture contained no colliding company; a sort assertion whose fixture was already
+sorted; and four point-in-time tests that passed with the `pit` argument ignored entirely. Every new test
+guarding a behaviour must be proved to fail when that behaviour is removed.

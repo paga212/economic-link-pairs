@@ -2,112 +2,120 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Status: live forward paper-trade
+## Status: research complete, result is a null
 
-This is an active git repository (~25 commits). The live system is a **dynamic
-per-trade forward paper-trade** of the customer-supplier lead-lag strategy: it
-runs the engine on daily data, opens/manages trades (trailing stop + signal
-exit), and scores out-of-sample closed trades net of costs. **Recommendations
-only — it never executes, connects to a broker, or moves money.** See
-`PLAN.md` for the full design and `NOTES.md` for the build log.
+This repository tested Cohen & Frazzini's customer-supplier lead-lag effect on free modern
+data, and **found it absent under a properly powered, point-in-time test**.
 
-Built so far: Phase 0 (data spine + signal check), Phase 1 (backtest engine),
-Phase 2a (EDGAR extractor), Phase D (dynamic per-trade engine), Phase B
-(LLM-diversified link universe), Phase 3 (Fable-5 daily digest), the paired
-long/short expression engine, link validation, Phase 4 delivery (dashboard +
-per-trade detail charts + weekly email), the news/catalyst and risk/borrow LLM
-ensembles, and the Phase-5 kill-rule scorecard. Deliberately **stdlib-only — no
-third-party deps** (no pandas/numpy); Tiingo is the production price source.
+```
+p = 0.234    (stable across placebo seeds: 0.234, 0.239, 0.258, 0.242, 0.245)
+```
+
+A random rewiring of the same links earns a mean Sharpe of **+0.44** against the real wiring's
+**+0.63**. The raw strategy shows +28.8% annualized, Sharpe 0.63, 58% hit rate, market beta
+−0.09 — which against zero looks like a discovery, and against the honest null is a
+77th-percentile draw. That gap is the whole point of the placebo.
+
+This is a **real null, not a lack of power**: injecting the paper's own effect size into the
+real returns is detected at `p = 0.033`, in 5 of 5 placebo seeds. The calibration gate passed
+first (false-positive rate 4.8% vs nominal 5.0%, 600 trials).
+
+Full result, limitations and the reasoning are in `NOTES.md` (2026-07-10 entry).
+
+**There is nothing live here.** The daily paper-trade engine, the options overlay, the
+expression layer, the LLM overlays, the dashboard and the weekly email were all retired on
+2026-07-10 once the result came in. No cron runs, nothing is served, nothing is emailed, and
+nothing was ever executed or connected to a broker.
 
 ### Run
 ```
-python3 -m unittest discover -s tests   # 145 offline logic tests
-python3 track.py                         # daily tick → paper_state.json (needs Tiingo token)
-python3 catalyst.py                      # news/catalyst ensemble → catalyst.json (needs Anthropic key)
-python3 risk.py                          # risk/borrow facts → risk.json (needs Anthropic key)
-python3 digest.py                        # Fable-5 daily digest → digest.json (needs Anthropic key)
-python3 dashboard.py                     # paper_state.json (+ digest/catalyst/risk) → site/index.html
-python3 tradeviz.py                      # per-trade detail charts → site/trades.html (needs Tiingo token)
-EMAIL_DRYRUN=1 python3 email_report.py   # render the weekly email → email_report.eml (no send)
+python3 -m unittest discover -s tests   # 123 offline tests, no network
+python3 xbrl_build.py                    # SEC XBRL sweep 2013q1-2025q4 -> xbrl_links.json
+python3 calibrate.py 40 600 100 0        # calibration gate; run BEFORE quoting any p-value
+python3 pairtest.py                      # the test battery: screen -> pooled -> L/S -> placebo
+python3 linkcheck.py                     # validate a link universe -> rejected_links.json
+# historical phase drivers: phase0/1/2a/2a_build/b_build/c_backtest/c_coverage.py
 ```
-`run_paper.sh` chains track → catalyst → risk → digest → dashboard → tradeviz → serve →
-commit/push (cron `0 22 * * 1-5`). The set of open trades is **not static**: each tick
-re-simulates from history, so `paper_state.json` (and every page built from it) reflects
-whatever ideas are currently open — trades enter and exit on their own, and the charts and
-tables regenerate to match. The weekly email is delivered from the cloud by GitHub Actions
-(`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC), independent of this machine.
+`xbrl_build.py` downloads ~5GB of SEC quarterly zips one at a time, parsing and deleting each.
+It is already run: `xbrl_links.json` is committed and is the reproducible artifact.
 
-### Architecture (deterministic core; LLM owns orchestration/parsing only)
-- `elp/trades.py` — dynamic per-trade engine (entry signal, trailing stop, exits, net-of-cost stats)
-- `elp/express.py` — expression engine: turns each signal into a paired two-legged long/short idea (primary leg + liquidity-chosen neutralizer / ETF hedge)
-- `elp/liquidity.py` — tradeability / dollar-ADV gate used by the expression engine and link validation
-- `elp/linkcheck.py` — link validation (price-sanity + name↔ticker checks; quarantines bad links to `rejected_links.json`)
-- `elp/options.py` — Black-Scholes bear-put-spread pricer (defined-risk short leg, Grade-C IV)
-- `elp/signal.py` — prior-month customer return → supplier signal
-- `elp/digest.py` — Fable-5 Master/Orchestrator daily digest (ranks/narrates open trades; never emits a number)
-- `elp/tradeviz.py` — per-trade detail charts (pure inline SVG, no JS deps): OHLC candlesticks for stock legs, a blue line for the option (spread) mark with the underlying's candles grouped above it, a combined-return chart, date x-axis + y-value axis, and a light/dark toggle; rebuilt from the current open list every tick
-- `elp/catalyst.py`, `elp/news.py` — LLM news/catalyst ensemble → `catalyst.json` (fail-soft; feeds the digest and dashboard flags)
-- `elp/risk.py` — LLM risk/borrow facts → `risk.json` (fail-soft; short-borrow / hard-to-borrow flags)
-- `elp/killrule.py` — Phase-5 kill-rule scorecard (Sharpe / expectancy / dealflow gate)
-- `elp/backtest.py` — monthly cross-sectional long/short engine (engine validation)
-- `elp/links.py` — `load_universe()` over the diversified link table (`universe_links.json`)
-- `elp/llm.py` — LLM link extraction + `complete_fallback` (Fable-5 → Opus-4.8) (Phase B / Phase 3)
-- `elp/tiingo.py` — production prices (`fetch_daily`, `fetch_daily_ohlc`); `elp/prices.py` — keyless Yahoo prototype
-- `elp/edgar.py`, `elp/cf_links.py` — SEC EDGAR extractor; free Cohen-Frazzini link-file parser
-- Entry scripts: `track.py`, `catalyst.py`, `risk.py`, `digest.py`, `dashboard.py`, `tradeviz.py`, `email_report.py`, `linkcheck.py`, and the `phase0/1/2a/2a_build/b_build/c_backtest/c_coverage/d_dynamic.py` phase drivers
-- Delivery: `dashboard.py` → `site/index.html` and `tradeviz.py` → `site/trades.html` (both served by `serve.sh`); `email_report.py` (stdlib `smtplib` weekly report, self-only recipient) sent from the cloud by `.github/workflows/weekly-email.yml`
+### Architecture
+- `elp/fsds.py` — SEC Financial Statement Data Sets reader: streams a quarterly zip, yields
+  `MajorCustomers`-tagged facts as `{cik, member, filed, value, tag, uom}`
+- `elp/edgar.py` — CIK↔ticker map (canonical common share, not a preferred), `CATEGORY`
+  blocklist, and `resolve_member()`: the precision-gated XBRL-member-to-ticker resolver
+- `xbrl_build.py` — sweeps quarters, picks each supplier's **principal customer** by largest
+  disclosed USD revenue per filing, writes the dated link table `xbrl_links.json`
+- `elp/pit.py` — `links_asof()`: dated links → `{formation month: [(supplier, customer)]}`.
+  A link is live the month after `filed` and lapses `LIFE_MONTHS = 15` later; a newer
+  disclosure supersedes an older one, so a supplier holds one customer in any month
+- `elp/backtest.py` — the paper's engine: rank suppliers by their principal customer's
+  prior-month return, long the top slice, short the bottom, equal weight, hold one month.
+  Accepts a static link list or a point-in-time table
+- `elp/pairtest.py` — the test battery: `screen()`, `screened_sharpe()`, `placebo()`,
+  `placebo_pvalue()`, `market_beta()`, `suppliers_per_month()`
+- `calibrate.py` — the gate: the false-positive rate of screen+placebo under a no-effect null
+- `elp/signal.py` — lagged vs contemporaneous pair statistics
+- `elp/linkcheck.py`, `elp/liquidity.py` — link validation, dollar-ADV gate
+- `elp/tiingo.py` — production prices (with retry); `elp/prices.py` — keyless Yahoo prototype
+- `elp/links.py`, `elp/cf_links.py`, `elp/llm.py` — legacy link universes (LLM/EDGAR and the
+  free Cohen-Frazzini file). Superseded by `xbrl_links.json`; kept for the phase drivers
+
+## The two invariants that make the result mean anything
+
+**1. `screen()` is a pure function of `(links, returns)` and runs on the UNION of pairs over
+full history, never month by month.** It filters pairs on `lagged_corr > 0` measured on the
+same history the backtest then runs on, which alone is data snooping. `placebo()` applies the
+*identical* screen to every random rewiring, so the selection bias lands on both sides. This is
+why the null Sharpe is +0.44 rather than zero, and why the real Sharpe is compared to that null
+and never to zero. If the real and null universes were screened or traded differently, the
+p-value would be meaningless.
+
+**2. Never quote a p-value before `calibrate.py` passes.** Decide what "significant" means while
+you still have no stake in the outcome.
+
+## Hard-won lessons (do not relearn these)
+
+- **A resolver cannot be validated by unit tests on synthetic fixtures.** Every consequential
+  bug here was invisible to a green suite and obvious the moment the shipped code met real SEC
+  data. A reviewer explicitly cleared `_canonical` as "verified as sound" while it corrupted 204
+  of 8004 CIKs (`DTE`→`DTB`, `GOOGL`→`GOOG`). Run the real code on real data and read the output.
+- **Prove every guard test fails when you remove the behaviour it guards.** Three vacuous tests
+  shipped in this project and were caught in review: a fixture with no colliding company, a sort
+  assertion whose fixture was already sorted, and four point-in-time tests that passed with the
+  `pit` argument ignored entirely.
+- **"Principal customer" is not "first in the list".** It silently became "alphabetically first"
+  twice, at two different layers. It is the customer with the largest disclosed revenue.
+- **A swallowed failure is a defect.** A transient price fetch once rendered as "not enough
+  overlapping price history", blaming the data for a network error. Every fallback, skip and drop
+  must be counted and printed.
 
 ## What this project is about
 
-The goal is to implement and backtest the trading strategy from Cohen &
-Frazzini, "Economic Links and Predictable Returns" (this draft dated
-2006-02-23; later published in the *Journal of Finance*, 2008). Details below
-were verified against the PDF text (extracted via `pdftotext`), not recalled
-from memory.
+Cohen & Frazzini, "Economic Links and Predictable Returns" (draft 2006-02-23; *Journal of
+Finance*, 2008). Details below were verified against the PDF text (`pdftotext`), not recalled.
 
-Core finding: due to investor limited attention, stock prices do not promptly
-incorporate news about *economically linked* firms, producing cross-firm return
-predictability. The links used are **customer-supplier** relationships. Under
-SFAS 131 (SFAS 14 before 1997), a firm must disclose the identity of any
-customer representing **more than 10% of total sales**; in the linked sample the
-average customer accounts for **~20%** of the supplier's sales.
+Core claim: because of limited investor attention, prices do not promptly incorporate news about
+economically linked firms, producing cross-firm return predictability. Links are
+**customer-supplier**: under SFAS 131 (SFAS 14 before 1997) a firm must disclose any customer
+representing **more than 10% of total sales**; in the linked sample the average customer is
+**~20%** of the supplier's sales.
 
-The strategy: each month, go long suppliers whose principal customer had the
-most positive stock return last month and short those whose customer had the
-worst, then rebalance monthly. The headline result is a long/short monthly alpha
-of **over 150 basis points (>18% per year)**. Baseline portfolios are
-**equal-weighted**; value-weighted variants are also reported. Risk adjustment
-uses a **4-factor (Carhart) model**. The Coastcast / Callaway pair (Section I)
-is the motivating worked example.
+The strategy: each month, long suppliers whose principal customer had the best stock return last
+month and short those whose customer had the worst; rebalance monthly. Headline result is a
+long/short monthly alpha **over 150 basis points (>18%/yr)**. Baseline portfolios are
+**equal-weighted**; risk adjustment uses a **4-factor (Carhart)** model. Coastcast / Callaway
+(Section I) is the motivating worked example. Universe is CRSP/Compustat U.S. common stocks
+(share codes 10, 11); links come from **Compustat segment files**, 1980-2004.
 
-Key data facts for replication:
-- **Universe / returns**: CRSP/Compustat, U.S. common stocks (CRSP share codes
-  10 and 11).
-- **Link data**: firms' principal customers from the **Compustat segment
-  files**, mapped to the customer's CRSP `permno`.
-- **Sample period**: customer-supplier data cover **1980–2004**.
-
-## Pipeline shape
-
-The stages are kept separable (data ingest → link mapping → signal → portfolio
-→ performance) so each can be verified against the paper independently:
-
-- **Link data**: the paper uses Compustat segment files (unavailable freely).
-  We use a diversified LLM-extracted EDGAR link table (`universe_links.json`,
-  via `elp/llm.py` / `elp/edgar.py`), with the free Cohen-Frazzini link file
-  (`elp/cf_links.py`) as historical ground truth. The named-link limits are
-  documented in `research/09`.
-- **Returns data**: daily equity returns from Tiingo (`elp/tiingo.py`);
-  keyless Yahoo (`elp/prices.py`) is a prototype only.
-- **Signal construction**: prior-month customer return → supplier signal (`elp/signal.py`).
-- **Portfolio / trade formation**: the live system is the dynamic per-trade
-  engine (`elp/trades.py`); `elp/backtest.py` is the monthly cross-sectional
-  long/short engine used for validation.
+Our replication substitutes SEC XBRL `srt:MajorCustomersAxis` disclosures (2013-2025) for the
+Compustat segment files, which are not free. A null on 2013-2025 is consistent with the effect
+having been real in 1980-2004 and since arbitraged away; this test cannot separate that from its
+never having existed.
 
 ## Conventions
 
-Follow the machine-global conventions in `~/.claude/CLAUDE.md` (concise commits
-and push after meaningful changes, finance/quant framing, autonomy rules).
-This project is deliberately **stdlib-only** — no third-party dependencies (not
-even pandas/numpy). Keep it that way unless a dependency clearly earns its keep;
-prefer bespoke stdlib code over adding a package.
+Follow the machine-global conventions in `~/.claude/CLAUDE.md`. This project is deliberately
+**stdlib-only** — no third-party dependencies, not even pandas or numpy. There is **no LLM in the
+link pipeline**: extraction and resolution must stay deterministic and reproducible. Keep it that
+way.

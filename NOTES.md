@@ -3,6 +3,33 @@
 Autonomous build session. Everything below is committed and pushed to `main`.
 Full plan in `PLAN.md`; literature/data research in `research/`.
 
+> **Update 2026-07-10 (later) — the live engine is retired and the cron is stopped.**
+>
+> The powered test says there is no edge, so the daily paper-trade engine was resolved by
+> deletion rather than by fixing its known bugs (the lookahead beta in the hedge sizing, the
+> `is_tradeable` lookahead, the in-sample return displayed as forward). Fixing code we had
+> decided to delete would have been waste.
+>
+> **Removed:** `elp/trades.py`, `elp/express.py`, `elp/options.py`, `elp/tradeviz.py`,
+> `elp/catalyst.py`, `elp/news.py`, `elp/risk.py`, `elp/digest.py`, `elp/killrule.py`,
+> `track.py`, `catalyst.py`, `risk.py`, `digest.py`, `dashboard.py`, `tradeviz.py`,
+> `email_report.py`, `phase_d_dynamic.py`, `run_paper.sh`, `serve.sh`,
+> `.github/workflows/weekly-email.yml`, `paper_state.json`, `paper_start.txt`, and their 14
+> test modules. Suite goes 231 -> 123 tests, still green.
+>
+> **Stopped:** the two crontab entries `0 22 * * 1-5 run_paper.sh` and `@reboot serve.sh`
+> (crontab backed up to `~/crontab.backup.2026-07-10`); the dashboard server on :8787. The
+> hourly `autosync.sh` and the unrelated `hidden-markov` jobs are untouched. Nothing is served,
+> nothing is emailed, nothing runs on a schedule. Nothing was ever executed or sent to a broker.
+>
+> **Kept:** the paper's monthly engine (`elp/backtest.py`), the test battery
+> (`elp/pairtest.py`, `calibrate.py`, `pairtest.py`), the point-in-time link universe
+> (`elp/fsds.py`, `elp/pit.py`, `xbrl_build.py`, `xbrl_links.json`), link validation,
+> price sources, and the historical phase drivers.
+>
+> `elp/liquidity.py` and `elp/llm.py` survive because `linkcheck.py` and `phase_b_build.py`
+> still use them, not because the engine did.
+
 > **Update 2026-07-10 — the universe was expanded, the test has power, and the effect is not there.**
 >
 > Follows the 2026-07-09 entry below, which found `p = 0.828` on a 3-supplier cross-section and
@@ -366,7 +393,7 @@ expansion is what diversifies it.
 
 ## How to run
 ```
-python3 -m unittest discover -s tests   # 231 offline tests
+python3 -m unittest discover -s tests   # 123 offline tests
 python3 xbrl_build.py                    # SEC XBRL sweep → xbrl_links.json (point-in-time links)
 python3 calibrate.py 40 600 100 0        # calibration gate: run BEFORE quoting a p-value
 python3 pairtest.py                      # C-F test battery: screen → pooled → L/S → placebo

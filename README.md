@@ -28,37 +28,46 @@ The implementation plan is in [PLAN.md](PLAN.md) and the supporting literature/d
 
 Implementation notes live in [CLAUDE.md](CLAUDE.md).
 
-## Status: live forward paper-trade (dynamic per-trade)
+## Status: research complete, and the answer is a null
 
-Decision (see `NOTES.md`, `research/10`): rigorous free *historical* proof is infeasible
-(C-F links are permno-keyed; no free delisted ticker map), so we prove it **forward** —
-a live paper-trade logged out-of-sample and scored net of costs as trades close. The live
-system is a **dynamic per-trade engine** (`elp/trades.py`): it enters on the customer
-signal, manages each trade with a trailing stop + signal-reversal exit, and expresses the
-short leg as a defined-risk **bear-put-spread** (no borrow). `track.py` runs the daily tick
-and `dashboard.py` renders the results.
-
-Stdlib-only (no third-party deps). Run:
+Tested on free modern data (SEC XBRL customer disclosures, 2013-2025) with a point-in-time link
+universe and a permutation test calibrated *before* the answer was computed.
 
 ```
-python3 -m unittest discover -s tests   # offline logic tests (71)
-python3 track.py                         # daily tick: open/manage trades + score OOS closed → paper_state.json
-python3 digest.py                        # Fable-5 daily digest (ranked read of the open book) → digest.json
-python3 dashboard.py                     # paper_state.json (+ digest.json) → site/index.html
+p = 0.234     real long/short Sharpe +0.63
+              null Sharpe from randomly rewiring the same links: mean +0.44
+```
+
+The strategy posts +28.8% annualized, Sharpe 0.63, a 58% hit rate and a market beta of -0.09.
+Against zero that reads as a discovery. Against a null built by randomly rewiring the same 135
+links through the identical screen, it is a 77th-percentile draw. **That gap is the result.**
+
+This is a real null rather than an absence of power: injecting the paper's own effect size into
+the real returns is detected at `p = 0.033`, in 5 of 5 placebo seeds. The calibration gate
+passed first (false-positive rate 4.8% against a nominal 5.0%, on 600 trials).
+
+An earlier attempt on a 3-supplier universe returned `p = 0.828`, which was uninformative: no
+evidence, and no ability to find any. Expanding to a median of 40 suppliers per formation month
+is what made the null meaningful. Caveats that bound the claim (survivorship, era, XBRL tagging
+selection) are in `NOTES.md`.
+
+Stdlib-only (no third-party deps, no LLM in the pipeline). Run:
+
+```
+python3 -m unittest discover -s tests   # 123 offline logic tests, no network
+python3 xbrl_build.py                    # SEC XBRL sweep 2013-2025 -> xbrl_links.json (committed)
+python3 calibrate.py 40 600 100 0        # calibration gate; run BEFORE quoting a p-value
+python3 pairtest.py                      # screen -> pooled stats -> long/short -> placebo
 python3 phase0.py / phase1.py            # earlier signal-direction check / engine on curated set
 python3 phase_c_backtest.py              # directional historical check on resolvable C-F links
 ```
 
-`track.py` needs a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`). It writes
-`paper_state.json` (dashboard + OOS audit trail) and `paper_start.txt` (the OOS boundary).
-`run_paper.sh` chains track → digest → dashboard → serve → commit/push on a weekday-evening cron.
-Recommendations only — no execution.
+`pairtest.py` and `xbrl_build.py` need a Tiingo token (`TIINGO_API_KEY` or `.tiingo_token`) plus
+SEC's free bulk data.
 
-**Delivery.** A `digest.py` step ranks/narrates the open book with Fable-5 (numbers still
-come from `paper_state.json`, never the model), rendered into the dashboard. A weekly email
-report (`email_report.py`, stdlib `smtplib`, self-only recipient) is sent **from the cloud**
-by GitHub Actions (`.github/workflows/weekly-email.yml`, Mondays 08:00 UTC), so it arrives
-even when this machine is down; the basement cron is an on-demand fallback.
+**Nothing runs on a schedule.** The daily paper-trade engine, the options overlay, the LLM
+narration layer, the dashboard and the weekly email were retired on 2026-07-10 once the result
+came in. No cron, no server, no email. Nothing was ever executed or connected to a broker.
 
 Production prices come from **Tiingo** (`elp/tiingo.py`, per
 [research/08](research/08-data-procurement.md)); keyless Yahoo (`elp/prices.py`) survives

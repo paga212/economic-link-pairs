@@ -95,11 +95,60 @@ class TestPointInTimeLinks(unittest.TestCase):
                 "C2": {m: -0.05 for m in ms}}
 
     def test_a_repeated_mapping_equals_the_static_list(self):
-        """A per-month table that repeats the same links must reproduce the static result."""
+        """Smoke test only: checks the static and PIT code paths agree when the PIT
+        table repeats the same links every month. Because the content never varies
+        by month, this does NOT distinguish formation-month indexing from
+        holding-month indexing (both would produce identical output here); the
+        formation/holding key-swap guard lives in
+        test_a_formation_holding_key_swap_is_detected below."""
         R = self._returns()
         static = [("S1", "C1"), ("S2", "C2")]
         pit = {m: list(static) for m in _months(6)}
         self.assertEqual(long_short_returns(static, R), long_short_returns(pit, R))
+
+    def test_a_formation_holding_key_swap_is_detected(self):
+        """PIT link content varies from month to month, so indexing by holding month
+        (a formation<->holding key-swap bug) selects a genuinely different supplier
+        set than indexing by formation month, and yields a different long-short
+        return -- not merely a plausible-looking one."""
+        months = _months(8)
+        mapping_a = [("S1", "C1"), ("S2", "C2"), ("S3", "C3")]
+        mapping_b = [("S1", "C3"), ("S2", "C2"), ("S3", "C1")]  # C1/C3 swapped vs S1/S3
+        links = {m: (mapping_a if i % 2 == 0 else mapping_b) for i, m in enumerate(months)}
+
+        returns = {
+            "C1": {m: 0.10 for m in months},
+            "C2": {m: 0.00 for m in months},
+            "C3": {m: -0.10 for m in months},
+            "S1": {m: 1.0 for m in months},
+            "S2": {m: 2.0 for m in months},
+            "S3": {m: 3.0 for m in months},
+        }
+
+        H = months[4]  # interior holding month: not first/last, so neither a
+        # KeyError nor the n<2 filter can mask the bug. Formation month is
+        # months[3] (odd index -> mapping_b); H itself is even index -> mapping_a.
+        # Adjacent months always have opposite parity, so the two mappings never
+        # coincide between a formation month and its holding month.
+
+        out = long_short_returns(links, returns)
+
+        # Correct (formation-keyed) result: cust_of(links[months[3]]) = mapping_b ->
+        # S1->C3 (rc=-0.10), S2->C2 (rc=0.00), S3->C1 (rc=0.10)
+        # ranked ascending by rc: S1, S2, S3 -> short S1, long S3
+        # ls = supplier_holding(S3) - supplier_holding(S1) = 3.0 - 1.0 = 2.0
+        expected_from_formation = 2.0
+
+        # If the engine instead indexed the PIT dict by holding month H directly,
+        # it would use cust_of(links[H]) = mapping_a ->
+        # S1->C1 (rc=0.10), S2->C2 (rc=0.00), S3->C3 (rc=-0.10)
+        # ranked ascending by rc: S3, S2, S1 -> short S3, long S1
+        # ls = supplier_holding(S1) - supplier_holding(S3) = 1.0 - 3.0 = -2.0
+        expected_from_holding = -2.0
+
+        self.assertIn(H, out)
+        self.assertAlmostEqual(out[H], expected_from_formation, places=9)
+        self.assertNotAlmostEqual(out[H], expected_from_holding, places=9)
 
     def test_a_month_with_no_links_is_skipped(self):
         R = self._returns()

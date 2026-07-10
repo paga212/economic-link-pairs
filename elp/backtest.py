@@ -29,7 +29,15 @@ def _next(key: tuple[int, int]) -> tuple[int, int]:
 
 
 def _cust_of(pairs: Links) -> dict[str, str]:
-    """{supplier: principal customer}. First listed wins, matching the paper's 'principal'."""
+    """{supplier: principal customer}. Takes the first (supplier, customer) pair
+    listed per supplier; the caller is responsible for ordering pairs so the
+    principal customer comes first. For the point-in-time path, elp/pit.py's
+    links_asof() returns a SORTED list, so "first" there means alphabetically
+    first by customer ticker, not necessarily "principal" -- though xbrl_build.py
+    now guarantees at most one customer per supplier per filing (it selects the
+    argmax-revenue customer), so the ordering question does not arise for the
+    XBRL universe. For the legacy static universe, the first entry is whatever
+    order the source file listed."""
     out: dict[str, str] = {}
     for s, c in pairs:
         out.setdefault(s, c)

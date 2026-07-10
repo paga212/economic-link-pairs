@@ -56,14 +56,16 @@ customerone customertwo customerthree customerfour customerfive customersix
 
 def _canonical(rows: dict) -> dict:
     """{cik: {'ticker','title'}} keeping ONE ticker per CIK. company_tickers.json lists every
-    share class (Ford: F, F-PB, F-PC, F-PD) and last-wins would pick a preferred. Prefer a
-    plain ticker, then the shortest, then alphabetical."""
+    share class (Ford: F, F-PB, F-PC, F-PD) for a CIK, with the primary common share FIRST --
+    that file order, not sorting, is what tells us which one is common. Take the first ticker
+    in file order that has no '-' or '.' (a share-class marker); if every class has one, take
+    the first overall."""
     by_cik: dict[int, list] = {}
     for row in rows.values():
         by_cik.setdefault(int(row["cik_str"]), []).append((row["ticker"], row["title"]))
     out = {}
     for cik, tks in by_cik.items():
-        tk, title = sorted(tks, key=lambda t: ("-" in t[0] or "." in t[0], len(t[0]), t[0]))[0]
+        tk, title = next((t for t in tks if "-" not in t[0] and "." not in t[0]), tks[0])
         out[cik] = {"ticker": tk, "title": title}
     return out
 
@@ -96,19 +98,24 @@ def _prefix_unique(toks: tuple, titles: dict) -> str | None:
 def resolve_member(member: str, by_name: dict, titles: dict) -> str | None:
     """Resolve an XBRL MajorCustomers member to a ticker, precision first.
 
-    Three gates, in order: reject known non-companies; exact normalized match; then a
-    UNIQUE prefix match (so 'Amazon' finds 'amazon com' but 'Delta' finds nothing, because
-    Delta Air Lines and Delta Apparel both start with it). A leading token shorter than 4
-    characters is rejected outright -- it matches too much.
+    Three gates, in order: reject known non-companies; exact normalized match (only if
+    unambiguous -- two different CIKs can normalize to the same title); then a UNIQUE prefix
+    match (so 'Amazon' finds 'amazon com' but 'Delta' finds nothing, because Delta Air Lines
+    and Delta Apparel both start with it). A leading token shorter than 4 characters is
+    rejected outright -- it matches too much.
     """
     if _member_key(member) in CATEGORY:
         return None
     name = _demember(member)
+    toks = tuple(norm(name).split())
+    if not toks:
+        return None
     tk = resolve(name, by_name)
     if tk:
-        return tk
-    toks = tuple(norm(name).split())
-    if not toks or len(toks[0]) < 4:
+        # by_name is built with setdefault, so an exact hit can hide a second CIK whose
+        # title normalizes the same way. Confirm via titles (a set) before trusting it.
+        return tk if len(titles.get(toks, ())) <= 1 else None
+    if len(toks[0]) < 4:
         return None
     return _prefix_unique(toks, titles)
 

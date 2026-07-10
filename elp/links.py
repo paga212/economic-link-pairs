@@ -1,7 +1,10 @@
-"""Customer->supplier link universe.
+"""Customer->supplier link universe (legacy fallback only).
 
-`load_universe()` returns the Phase-B LLM-extracted, disclosure-derived links
-(universe_links.json) when present, else falls back to the hand-curated HIGHSIGNAL_LINKS.
+The production universe is now the deterministic XBRL table `xbrl_links.json` (see
+`xbrl_build.py`); `pairtest.py` reads that directly. `load_universe()` remains as a fallback
+for the older phase scripts: it reads `universe_links.json` if present, else returns the
+hand-curated HIGHSIGNAL_LINKS. That JSON and its LLM producer (`phase_b_build.py`) were
+removed on 2026-07-10, so in this repo the function always returns HIGHSIGNAL_LINKS.
 The LINKS / CURATED_DIVERSE sets remain for the older phase scripts.
 """
 import json
@@ -59,10 +62,10 @@ HIGHSIGNAL_LINKS: list[tuple[str, str, str]] = [
 
 
 def load_universe(path: str = "universe_links.json", min_conf: float = 0.6):
-    """Phase-B disclosure-derived links (named + confident), else the hand-curated set.
+    """Disclosure-derived links from `path` (named + confident), else the hand-curated set.
 
-    Returns list of (supplier, customer, note). The daily tracker uses this; refresh the
-    file with phase_b_build.py (it is NOT re-extracted on every run).
+    Returns list of (supplier, customer, note). `universe_links.json` no longer exists in this
+    repo, so this returns HIGHSIGNAL_LINKS unless a caller passes an explicit `path`.
     """
     if os.path.exists(path):
         try:

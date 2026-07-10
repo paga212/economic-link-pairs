@@ -34,7 +34,7 @@ python3 xbrl_build.py                    # SEC XBRL sweep 2013q1-2025q4 -> xbrl_
 python3 calibrate.py 40 600 100 0        # calibration gate; run BEFORE quoting any p-value
 python3 pairtest.py                      # the test battery: screen -> pooled -> L/S -> placebo
 python3 linkcheck.py                     # validate a link universe -> rejected_links.json
-# historical phase drivers: phase0/1/2a/2a_build/b_build/c_backtest/c_coverage.py
+# historical phase drivers: phase0/1/2a/2a_build/c_backtest/c_coverage.py
 ```
 `xbrl_build.py` downloads ~5GB of SEC quarterly zips one at a time, parsing and deleting each.
 It is already run: `xbrl_links.json` is committed and is the reproducible artifact.
@@ -58,8 +58,10 @@ It is already run: `xbrl_links.json` is committed and is the reproducible artifa
 - `elp/signal.py` — lagged vs contemporaneous pair statistics
 - `elp/linkcheck.py`, `elp/liquidity.py` — link validation, dollar-ADV gate
 - `elp/tiingo.py` — production prices (with retry); `elp/prices.py` — keyless Yahoo prototype
-- `elp/links.py`, `elp/cf_links.py`, `elp/llm.py` — legacy link universes (LLM/EDGAR and the
-  free Cohen-Frazzini file). Superseded by `xbrl_links.json`; kept for the phase drivers
+- `elp/links.py`, `elp/cf_links.py` — legacy link universes (a hand-curated fallback set and the
+  free Cohen-Frazzini file). Superseded by `xbrl_links.json`; kept for the phase drivers. The LLM
+  extraction path (`elp/llm.py`, `phase_b_build.py`, `universe_links.json`) was removed 2026-07-10:
+  the XBRL universe is deterministic, so the pipeline has no LLM in it at all
 
 ## The two invariants that make the result mean anything
 

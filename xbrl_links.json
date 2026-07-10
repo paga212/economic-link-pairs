@@ -1,0 +1,4692 @@
+[
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2013-01-07"
+ },
+ {
+  "supplier": "ISSC",
+  "customer": "AAL",
+  "filed": "2013-02-11"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2013-02-25"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2013-02-26"
+ },
+ {
+  "supplier": "SD",
+  "customer": "OXY",
+  "filed": "2013-03-01"
+ },
+ {
+  "supplier": "OLP",
+  "customer": "HVT",
+  "filed": "2013-03-15"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2013-03-15"
+ },
+ {
+  "supplier": "RMTI",
+  "customer": "DVA",
+  "filed": "2013-03-18"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2013-03-27"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2013-04-01"
+ },
+ {
+  "supplier": "CDXS",
+  "customer": "SHEL",
+  "filed": "2013-04-02"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2013-04-08"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2013-05-06"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2013-05-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2013-05-08"
+ },
+ {
+  "supplier": "ISSC",
+  "customer": "AAL",
+  "filed": "2013-05-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2013-05-15"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2013-07-08"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2013-07-29"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2013-08-06"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2013-08-07"
+ },
+ {
+  "supplier": "ISSC",
+  "customer": "AAL",
+  "filed": "2013-08-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2013-08-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2013-08-14"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2013-10-28"
+ },
+ {
+  "supplier": "INVA",
+  "customer": "CAH",
+  "filed": "2013-11-01"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2013-11-04"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2013-11-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2013-11-13"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2013-11-14"
+ },
+ {
+  "supplier": "MWA",
+  "customer": "FERG",
+  "filed": "2013-11-22"
+ },
+ {
+  "supplier": "ISSC",
+  "customer": "AAL",
+  "filed": "2013-12-20"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2014-01-07"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2014-02-07"
+ },
+ {
+  "supplier": "IRWD",
+  "customer": "AZN",
+  "filed": "2014-02-07"
+ },
+ {
+  "supplier": "ISSC",
+  "customer": "AAL",
+  "filed": "2014-02-11"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2014-02-18"
+ },
+ {
+  "supplier": "CLW",
+  "customer": "KR",
+  "filed": "2014-02-20"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2014-02-20"
+ },
+ {
+  "supplier": "IDCC",
+  "customer": "INTC",
+  "filed": "2014-02-24"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2014-02-26"
+ },
+ {
+  "supplier": "CWEN",
+  "customer": "PCG",
+  "filed": "2014-02-28"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2014-02-28"
+ },
+ {
+  "supplier": "SD",
+  "customer": "OXY",
+  "filed": "2014-02-28"
+ },
+ {
+  "supplier": "INVA",
+  "customer": "MCK",
+  "filed": "2014-03-03"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "SONY",
+  "filed": "2014-03-12"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2014-03-14"
+ },
+ {
+  "supplier": "OLP",
+  "customer": "HVT",
+  "filed": "2014-03-17"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2014-03-20"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2014-03-27"
+ },
+ {
+  "supplier": "GLP",
+  "customer": "PSX",
+  "filed": "2014-04-01"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2014-04-07"
+ },
+ {
+  "supplier": "TK",
+  "customer": "BP",
+  "filed": "2014-04-28"
+ },
+ {
+  "supplier": "TNK",
+  "customer": "COP",
+  "filed": "2014-04-30"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2014-05-07"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2014-05-08"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2014-05-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2014-05-14"
+ },
+ {
+  "supplier": "XNCR",
+  "customer": "AMGN",
+  "filed": "2014-05-15"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2014-07-03"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2014-07-03"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2014-07-22"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2014-08-01"
+ },
+ {
+  "supplier": "XNCR",
+  "customer": "AMGN",
+  "filed": "2014-08-01"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2014-08-04"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2014-08-08"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2014-08-11"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2014-08-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2014-08-14"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2014-10-27"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2014-11-03"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "FE",
+  "filed": "2014-11-04"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2014-11-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2014-11-10"
+ },
+ {
+  "supplier": "XNCR",
+  "customer": "AMGN",
+  "filed": "2014-11-10"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2014-11-13"
+ },
+ {
+  "supplier": "MWA",
+  "customer": "FERG",
+  "filed": "2014-11-26"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2015-01-09"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2015-02-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2015-02-17"
+ },
+ {
+  "supplier": "IRWD",
+  "customer": "AZN",
+  "filed": "2015-02-18"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2015-02-19"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2015-02-25"
+ },
+ {
+  "supplier": "CLW",
+  "customer": "KR",
+  "filed": "2015-02-26"
+ },
+ {
+  "supplier": "BRK-B",
+  "customer": "WMT",
+  "filed": "2015-03-02"
+ },
+ {
+  "supplier": "GLP",
+  "customer": "PSX",
+  "filed": "2015-03-03"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2015-03-10"
+ },
+ {
+  "supplier": "OLP",
+  "customer": "HVT",
+  "filed": "2015-03-12"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2015-03-13"
+ },
+ {
+  "supplier": "GLP",
+  "customer": "PSX",
+  "filed": "2015-03-13"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2015-03-17"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2015-03-30"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2015-04-10"
+ },
+ {
+  "supplier": "TNK",
+  "customer": "COP",
+  "filed": "2015-04-28"
+ },
+ {
+  "supplier": "TK",
+  "customer": "BP",
+  "filed": "2015-04-29"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2015-05-05"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2015-05-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2015-05-08"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2015-05-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2015-05-14"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2015-05-15"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2015-07-10"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2015-07-31"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2015-08-04"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2015-08-05"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2015-08-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2015-08-10"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2015-08-10"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2015-08-12"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2015-08-14"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2015-09-04"
+ },
+ {
+  "supplier": "EYPT",
+  "customer": "PFE",
+  "filed": "2015-09-10"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2015-10-27"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2015-11-03"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2015-11-04"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2015-11-05"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2015-11-06"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2015-11-06"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2015-11-06"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2015-11-13"
+ },
+ {
+  "supplier": "MWA",
+  "customer": "FERG",
+  "filed": "2015-11-24"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2016-01-08"
+ },
+ {
+  "supplier": "LYTS",
+  "customer": "PSX",
+  "filed": "2016-02-04"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2016-02-05"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "BNS",
+  "filed": "2016-02-17"
+ },
+ {
+  "supplier": "IDCC",
+  "customer": "KYOCF",
+  "filed": "2016-02-18"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2016-02-18"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2016-02-18"
+ },
+ {
+  "supplier": "IRWD",
+  "customer": "AZN",
+  "filed": "2016-02-19"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2016-02-19"
+ },
+ {
+  "supplier": "CLW",
+  "customer": "KR",
+  "filed": "2016-02-22"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2016-02-25"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "BMY",
+  "filed": "2016-02-25"
+ },
+ {
+  "supplier": "BRK-B",
+  "customer": "WMT",
+  "filed": "2016-02-29"
+ },
+ {
+  "supplier": "GLP",
+  "customer": "PSX",
+  "filed": "2016-02-29"
+ },
+ {
+  "supplier": "RIGL",
+  "customer": "BMY",
+  "filed": "2016-03-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2016-03-11"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2016-03-11"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2016-03-14"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2016-03-15"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2016-03-30"
+ },
+ {
+  "supplier": "TK",
+  "customer": "BP",
+  "filed": "2016-04-26"
+ },
+ {
+  "supplier": "TNK",
+  "customer": "COP",
+  "filed": "2016-04-27"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2016-04-28"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2016-05-05"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2016-05-06"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2016-05-06"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2016-05-09"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2016-05-10"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2016-05-10"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2016-05-13"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2016-07-29"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2016-08-02"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2016-08-04"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2016-08-04"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2016-08-05"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2016-08-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2016-08-09"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2016-08-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2016-08-15"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2016-10-28"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2016-10-31"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2016-11-01"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2016-11-02"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2016-11-04"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2016-11-07"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2016-11-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2016-11-08"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2016-11-14"
+ },
+ {
+  "supplier": "MWA",
+  "customer": "FERG",
+  "filed": "2016-11-22"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2017-01-09"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2017-02-08"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2017-02-16"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2017-02-17"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2017-02-21"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "TD",
+  "filed": "2017-02-21"
+ },
+ {
+  "supplier": "CLW",
+  "customer": "KR",
+  "filed": "2017-02-22"
+ },
+ {
+  "supplier": "IDCC",
+  "customer": "AAPL",
+  "filed": "2017-02-23"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2017-02-23"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2017-02-24"
+ },
+ {
+  "supplier": "FCX",
+  "customer": "PSX",
+  "filed": "2017-02-24"
+ },
+ {
+  "supplier": "BRK-B",
+  "customer": "WMT",
+  "filed": "2017-02-27"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2017-02-27"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "BIIB",
+  "filed": "2017-03-01"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2017-03-01"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2017-03-06"
+ },
+ {
+  "supplier": "RIGL",
+  "customer": "BMY",
+  "filed": "2017-03-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2017-03-09"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2017-03-09"
+ },
+ {
+  "supplier": "CVLG",
+  "customer": "WMT",
+  "filed": "2017-03-14"
+ },
+ {
+  "supplier": "OSUR",
+  "customer": "ABBV",
+  "filed": "2017-03-14"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2017-03-28"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2017-03-30"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2017-05-01"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2017-05-04"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2017-05-05"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2017-05-09"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2017-05-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2017-05-15"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2017-07-31"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2017-08-02"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2017-08-04"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2017-08-08"
+ },
+ {
+  "supplier": "LRN",
+  "customer": "API",
+  "filed": "2017-08-09"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2017-08-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2017-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "CMCSA",
+  "filed": "2017-09-01"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2017-09-07"
+ },
+ {
+  "supplier": "EYPT",
+  "customer": "PFE",
+  "filed": "2017-09-13"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2017-10-10"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2017-10-26"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2017-10-26"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2017-10-31"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DUK",
+  "filed": "2017-10-31"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2017-11-07"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ACHC",
+  "filed": "2017-11-08"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2017-11-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2017-11-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2017-11-14"
+ },
+ {
+  "supplier": "MWA",
+  "customer": "FERG",
+  "filed": "2017-11-21"
+ },
+ {
+  "supplier": "DY",
+  "customer": "CMCSA",
+  "filed": "2017-11-22"
+ },
+ {
+  "supplier": "CNR",
+  "customer": "DUK",
+  "filed": "2017-12-13"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2017-12-20"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2018-01-25"
+ },
+ {
+  "supplier": "HCC",
+  "customer": "MT",
+  "filed": "2018-02-14"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2018-02-14"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2018-02-15"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2018-02-15"
+ },
+ {
+  "supplier": "CNR",
+  "customer": "DUK",
+  "filed": "2018-02-16"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ACHC",
+  "filed": "2018-02-16"
+ },
+ {
+  "supplier": "PPC",
+  "customer": "APWC",
+  "filed": "2018-02-16"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2018-02-21"
+ },
+ {
+  "supplier": "IDCC",
+  "customer": "AAPL",
+  "filed": "2018-02-22"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "TD",
+  "filed": "2018-02-22"
+ },
+ {
+  "supplier": "BRK-B",
+  "customer": "WMT",
+  "filed": "2018-02-26"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2018-02-27"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2018-02-27"
+ },
+ {
+  "supplier": "DY",
+  "customer": "CMCSA",
+  "filed": "2018-03-02"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2018-03-05"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2018-03-07"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2018-03-07"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2018-03-09"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2018-03-13"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2018-03-13"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2018-03-23"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2018-03-29"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2018-04-02"
+ },
+ {
+  "supplier": "LTM",
+  "customer": "FRGT",
+  "filed": "2018-04-05"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2018-04-24"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "TD",
+  "filed": "2018-04-26"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2018-04-30"
+ },
+ {
+  "supplier": "CNR",
+  "customer": "DUK",
+  "filed": "2018-05-03"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2018-05-08"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2018-05-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2018-05-09"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2018-05-10"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2018-05-10"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2018-05-10"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2018-05-15"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2018-05-24"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2018-06-04"
+ },
+ {
+  "supplier": "ORA",
+  "customer": "SCE-PN",
+  "filed": "2018-06-19"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2018-06-22"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2018-07-24"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2018-07-30"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2018-07-31"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2018-08-03"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2018-08-07"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "BIIB",
+  "filed": "2018-08-07"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2018-08-07"
+ },
+ {
+  "supplier": "LRN",
+  "customer": "API",
+  "filed": "2018-08-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2018-08-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2018-08-09"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2018-08-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2018-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2018-08-30"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2018-09-05"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2018-09-06"
+ },
+ {
+  "supplier": "EYPT",
+  "customer": "PFE",
+  "filed": "2018-09-18"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2018-10-15"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2018-10-23"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2018-10-26"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2018-10-29"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2018-11-02"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "BIIB",
+  "filed": "2018-11-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2018-11-06"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2018-11-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2018-11-09"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2018-11-09"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2018-11-09"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2018-11-09"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2018-11-09"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2018-11-13"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2018-11-14"
+ },
+ {
+  "supplier": "HP",
+  "customer": "EOG",
+  "filed": "2018-11-16"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2018-11-21"
+ },
+ {
+  "supplier": "MWA",
+  "customer": "FERG",
+  "filed": "2018-11-21"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2018-12-19"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2018-12-21"
+ },
+ {
+  "supplier": "AYI",
+  "customer": "INTR",
+  "filed": "2019-01-09"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2019-02-01"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2019-02-06"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2019-02-07"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2019-02-08"
+ },
+ {
+  "supplier": "GLPI",
+  "customer": "BYD",
+  "filed": "2019-02-13"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2019-02-13"
+ },
+ {
+  "supplier": "PPC",
+  "customer": "APWC",
+  "filed": "2019-02-14"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2019-02-15"
+ },
+ {
+  "supplier": "ASC",
+  "customer": "POOL",
+  "filed": "2019-02-15"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "ENSG",
+  "filed": "2019-02-19"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2019-02-20"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2019-02-21"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "TD",
+  "filed": "2019-02-21"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2019-02-22"
+ },
+ {
+  "supplier": "BRK-B",
+  "customer": "WMT",
+  "filed": "2019-02-25"
+ },
+ {
+  "supplier": "KBR",
+  "customer": "CVX",
+  "filed": "2019-02-26"
+ },
+ {
+  "supplier": "THRM",
+  "customer": "LEA",
+  "filed": "2019-02-26"
+ },
+ {
+  "supplier": "XYZ",
+  "customer": "SBUX",
+  "filed": "2019-02-27"
+ },
+ {
+  "supplier": "ACA",
+  "customer": "TRN",
+  "filed": "2019-02-28"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2019-03-01"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "BIIB",
+  "filed": "2019-03-01"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2019-03-01"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2019-03-04"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2019-03-05"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2019-03-07"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2019-03-08"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2019-03-11"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2019-03-15"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2019-03-18"
+ },
+ {
+  "supplier": "CPTP",
+  "customer": "AVB",
+  "filed": "2019-03-18"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2019-03-20"
+ },
+ {
+  "supplier": "HKHC",
+  "customer": "WMT",
+  "filed": "2019-03-20"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2019-03-21"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2019-03-29"
+ },
+ {
+  "supplier": "BW",
+  "customer": "SO",
+  "filed": "2019-04-02"
+ },
+ {
+  "supplier": "AYI",
+  "customer": "INTR",
+  "filed": "2019-04-03"
+ },
+ {
+  "supplier": "LTM",
+  "customer": "FRGT",
+  "filed": "2019-04-15"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2019-04-15"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2019-04-24"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2019-04-25"
+ },
+ {
+  "supplier": "BLX",
+  "customer": "FISI",
+  "filed": "2019-04-30"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2019-05-01"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2019-05-06"
+ },
+ {
+  "supplier": "PWR",
+  "customer": "PCG",
+  "filed": "2019-05-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2019-05-07"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2019-05-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2019-05-09"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2019-05-09"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2019-05-09"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2019-05-10"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2019-05-10"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "SKHY",
+  "filed": "2019-05-15"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2019-05-15"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2019-05-23"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2019-06-12"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2019-06-26"
+ },
+ {
+  "supplier": "AYI",
+  "customer": "INTR",
+  "filed": "2019-07-02"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2019-07-24"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2019-07-25"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2019-07-31"
+ },
+ {
+  "supplier": "ASC",
+  "customer": "POOL",
+  "filed": "2019-08-02"
+ },
+ {
+  "supplier": "PWR",
+  "customer": "PCG",
+  "filed": "2019-08-02"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2019-08-05"
+ },
+ {
+  "supplier": "LRN",
+  "customer": "API",
+  "filed": "2019-08-07"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2019-08-07"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2019-08-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2019-08-08"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2019-08-09"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2019-08-09"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2019-08-09"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2019-08-09"
+ },
+ {
+  "supplier": "TH",
+  "customer": "TCPA",
+  "filed": "2019-08-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2019-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2019-08-29"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2019-09-05"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2019-09-11"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2019-10-17"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2019-10-22"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2019-10-23"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2019-10-30"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2019-11-01"
+ },
+ {
+  "supplier": "PWR",
+  "customer": "PCG",
+  "filed": "2019-11-01"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2019-11-06"
+ },
+ {
+  "supplier": "GOGO",
+  "customer": "AAL",
+  "filed": "2019-11-07"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2019-11-07"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2019-11-07"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2019-11-08"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2019-11-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2019-11-08"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2019-11-12"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2019-11-12"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2019-11-12"
+ },
+ {
+  "supplier": "TH",
+  "customer": "TCPA",
+  "filed": "2019-11-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2019-11-14"
+ },
+ {
+  "supplier": "HP",
+  "customer": "EOG",
+  "filed": "2019-11-15"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2019-11-18"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2019-11-27"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2019-12-20"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2019-12-20"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2020-02-05"
+ },
+ {
+  "supplier": "SENEA",
+  "customer": "BGS",
+  "filed": "2020-02-05"
+ },
+ {
+  "supplier": "BIIB",
+  "customer": "ABBV",
+  "filed": "2020-02-06"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2020-02-06"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2020-02-12"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2020-02-13"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2020-02-13"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2020-02-19"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "TD",
+  "filed": "2020-02-20"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2020-02-24"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2020-02-25"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2020-02-27"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2020-02-27"
+ },
+ {
+  "supplier": "RIGL",
+  "customer": "ACRS",
+  "filed": "2020-02-27"
+ },
+ {
+  "supplier": "PWR",
+  "customer": "PCG",
+  "filed": "2020-02-28"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2020-03-02"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2020-03-02"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2020-03-02"
+ },
+ {
+  "supplier": "IONS",
+  "customer": "BIIB",
+  "filed": "2020-03-02"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2020-03-04"
+ },
+ {
+  "supplier": "CPTP",
+  "customer": "AVB",
+  "filed": "2020-03-06"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2020-03-06"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2020-03-11"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2020-03-13"
+ },
+ {
+  "supplier": "GOGO",
+  "customer": "AAL",
+  "filed": "2020-03-13"
+ },
+ {
+  "supplier": "TH",
+  "customer": "TCPA",
+  "filed": "2020-03-13"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2020-03-16"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2020-03-16"
+ },
+ {
+  "supplier": "HKHC",
+  "customer": "WMT",
+  "filed": "2020-03-17"
+ },
+ {
+  "supplier": "LTM",
+  "customer": "FRGT",
+  "filed": "2020-03-19"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2020-03-26"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2020-03-27"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2020-03-27"
+ },
+ {
+  "supplier": "BW",
+  "customer": "SO",
+  "filed": "2020-03-30"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "GMAB",
+  "filed": "2020-03-31"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "GMAB",
+  "filed": "2020-04-01"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2020-04-14"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2020-04-29"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2020-04-29"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2020-04-30"
+ },
+ {
+  "supplier": "RIGL",
+  "customer": "ACRS",
+  "filed": "2020-05-05"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2020-05-06"
+ },
+ {
+  "supplier": "VCYT",
+  "customer": "AZN",
+  "filed": "2020-05-06"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2020-05-07"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2020-05-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2020-05-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2020-05-11"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2020-05-11"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2020-05-11"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2020-05-15"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2020-05-15"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2020-05-21"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2020-06-04"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2020-06-10"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "SKHY",
+  "filed": "2020-06-12"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2020-06-30"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2020-07-29"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2020-07-30"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2020-07-30"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2020-08-04"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2020-08-05"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2020-08-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2020-08-10"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2020-08-10"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2020-08-10"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2020-08-10"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2020-08-10"
+ },
+ {
+  "supplier": "LRN",
+  "customer": "API",
+  "filed": "2020-08-12"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2020-08-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2020-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2020-08-27"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2020-09-03"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2020-09-09"
+ },
+ {
+  "supplier": "SMMT",
+  "customer": "SRPT",
+  "filed": "2020-09-29"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2020-10-19"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2020-10-28"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2020-10-28"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2020-10-29"
+ },
+ {
+  "supplier": "GTES",
+  "customer": "CTOS",
+  "filed": "2020-11-04"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2020-11-05"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2020-11-05"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2020-11-06"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2020-11-06"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2020-11-06"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2020-11-06"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2020-11-09"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2020-11-09"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2020-11-09"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2020-11-09"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2020-11-13"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2020-11-13"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2020-11-17"
+ },
+ {
+  "supplier": "HP",
+  "customer": "EOG",
+  "filed": "2020-11-20"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2020-11-24"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2020-12-14"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2020-12-18"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2021-02-04"
+ },
+ {
+  "supplier": "GTES",
+  "customer": "CTOS",
+  "filed": "2021-02-10"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2021-02-11"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2021-02-11"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2021-02-17"
+ },
+ {
+  "supplier": "CDE",
+  "customer": "TD",
+  "filed": "2021-02-17"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2021-02-17"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2021-02-18"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "JPM",
+  "filed": "2021-02-18"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2021-02-22"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2021-02-23"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2021-02-24"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2021-02-25"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2021-02-26"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2021-03-01"
+ },
+ {
+  "supplier": "INO",
+  "customer": "AZN",
+  "filed": "2021-03-01"
+ },
+ {
+  "supplier": "EYE",
+  "customer": "WMT",
+  "filed": "2021-03-03"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2021-03-04"
+ },
+ {
+  "supplier": "DY",
+  "customer": "VZ",
+  "filed": "2021-03-05"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2021-03-05"
+ },
+ {
+  "supplier": "OPTT",
+  "customer": "E",
+  "filed": "2021-03-05"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2021-03-05"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2021-03-10"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2021-03-10"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2021-03-11"
+ },
+ {
+  "supplier": "SMHI",
+  "customer": "XOM",
+  "filed": "2021-03-12"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2021-03-15"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2021-03-19"
+ },
+ {
+  "supplier": "HKHC",
+  "customer": "WMT",
+  "filed": "2021-03-29"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2021-03-29"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "PFE",
+  "filed": "2021-03-30"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2021-04-28"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2021-04-29"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2021-05-05"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2021-05-05"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2021-05-06"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2021-05-07"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2021-05-07"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2021-05-07"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2021-05-10"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2021-05-10"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2021-05-12"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "MU",
+  "filed": "2021-05-12"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2021-05-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2021-05-26"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2021-06-04"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2021-06-09"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2021-07-28"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2021-07-29"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2021-08-03"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2021-08-04"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2021-08-06"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2021-08-06"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2021-08-06"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2021-08-09"
+ },
+ {
+  "supplier": "GTES",
+  "customer": "CTOS",
+  "filed": "2021-08-09"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2021-08-09"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2021-08-09"
+ },
+ {
+  "supplier": "LRN",
+  "customer": "API",
+  "filed": "2021-08-11"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2021-08-13"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2021-08-16"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2021-09-02"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2021-09-02"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2021-09-08"
+ },
+ {
+  "supplier": "NLCP",
+  "customer": "CRLBF",
+  "filed": "2021-09-09"
+ },
+ {
+  "supplier": "OPTT",
+  "customer": "VAL",
+  "filed": "2021-09-13"
+ },
+ {
+  "supplier": "NLCP",
+  "customer": "CRLBF",
+  "filed": "2021-09-21"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2021-09-24"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2021-10-08"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2021-10-27"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2021-10-28"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2021-10-28"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2021-11-04"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2021-11-05"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2021-11-05"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2021-11-08"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "CYH",
+  "filed": "2021-11-08"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2021-11-09"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2021-11-09"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2021-11-09"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2021-11-12"
+ },
+ {
+  "supplier": "NLCP",
+  "customer": "CRLBF",
+  "filed": "2021-11-12"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2021-11-15"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2021-11-15"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2021-11-24"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2021-12-10"
+ },
+ {
+  "supplier": "OPTT",
+  "customer": "VAL",
+  "filed": "2021-12-14"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2021-12-17"
+ },
+ {
+  "supplier": "IVDA",
+  "customer": "CHT",
+  "filed": "2021-12-30"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2022-02-03"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2022-02-04"
+ },
+ {
+  "supplier": "GOLD",
+  "customer": "MS",
+  "filed": "2022-02-08"
+ },
+ {
+  "supplier": "MAR",
+  "customer": "HST",
+  "filed": "2022-02-15"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2022-02-16"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2022-02-16"
+ },
+ {
+  "supplier": "CDE",
+  "customer": "TD",
+  "filed": "2022-02-16"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2022-02-16"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2022-02-17"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2022-02-18"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2022-02-22"
+ },
+ {
+  "supplier": "DAN",
+  "customer": "STLA",
+  "filed": "2022-02-23"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "JPM",
+  "filed": "2022-02-24"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2022-02-25"
+ },
+ {
+  "supplier": "EYE",
+  "customer": "WMT",
+  "filed": "2022-02-28"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2022-02-28"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2022-02-28"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2022-03-01"
+ },
+ {
+  "supplier": "INO",
+  "customer": "AZN",
+  "filed": "2022-03-01"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2022-03-03"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2022-03-04"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2022-03-04"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2022-03-07"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2022-03-09"
+ },
+ {
+  "supplier": "SMHI",
+  "customer": "XOM",
+  "filed": "2022-03-10"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2022-03-11"
+ },
+ {
+  "supplier": "OPTT",
+  "customer": "E",
+  "filed": "2022-03-14"
+ },
+ {
+  "supplier": "AEIS",
+  "customer": "AMAT",
+  "filed": "2022-03-16"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2022-03-16"
+ },
+ {
+  "supplier": "NLCP",
+  "customer": "CRLBF",
+  "filed": "2022-03-18"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "MBGAF",
+  "filed": "2022-03-28"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "PFE",
+  "filed": "2022-03-30"
+ },
+ {
+  "supplier": "HKHC",
+  "customer": "WMT",
+  "filed": "2022-03-31"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2022-03-31"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-04-01"
+ },
+ {
+  "supplier": "TNK",
+  "customer": "SHEL",
+  "filed": "2022-04-06"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-04-11"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-04-22"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "MU",
+  "filed": "2022-04-25"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2022-04-27"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2022-04-27"
+ },
+ {
+  "supplier": "ILPT",
+  "customer": "FDX",
+  "filed": "2022-04-27"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2022-04-27"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2022-04-28"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2022-05-05"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2022-05-06"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2022-05-06"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2022-05-09"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2022-05-09"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2022-05-10"
+ },
+ {
+  "supplier": "G",
+  "customer": "GE",
+  "filed": "2022-05-10"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2022-05-10"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-05-13"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2022-05-16"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2022-05-26"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2022-05-27"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2022-06-08"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-06-16"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-07-01"
+ },
+ {
+  "supplier": "ILPT",
+  "customer": "FDX",
+  "filed": "2022-07-26"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2022-07-27"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2022-07-27"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2022-07-28"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2022-08-02"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2022-08-05"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2022-08-05"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2022-08-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2022-08-09"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2022-08-10"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2022-08-11"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-08-15"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2022-08-15"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2022-08-25"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2022-09-07"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2022-09-08"
+ },
+ {
+  "supplier": "MU",
+  "customer": "INTC",
+  "filed": "2022-10-07"
+ },
+ {
+  "supplier": "ILPT",
+  "customer": "FDX",
+  "filed": "2022-10-25"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2022-10-26"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "PFE",
+  "filed": "2022-10-26"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2022-10-27"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2022-11-01"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2022-11-02"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2022-11-03"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2022-11-04"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2022-11-04"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2022-11-08"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2022-11-08"
+ },
+ {
+  "supplier": "GOLD",
+  "customer": "MS",
+  "filed": "2022-11-09"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2022-11-10"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2022-11-14"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2022-11-14"
+ },
+ {
+  "supplier": "RDW",
+  "customer": "BA",
+  "filed": "2022-11-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2022-11-23"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2022-12-16"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2023-02-09"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2023-02-09"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2023-02-09"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2023-02-10"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2023-02-14"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2023-02-15"
+ },
+ {
+  "supplier": "ALKS",
+  "customer": "BIIB",
+  "filed": "2023-02-16"
+ },
+ {
+  "supplier": "DAN",
+  "customer": "STLA",
+  "filed": "2023-02-21"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "BKD",
+  "filed": "2023-02-21"
+ },
+ {
+  "supplier": "CDE",
+  "customer": "BMO",
+  "filed": "2023-02-22"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2023-02-22"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2023-02-22"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "JPM",
+  "filed": "2023-02-23"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2023-02-24"
+ },
+ {
+  "supplier": "PLX",
+  "customer": "PFE",
+  "filed": "2023-02-27"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2023-03-01"
+ },
+ {
+  "supplier": "EYE",
+  "customer": "WMT",
+  "filed": "2023-03-01"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2023-03-03"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2023-03-03"
+ },
+ {
+  "supplier": "SMHI",
+  "customer": "XOM",
+  "filed": "2023-03-06"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "BMY",
+  "filed": "2023-03-07"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2023-03-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2023-03-08"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2023-03-09"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2023-03-10"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2023-03-14"
+ },
+ {
+  "supplier": "MUX",
+  "customer": "BNS",
+  "filed": "2023-03-14"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "PFE",
+  "filed": "2023-03-27"
+ },
+ {
+  "supplier": "HKHC",
+  "customer": "WMT",
+  "filed": "2023-03-29"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2023-03-31"
+ },
+ {
+  "supplier": "TNK",
+  "customer": "SHEL",
+  "filed": "2023-03-31"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2023-03-31"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2023-04-14"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2023-04-26"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2023-04-27"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "MU",
+  "filed": "2023-04-28"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2023-05-02"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2023-05-02"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2023-05-04"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2023-05-09"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2023-05-09"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2023-05-09"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2023-05-09"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2023-05-10"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2023-05-10"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2023-05-11"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2023-05-12"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2023-05-25"
+ },
+ {
+  "supplier": "AMBA",
+  "customer": "MSI",
+  "filed": "2023-06-06"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2023-06-07"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "JPM",
+  "filed": "2023-07-20"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2023-07-26"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2023-07-27"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2023-08-04"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2023-08-04"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2023-08-07"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2023-08-07"
+ },
+ {
+  "supplier": "DAC",
+  "customer": "ZIM",
+  "filed": "2023-08-07"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2023-08-08"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2023-08-08"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2023-08-11"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2023-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2023-08-24"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2023-09-06"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2023-09-07"
+ },
+ {
+  "supplier": "KNOP",
+  "customer": "EQNR",
+  "filed": "2023-09-11"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2023-10-25"
+ },
+ {
+  "supplier": "CUZ",
+  "customer": "NSC",
+  "filed": "2023-10-26"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2023-11-03"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2023-11-03"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2023-11-07"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2023-11-07"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2023-11-07"
+ },
+ {
+  "supplier": "GOLD",
+  "customer": "MS",
+  "filed": "2023-11-08"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2023-11-09"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2023-11-09"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2023-11-14"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2023-11-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2023-11-22"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2023-11-29"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2023-12-15"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2024-01-26"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2024-02-06"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DTE",
+  "filed": "2024-02-08"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2024-02-08"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2024-02-14"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2024-02-14"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2024-02-15"
+ },
+ {
+  "supplier": "DAN",
+  "customer": "STLA",
+  "filed": "2024-02-20"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2024-02-20"
+ },
+ {
+  "supplier": "CDE",
+  "customer": "BMO",
+  "filed": "2024-02-21"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2024-02-22"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2024-02-23"
+ },
+ {
+  "supplier": "EYE",
+  "customer": "WMT",
+  "filed": "2024-02-27"
+ },
+ {
+  "supplier": "CYTK",
+  "customer": "AMGN",
+  "filed": "2024-02-28"
+ },
+ {
+  "supplier": "EDIT",
+  "customer": "VRTX",
+  "filed": "2024-02-28"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "JPM",
+  "filed": "2024-02-29"
+ },
+ {
+  "supplier": "SMHI",
+  "customer": "XOM",
+  "filed": "2024-02-29"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2024-03-01"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "BMY",
+  "filed": "2024-03-06"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2024-03-07"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2024-03-07"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2024-03-08"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2024-03-12"
+ },
+ {
+  "supplier": "PLX",
+  "customer": "PFE",
+  "filed": "2024-03-14"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2024-03-14"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2024-03-15"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2024-03-15"
+ },
+ {
+  "supplier": "TNK",
+  "customer": "SHEL",
+  "filed": "2024-03-15"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "PFE",
+  "filed": "2024-03-20"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2024-03-28"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2024-04-24"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "MU",
+  "filed": "2024-04-30"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2024-05-01"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2024-05-03"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2024-05-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2024-05-06"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "DKILF",
+  "filed": "2024-05-06"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2024-05-07"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2024-05-07"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2024-05-08"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2024-05-09"
+ },
+ {
+  "supplier": "GOLD",
+  "customer": "MS",
+  "filed": "2024-05-09"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2024-05-09"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2024-05-15"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2024-05-23"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2024-05-24"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2024-06-06"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2024-06-17"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2024-06-27"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2024-07-31"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2024-08-02"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2024-08-05"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2024-08-06"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2024-08-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2024-08-06"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2024-08-07"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2024-08-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "DKILF",
+  "filed": "2024-08-08"
+ },
+ {
+  "supplier": "INBX",
+  "customer": "REGN",
+  "filed": "2024-08-13"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2024-08-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2024-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2024-08-22"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2024-09-04"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2024-09-05"
+ },
+ {
+  "supplier": "KNOP",
+  "customer": "EQNR",
+  "filed": "2024-09-18"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2024-10-15"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2024-10-30"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "GSK",
+  "filed": "2024-10-31"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2024-11-01"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2024-11-05"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2024-11-05"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2024-11-05"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2024-11-07"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2024-11-07"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "DKILF",
+  "filed": "2024-11-07"
+ },
+ {
+  "supplier": "GOLD",
+  "customer": "MS",
+  "filed": "2024-11-08"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2024-11-08"
+ },
+ {
+  "supplier": "INBX",
+  "customer": "REGN",
+  "filed": "2024-11-14"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2024-11-14"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2024-11-14"
+ },
+ {
+  "supplier": "RGEN",
+  "customer": "PFE",
+  "filed": "2024-11-18"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2024-11-21"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "AMGN",
+  "filed": "2024-11-26"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2024-11-27"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2024-12-20"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2025-02-07"
+ },
+ {
+  "supplier": "CNX",
+  "customer": "DTE",
+  "filed": "2025-02-11"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2025-02-12"
+ },
+ {
+  "supplier": "UE",
+  "customer": "HD",
+  "filed": "2025-02-12"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2025-02-13"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2025-02-14"
+ },
+ {
+  "supplier": "CDE",
+  "customer": "BMO",
+  "filed": "2025-02-19"
+ },
+ {
+  "supplier": "DAN",
+  "customer": "STLA",
+  "filed": "2025-02-20"
+ },
+ {
+  "supplier": "ICHR",
+  "customer": "LRCX",
+  "filed": "2025-02-21"
+ },
+ {
+  "supplier": "NEM",
+  "customer": "JPM",
+  "filed": "2025-02-21"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2025-02-25"
+ },
+ {
+  "supplier": "WMB",
+  "customer": "D",
+  "filed": "2025-02-25"
+ },
+ {
+  "supplier": "CTRI",
+  "customer": "SWX",
+  "filed": "2025-02-26"
+ },
+ {
+  "supplier": "DTM",
+  "customer": "EXE",
+  "filed": "2025-02-26"
+ },
+ {
+  "supplier": "MAT",
+  "customer": "WMT",
+  "filed": "2025-02-26"
+ },
+ {
+  "supplier": "SMHI",
+  "customer": "XOM",
+  "filed": "2025-02-26"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2025-02-28"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2025-02-28"
+ },
+ {
+  "supplier": "EDIT",
+  "customer": "VRTX",
+  "filed": "2025-03-05"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "GSK",
+  "filed": "2025-03-05"
+ },
+ {
+  "supplier": "ERO",
+  "customer": "RGLD",
+  "filed": "2025-03-06"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2025-03-06"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2025-03-07"
+ },
+ {
+  "supplier": "BNTX",
+  "customer": "PFE",
+  "filed": "2025-03-10"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "DOO",
+  "filed": "2025-03-11"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "CMCSA",
+  "filed": "2025-03-11"
+ },
+ {
+  "supplier": "INBX",
+  "customer": "REGN",
+  "filed": "2025-03-17"
+ },
+ {
+  "supplier": "PLX",
+  "customer": "PFE",
+  "filed": "2025-03-17"
+ },
+ {
+  "supplier": "KNOP",
+  "customer": "EQNR",
+  "filed": "2025-03-27"
+ },
+ {
+  "supplier": "MGA",
+  "customer": "GM",
+  "filed": "2025-03-28"
+ },
+ {
+  "supplier": "VASO",
+  "customer": "GEHC",
+  "filed": "2025-03-31"
+ },
+ {
+  "supplier": "INBX",
+  "customer": "REGN",
+  "filed": "2025-04-17"
+ },
+ {
+  "supplier": "TGS",
+  "customer": "VIST",
+  "filed": "2025-04-24"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2025-04-30"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2025-04-30"
+ },
+ {
+  "supplier": "SIMO",
+  "customer": "MU",
+  "filed": "2025-04-30"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2025-05-01"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2025-05-02"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2025-05-05"
+ },
+ {
+  "supplier": "CDE",
+  "customer": "BMO",
+  "filed": "2025-05-06"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2025-05-06"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2025-05-08"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "DKILF",
+  "filed": "2025-05-08"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "GSK",
+  "filed": "2025-05-08"
+ },
+ {
+  "supplier": "PLX",
+  "customer": "PFE",
+  "filed": "2025-05-09"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2025-05-09"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "SRPT",
+  "filed": "2025-05-12"
+ },
+ {
+  "supplier": "CTRI",
+  "customer": "SWX",
+  "filed": "2025-05-12"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2025-05-19"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2025-05-20"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2025-05-22"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2025-06-05"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2025-06-27"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2025-07-30"
+ },
+ {
+  "supplier": "VTR",
+  "customer": "BKD",
+  "filed": "2025-07-31"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2025-08-01"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2025-08-01"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2025-08-05"
+ },
+ {
+  "supplier": "CTRI",
+  "customer": "SWX",
+  "filed": "2025-08-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2025-08-06"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2025-08-06"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "SRPT",
+  "filed": "2025-08-07"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "ONC",
+  "filed": "2025-08-07"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "DKILF",
+  "filed": "2025-08-08"
+ },
+ {
+  "supplier": "MRCY",
+  "customer": "LMT",
+  "filed": "2025-08-11"
+ },
+ {
+  "supplier": "INBX",
+  "customer": "REGN",
+  "filed": "2025-08-13"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2025-08-13"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2025-08-14"
+ },
+ {
+  "supplier": "PLX",
+  "customer": "PFE",
+  "filed": "2025-08-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2025-08-21"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2025-08-25"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2025-09-04"
+ },
+ {
+  "supplier": "KNOP",
+  "customer": "EQNR",
+  "filed": "2025-09-29"
+ },
+ {
+  "supplier": "AM",
+  "customer": "AR",
+  "filed": "2025-10-29"
+ },
+ {
+  "supplier": "JAKK",
+  "customer": "WMT",
+  "filed": "2025-10-31"
+ },
+ {
+  "supplier": "STRT",
+  "customer": "GM",
+  "filed": "2025-10-31"
+ },
+ {
+  "supplier": "CMT",
+  "customer": "PCAR",
+  "filed": "2025-11-04"
+ },
+ {
+  "supplier": "NRP",
+  "customer": "AMR",
+  "filed": "2025-11-04"
+ },
+ {
+  "supplier": "CTRI",
+  "customer": "SWX",
+  "filed": "2025-11-05"
+ },
+ {
+  "supplier": "ATRO",
+  "customer": "BA",
+  "filed": "2025-11-06"
+ },
+ {
+  "supplier": "NHI",
+  "customer": "NHC",
+  "filed": "2025-11-06"
+ },
+ {
+  "supplier": "UEIC",
+  "customer": "DKILF",
+  "filed": "2025-11-06"
+ },
+ {
+  "supplier": "ZYME",
+  "customer": "ONC",
+  "filed": "2025-11-06"
+ },
+ {
+  "supplier": "BMNM",
+  "customer": "ORC",
+  "filed": "2025-11-07"
+ },
+ {
+  "supplier": "MP",
+  "customer": "AAPL",
+  "filed": "2025-11-07"
+ },
+ {
+  "supplier": "TPICQ",
+  "customer": "GEV",
+  "filed": "2025-11-10"
+ },
+ {
+  "supplier": "PLX",
+  "customer": "PFE",
+  "filed": "2025-11-13"
+ },
+ {
+  "supplier": "INBX",
+  "customer": "REGN",
+  "filed": "2025-11-14"
+ },
+ {
+  "supplier": "MSN",
+  "customer": "WMT",
+  "filed": "2025-11-14"
+ },
+ {
+  "supplier": "DY",
+  "customer": "T",
+  "filed": "2025-11-20"
+ },
+ {
+  "supplier": "RJET",
+  "customer": "UAL",
+  "filed": "2025-11-21"
+ },
+ {
+  "supplier": "ARWR",
+  "customer": "SRPT",
+  "filed": "2025-11-25"
+ },
+ {
+  "supplier": "MOG-A",
+  "customer": "BA",
+  "filed": "2025-11-26"
+ },
+ {
+  "supplier": "CIEN",
+  "customer": "T",
+  "filed": "2025-12-12"
+ }
+]

@@ -80,17 +80,26 @@ SEC FSDS quarterly zip (2013q1..2025q4)
 `MajorCustomers=` rows, then deletes the zip. Nothing over ~125MB is held or kept. Public
 surface: `major_customers(quarter)` and `quarters(start, end)`.
 
-**`elp/edgar.py` (extend).** `resolve_member(member, by_name, by_core)` widens the existing
-`resolve()` under a precision gate: strip a trailing `Member`, split CamelCase, then try exact
-norm, then spaceless, then a *core* index built by dropping corporate suffixes
-(`inc corp corporation company co ltd llc plc holdings group`) and a leading `the`. A `CATEGORY`
-frozenset rejects the measured non-company members before any match is attempted. Each widening
-rule must pass a precision test; a rule that admits one bad link does not ship.
+**`elp/edgar.py` (extend).** `resolve_member(member, by_name, titles)` widens the existing
+`resolve()` under a precision gate: reject any member in a `CATEGORY` frozenset of measured
+non-companies; strip a trailing `Member` and split CamelCase; try exact norm; then a **unique
+prefix** match against normalized SEC titles. Plus `_canonical()`, so a CIK maps to its common
+share class rather than a preferred.
 
-**`elp/pit.py` (new, small).** `links_asof(dated_links, months, lag=3, life=12)` →
-`{formation_month: [(supplier, customer)]}`. A link disclosed for fiscal year ending `F` becomes
-usable 3 months later (filing lag) and lapses 12 months after that (annual refresh). These two
-constants are the module's only judgement calls; both are named and documented.
+Two corrections to an earlier draft of this section, both found by verification rather than
+reasoning. First, `norm()` **already** strips corporate suffixes, so the planned separate "core
+index" was redundant; the real miss is `Amazon` against `amazon com`, which prefix matching fixes.
+Second, uniqueness gating alone is insufficient — it bound `Customers→CUBB`, `Business→BFST` and
+`Ford→F-PD`. The `CATEGORY` blocklist and `_canonical()` exist to kill exactly those three failure
+modes. With all three rules the widening adds 10 members over exact-norm, every one verified
+correct by inspection.
+
+**`elp/pit.py` (new, small).** `links_asof(dated_links, months, life=15)` →
+`{formation_month: [(supplier, customer)]}`. A link is live from the month after its `filed` date
+and lapses `life` months later. **`filed` removes the need for a filing-lag constant entirely** —
+it is the date the disclosure became public. `life = 15` rather than 12 because annual filings
+arrive roughly every 12 months and a 12-month life opens a hole whenever one slips. This is the
+module's only remaining judgement call.
 
 **`elp/backtest.py` (minimal change).** `long_short_returns` accepts `links` as either the
 present `list[(s, c)]` or a `{month: [(s, c)]}` mapping, resolving the customer map per formation

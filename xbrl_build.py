@@ -23,13 +23,16 @@ def main(start: str = "2013q1", end: str = "2025q4", out: str = OUT) -> None:
     titles = title_index(by_cik)
     resolved: dict[str, str | None] = {}  # per-run memo: resolve_member() is called ~6,300x/quarter
     seen, links = set(), []
-    for q in quarters(start, end):
-        path = os.path.join(tempfile.gettempdir(), f"fsds_{q}.zip")
+    all_quarters = quarters(start, end)
+    skipped: list[str] = []
+    for q in all_quarters:
+        path = os.path.join(tempfile.gettempdir(), f"fsds_{os.getpid()}_{q}.zip")
         try:
             fetch_quarter(q, path)
             rows = major_customers(path)
         except Exception as e:
             print(f"  warn {q}: {type(e).__name__} — quarter skipped")
+            skipped.append(q)
             continue
         finally:
             if os.path.exists(path):
@@ -56,7 +59,11 @@ def main(start: str = "2013q1", end: str = "2025q4", out: str = OUT) -> None:
               f"total {len(links):>5} | suppliers {len({x['supplier'] for x in links}):>4}")
     links.sort(key=lambda x: (x["filed"], x["supplier"], x["customer"]))
     json.dump(links, open(out, "w"), indent=1)
-    print(f"\nwrote {out}: {len(links)} links, "
+    parsed = len(all_quarters) - len(skipped)
+    print(f"\ncoverage: {parsed}/{len(all_quarters)} quarters parsed, {len(skipped)} skipped")
+    if skipped:
+        print(f"  SKIPPED: {', '.join(skipped)}")
+    print(f"wrote {out}: {len(links)} links, "
           f"{len({x['supplier'] for x in links})} suppliers, "
           f"{len({x['customer'] for x in links})} customers")
 

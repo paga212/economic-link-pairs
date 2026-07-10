@@ -51,7 +51,15 @@ nationalaccounts thirdparty thirdpartynet toolanddie major domestic internationa
 segment segments product products service services corporate
 customera customerb customerc customerd customere customerf
 customerone customertwo customerthree customerfour customerfive customersix
+marine defense intergroup
 """.split())
+# marine/defense: genuine end-market categories (e.g. "Marine" and "Defense" segments),
+# already blocked by the >=2-token prefix guard below but listed to document the observed
+# false links (POLA<-MARPS via "Marine", OPTX<-DTII via "Defense"). intergroup is
+# load-bearing: "InterGroupMember" demembers to "Inter Group", and norm() strips the
+# "Group" suffix, leaving the single token "inter" -- which EXACTLY matched "Inter & Co,
+# Inc." (LX<-INTR). That is an exact match, not a prefix match, so the token-count guard
+# cannot catch it; only this CATEGORY entry does.
 
 
 def _canonical(rows: dict) -> dict:
@@ -100,9 +108,15 @@ def resolve_member(member: str, by_name: dict, titles: dict) -> str | None:
 
     Three gates, in order: reject known non-companies; exact normalized match (only if
     unambiguous -- two different CIKs can normalize to the same title); then a UNIQUE prefix
-    match (so 'Amazon' finds 'amazon com' but 'Delta' finds nothing, because Delta Air Lines
-    and Delta Apparel both start with it). A leading token shorter than 4 characters is
-    rejected outright -- it matches too much.
+    match on a MULTI-token name (so 'BankOfMontreal' finds 'bank of montreal financial' but
+    'Delta' finds nothing, because Delta Air Lines and Delta Apparel both start with it). A
+    leading token shorter than 4 characters is rejected outright -- it matches too much.
+
+    Prefix matching requires at least 2 normalized tokens. A single-token member is usually
+    a bare noun -- an end market, a segment, a category -- or just a first word shared with
+    an unrelated listed company: the member "Regal" (EPR's tenant Regal Cinemas) uniquely
+    prefix-matches "Regal Rexnord Corp" and produced a false EPR<-RRX link. Multi-token
+    members carry enough signal to be safe.
     """
     if _member_key(member) in CATEGORY:
         return None
@@ -115,7 +129,7 @@ def resolve_member(member: str, by_name: dict, titles: dict) -> str | None:
         # by_name is built with setdefault, so an exact hit can hide a second CIK whose
         # title normalizes the same way. Confirm via titles (a set) before trusting it.
         return tk if len(titles.get(toks, ())) <= 1 else None
-    if len(toks[0]) < 4:
+    if len(toks) < 2 or len(toks[0]) < 4:
         return None
     return _prefix_unique(toks, titles)
 

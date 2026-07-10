@@ -33,7 +33,6 @@ python3 -m unittest discover -s tests   # 123 offline tests, no network
 python3 xbrl_build.py                    # SEC XBRL sweep 2013q1-2025q4 -> xbrl_links.json
 python3 calibrate.py 40 600 100 0        # calibration gate; run BEFORE quoting any p-value
 python3 pairtest.py                      # the test battery: screen -> pooled -> L/S -> placebo
-python3 linkcheck.py                     # validate a link universe -> rejected_links.json
 # historical phase drivers: phase0/1/2a/2a_build/c_backtest/c_coverage.py
 ```
 `xbrl_build.py` downloads ~5GB of SEC quarterly zips one at a time, parsing and deleting each.
@@ -56,7 +55,8 @@ It is already run: `xbrl_links.json` is committed and is the reproducible artifa
   `placebo_pvalue()`, `market_beta()`, `suppliers_per_month()`
 - `calibrate.py` — the gate: the false-positive rate of screen+placebo under a no-effect null
 - `elp/signal.py` — lagged vs contemporaneous pair statistics
-- `elp/linkcheck.py`, `elp/liquidity.py` — link validation, dollar-ADV gate
+- `elp/liquidity.py` — dollar-ADV / hedge-ratio primitives (currently unused by the research
+  path; kept for reference and covered by `tests/test_liquidity.py`)
 - `elp/tiingo.py` — production prices (with retry); `elp/prices.py` — keyless Yahoo prototype
 - `elp/links.py`, `elp/cf_links.py` — legacy link universes (a hand-curated fallback set and the
   free Cohen-Frazzini file). Superseded by `xbrl_links.json`; kept for the phase drivers. The LLM

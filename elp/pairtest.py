@@ -49,8 +49,8 @@ def screen(links, returns, tradeable=None, min_months: int = MIN_MONTHS):
 
     Pure function of its arguments: `placebo()` depends on this to screen a rewired universe
     exactly as it screens the real one. `tradeable`, when given, is the set of tickers passing
-    the dollar-ADV gate (the live universe is already gated by linkcheck.py, so the driver
-    passes None).
+    a dollar-ADV gate; the driver passes None (the XBRL universe is disclosure-derived, not
+    liquidity-screened).
     """
     kept, dropped = [], []
     for s, c in links:

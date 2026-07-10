@@ -82,9 +82,13 @@ def restrict_pit(pit: dict, kept: list) -> dict:
     return {m: [p for p in pairs if p in keep] for m, pairs in pit.items()}
 
 
-def _rewire_pit(pit: dict, mapping: dict) -> dict:
-    """Apply a supplier->customer permutation to every month of a PIT table."""
-    return {m: sorted({(s, mapping[s]) for s, _ in pairs if s in mapping})
+def _rewire_pit(pit: dict, pair_map: dict) -> dict:
+    """Apply a per-PAIR rewiring to every month of a PIT table, dropping any pair with no
+    image. Keyed by (supplier, old customer) rather than by supplier alone: a supplier whose
+    principal customer changed over time can carry two live pairs across different months of
+    the union, and a supplier-keyed mapping would collapse both onto one image, silently
+    losing a pair the real table has to trade."""
+    return {m: sorted({pair_map[p] for p in pairs if p in pair_map})
             for m, pairs in pit.items()}
 
 
@@ -169,18 +173,23 @@ def placebo(links, returns, n: int = 1000, seed: int = 0, cost_bps: float = 0.0,
     sets and every name's own return series, and destroying only the *pairing*. The same
     `screen()` then runs on the rewired universe, so the full-history lagged filter's
     selection bias applies to the null exactly as it applies to the real links. When `pit` is
-    given, the rewiring is applied to every month of the table (`_rewire_pit`), so the null
-    carries the same point-in-time structure as the real links. Deterministic for a given seed.
+    given, the rewiring is applied to every month of the table (`_rewire_pit`), keyed per
+    (supplier, old customer) PAIR rather than per supplier -- a supplier can carry two live
+    pairs across different months of the union (its principal customer changed over time), and
+    a supplier-keyed rewiring would silently collapse both onto one image. The rewired union
+    passed to `screened_sharpe` is exactly `pair_map.values()`, so the screen and the
+    restricted table always agree on which pairs exist. Deterministic for a given seed.
     """
     rng = random.Random(seed)
-    suppliers = [s for s, _ in links]
     customers = [c for _, c in links]
     out = []
     for _ in range(n):
         shuffled = customers[:]
         rng.shuffle(shuffled)
-        rewired = [(s, c) for s, c in zip(suppliers, shuffled) if s != c]
-        table = _rewire_pit(pit, dict(rewired)) if pit else None
+        pair_map = {(s, c_old): (s, c_new)
+                    for (s, c_old), c_new in zip(links, shuffled) if s != c_new}
+        rewired = list(pair_map.values())
+        table = _rewire_pit(pit, pair_map) if pit else None
         v = screened_sharpe(rewired, returns, cost_bps, tradeable, table)
         if v is not None:
             out.append(v)

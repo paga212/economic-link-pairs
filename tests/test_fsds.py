@@ -15,11 +15,14 @@ SUB = "\t".join(["adsh", "cik", "filed"]) + "\n" + \
       "0000-24-2\t789019\t20240315\n"
 
 # One customer row, one row on a different axis, one row whose adsh is unknown.
-NUM = "\t".join(["adsh", "tag", "segments", "value"]) + "\n" + \
-      "0000-24-1\tConcentrationRiskPercentage1\tConcentrationRiskByType=Cust;MajorCustomers=AppleIncMember;\t0.21\n" + \
-      "0000-24-1\tConcentrationRiskPercentage1\tEquitySecuritiesByIndustry=SoftwareSector;\t0.13\n" + \
-      "0000-24-2\tConcentrationRiskPercentage1\tMajorCustomers=CustomerAMember;\t\n" + \
-      "0000-XX-9\tConcentrationRiskPercentage1\tMajorCustomers=GhostMember;\t0.99\n"
+# The Apple row carries a revenue tag in USD (the realistic case for ranking); the
+# CustomerA row carries a percentage tag in "pure" (the realistic non-revenue case).
+NUM = "\t".join(["adsh", "tag", "uom", "segments", "value"]) + "\n" + \
+      "0000-24-1\tRevenueFromContractWithCustomerExcludingAssessedTax\tUSD\t" \
+      "ConcentrationRiskByType=Cust;MajorCustomers=AppleIncMember;\t0.21\n" + \
+      "0000-24-1\tConcentrationRiskPercentage1\tpure\tEquitySecuritiesByIndustry=SoftwareSector;\t0.13\n" + \
+      "0000-24-2\tConcentrationRiskPercentage1\tpure\tMajorCustomers=CustomerAMember;\t\n" + \
+      "0000-XX-9\tConcentrationRiskPercentage1\tpure\tMajorCustomers=GhostMember;\t0.99\n"
 
 
 def _zip(path):
@@ -59,6 +62,16 @@ class TestMajorCustomers(unittest.TestCase):
     def test_missing_value_becomes_none(self):
         row = next(r for r in major_customers(self.zip) if r["member"] == "CustomerAMember")
         self.assertIsNone(row["value"])
+
+    def test_carries_tag_and_uom_for_revenue_row(self):
+        row = next(r for r in major_customers(self.zip) if r["member"] == "AppleIncMember")
+        self.assertEqual(row["tag"], "RevenueFromContractWithCustomerExcludingAssessedTax")
+        self.assertEqual(row["uom"], "USD")
+
+    def test_carries_tag_and_uom_for_non_revenue_row(self):
+        row = next(r for r in major_customers(self.zip) if r["member"] == "CustomerAMember")
+        self.assertEqual(row["tag"], "ConcentrationRiskPercentage1")
+        self.assertEqual(row["uom"], "pure")
 
     def test_drops_rows_whose_filing_is_absent_from_sub(self):
         self.assertFalse([r for r in major_customers(self.zip) if r["member"] == "GhostMember"])

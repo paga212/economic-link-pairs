@@ -51,7 +51,13 @@ def _rows(z: zipfile.ZipFile, name: str):
 
 
 def major_customers(zip_path: str) -> list[dict]:
-    """[{cik, member, filed, value}] for every MajorCustomers-tagged fact in the quarter."""
+    """[{cik, member, filed, value, tag, uom}] for every MajorCustomers-tagged fact.
+
+    `tag` and `uom` let a caller rank customers by disclosed USD revenue instead of by
+    an arbitrary row order -- num.txt rows on this axis are overwhelmingly dollar revenue
+    (RevenueFromContractWithCustomer*, Revenues), but also include non-revenue and
+    non-USD facts that must not be conflated with it.
+    """
     with zipfile.ZipFile(zip_path) as z:
         sub = {r["adsh"]: r for r in _rows(z, "sub.txt")}
         out = []
@@ -72,7 +78,9 @@ def major_customers(zip_path: str) -> list[dict]:
                     raw = r.get("value") or ""
                     out.append({"cik": int(meta["cik"]), "member": part[len(_AXIS):],
                                 "filed": date(int(filed[:4]), int(filed[4:6]), int(filed[6:8])),
-                                "value": float(raw) if raw else None})
+                                "value": float(raw) if raw else None,
+                                "tag": r.get("tag") or "",
+                                "uom": r.get("uom") or ""})
             except (ValueError, KeyError, TypeError):
                 skipped += 1
         if skipped:

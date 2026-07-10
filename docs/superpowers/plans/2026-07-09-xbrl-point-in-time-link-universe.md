@@ -476,9 +476,20 @@ Therefore:
 - Accepting **every** tag on the axis (what `elp/fsds.py` does) is correct. Filtering to
   `ConcentrationRiskPercentage1` would cut 480 filings to 10.
 - **Do NOT emit a `pct` field.** An earlier draft of this task wrote `"pct": r["value"]`, which
-  would put dollar revenue into a field named `pct`. Nothing consumes it (the screen does not use
-  concentration), so drop it rather than mislabel it. `fsds.major_customers` keeps `value`, which
+  would put dollar revenue into a field named `pct`. `fsds.major_customers` keeps `value`, which
   is an honest name for a tagged fact's value.
+- **Use `value` to pick the principal customer.** The paper's signal is the customer representing
+  the largest share of a supplier's sales. Within a single filing, the disclosed dollar revenues
+  across a filer's customers are directly comparable, and their ranking IS that ordering. So
+  `xbrl_build.py` must emit, for each `(supplier, filed)`, only the **argmax-revenue** customer.
+  Rank only over rows whose `tag` contains "revenue" (case-insensitive) and whose `uom` is `USD`;
+  `elp/fsds.py` must therefore also return `tag` and `uom`. Ties, or a filing with no rankable
+  row, fall back to alphabetical, and that fallback must be documented.
+  **Why this matters:** on real 2024q1, 7 of 30 filings (23%) disclose more than one customer, and
+  taking the alphabetically-first customer picks the wrong principal in 4 of those 7 (`ICHR`:
+  AMAT $396M over the true LRCX $616M; `MGA`: F $5.3B over the true GM $6.2B; `DY`: CMCSA $474M
+  over the true T $958M). Leaving it to sort order reintroduces exactly the arbitrariness the
+  original engine had, where `cust_of.setdefault` let file position choose the signal.
 
 - [ ] **Step 1: Write the driver**
 

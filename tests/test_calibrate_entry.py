@@ -82,16 +82,108 @@ class TestMainReturnValue(unittest.TestCase):
 
 class TestMainDoesNotExitOnImport(unittest.TestCase):
     def test_calling_main_directly_does_not_raise_systemexit(self):
+        # Always rejects -> 100% -> anti-conservative -> FAIL. (Not the old "never rejects"
+        # case: under the one-sided criterion a 0% rate is CONSERVATIVE and now PASSES --
+        # see TestOneSidedCriterion below. This case still needs a legitimate FAIL to check
+        # main() returns rather than exits.)
         entry.screened_sharpe = lambda links, returns: 1.0
-        entry.placebo = lambda links, returns, n, seed: [2.0] * n  # never rejects -> 0% -> FAIL
+        # draws=25 (>= 19) so the minimum achievable p-value, 1/(draws+1), can reach <= 0.05.
+        entry.placebo = lambda links, returns, n, seed: [0.0] * n  # always rejects -> 100%
         try:
             with contextlib.redirect_stdout(io.StringIO()):
-                # trials=200 so the tolerance band is tight enough that a genuine 0% rate
-                # (this mock never rejects) is unambiguously outside it.
-                ok = entry.main(n=4, trials=200, draws=5)
+                # trials=200 (== MIN_DONE) so this is not merely UNDERPOWERED.
+                ok = entry.main(n=4, trials=200, draws=25)
             self.assertIs(ok, False)   # returned, did not exit
         finally:
             entry.screened_sharpe, entry.placebo = _ORIG_SHARPE, _ORIG_PLACEBO
+
+
+class TestOneSidedCriterion(unittest.TestCase):
+    """Problem 3: the gate must be one-sided against ANTI-conservative tests only. A
+    CONSERVATIVE test (under-rejects) cannot manufacture a false positive, so it must PASS,
+    not FAIL -- the old two-sided `abs(rate - 0.05) <= 2*se` criterion got this wrong."""
+
+    def tearDown(self):
+        entry.screened_sharpe, entry.placebo = _ORIG_SHARPE, _ORIG_PLACEBO
+
+    def test_anti_conservative_fails(self):
+        # Every trial rejects -> 100% -> far above 5% -> FAIL.
+        entry.screened_sharpe = lambda links, returns: 1.0
+        entry.placebo = lambda links, returns, n, seed: [0.0] * n
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            ok = entry.main(n=6, trials=200, draws=25)
+
+        self.assertIs(ok, False)
+        self.assertIn("GATE FAILED", buf.getvalue())
+
+    def test_conservative_passes_and_prints_conservative_line(self):
+        # Every trial fails to reject -> 0% -> far below 5% -> CONSERVATIVE, not a failure.
+        entry.screened_sharpe = lambda links, returns: 1.0
+        entry.placebo = lambda links, returns, n, seed: [2.0] * n
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            ok = entry.main(n=6, trials=200, draws=25)
+
+        out = buf.getvalue()
+        self.assertIs(ok, True)
+        self.assertIn(
+            "CONSERVATIVE: the test under-rejects, so a significant p-value is "
+            "trustworthy but power is lost.", out)
+        self.assertIn("GATE PASSED", out)
+
+
+class TestUnderpowered(unittest.TestCase):
+    """Problem 1: the gate must refuse to certify itself from too few trials, regardless of
+    how good the observed rate looks."""
+
+    def tearDown(self):
+        entry.screened_sharpe, entry.placebo = _ORIG_SHARPE, _ORIG_PLACEBO
+
+    def test_done_below_min_done_fails_even_at_exactly_5_percent(self):
+        # 199 < MIN_DONE (200). Rate is dead on target (10/199 close to 5%, but that must not
+        # matter): rejects on seed%20==0 among 199 trials -> 10/199 ~= 5.03%, essentially 5%.
+        entry.screened_sharpe = lambda links, returns: 1.0
+        entry.placebo = lambda links, returns, n, seed: (
+            [0.0] * n if seed % 20 == 0 else [2.0] * n)
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            ok = entry.main(n=6, trials=199, draws=25)
+
+        self.assertIs(ok, False)
+        self.assertIn("UNDERPOWERED", buf.getvalue())
+
+
+class TestSeedThreading(unittest.TestCase):
+    """Problem 2: `seed` must reach both the master RNG and the per-trial placebo seed
+    stream, and different master seeds must give disjoint placebo seed streams."""
+
+    def tearDown(self):
+        entry.screened_sharpe, entry.placebo = _ORIG_SHARPE, _ORIG_PLACEBO
+
+    def _collect_placebo_seeds(self, seed):
+        seen = []
+        entry.screened_sharpe = lambda links, returns: 1.0
+
+        def fake_placebo(links, returns, n, seed):
+            seen.append(seed)
+            return [2.0] * n
+
+        entry.placebo = fake_placebo
+        with contextlib.redirect_stdout(io.StringIO()):
+            entry.main(n=4, trials=3, draws=5, seed=seed)
+        return seen
+
+    def test_different_master_seeds_give_disjoint_placebo_seed_streams(self):
+        seeds_0 = self._collect_placebo_seeds(0)
+        seeds_1 = self._collect_placebo_seeds(1)
+
+        self.assertTrue(seeds_0)
+        self.assertTrue(seeds_1)
+        self.assertFalse(set(seeds_0) & set(seeds_1))
 
 
 class TestMainExitPath(unittest.TestCase):

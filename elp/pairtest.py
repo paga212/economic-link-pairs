@@ -30,7 +30,7 @@ from __future__ import annotations
 import random
 from statistics import mean, pstdev
 
-from elp.backtest import _prev, long_short_returns, performance
+from elp.backtest import _cust_of, _next, _prev, long_short_returns, performance
 from elp.signal import evaluate_pair
 
 # Wholesale distributors. SFAS 131 forces every pharmaceutical manufacturer to name the big
@@ -71,6 +71,23 @@ def screen(links, returns, tradeable=None, min_months: int = MIN_MONTHS):
     return kept, dropped
 
 
+def restrict_pit(pit: dict, kept: list) -> dict:
+    """Keep only screened pairs in each month's link list.
+
+    `screen()` runs once on the union of pairs over full history (the load-bearing
+    invariant); this restricts the resulting survivors down onto a point-in-time table
+    without re-screening month by month. Public because Task 7's driver imports it.
+    """
+    keep = set(kept)
+    return {m: [p for p in pairs if p in keep] for m, pairs in pit.items()}
+
+
+def _rewire_pit(pit: dict, mapping: dict) -> dict:
+    """Apply a supplier->customer permutation to every month of a PIT table."""
+    return {m: sorted({(s, mapping[s]) for s, _ in pairs if s in mapping})
+            for m, pairs in pit.items()}
+
+
 def pooled_stats(links, returns) -> dict:
     """Per-pair stats averaged across links. Diagnostic context, never an alpha claim: the
     paper's result is a portfolio spread, not a mean of pairwise correlations."""
@@ -84,13 +101,22 @@ def pooled_stats(links, returns) -> dict:
             "up_minus_down": mean(r["up_minus_down"] for r in rows)}
 
 
-def suppliers_per_month(links, returns) -> dict:
-    """{holding month: number of suppliers with both a signal and a return}. This is the
+def suppliers_per_month(links, returns, pit=None) -> dict:
+    """{month: number of suppliers with both a signal and a return}. This is the
     cross-section the long/short is formed from, i.e. the test's power. A 4-name book cannot
-    reject anything, and reading that as 'no edge' rather than 'no power' is the trap."""
-    cust_of: dict[str, str] = {}
-    for s, c in links:
-        cust_of.setdefault(s, c)
+    reject anything, and reading that as 'no edge' rather than 'no power' is the trap.
+
+    Keying asymmetry, deliberate: on the static path (pit=None) the keys are *holding*
+    months, derived from supplier returns. On the point-in-time path the keys are the
+    table's own *formation* months. Callers only ever consume `.values()`, so this is
+    harmless -- but it means the two paths' keys are not directly comparable.
+    """
+    if pit:
+        return {M: sum(1 for s, c in _cust_of(pairs).items()
+                       if returns.get(c, {}).get(M) is not None
+                       and returns.get(s, {}).get(_next(M)) is not None)
+                for M, pairs in pit.items()}
+    cust_of = _cust_of(links)
     months: set = set()
     for s in cust_of:
         months |= set(returns.get(s, {}))
@@ -114,14 +140,21 @@ def market_beta(series: dict, market: dict) -> float:
     return sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / var
 
 
-def screened_sharpe(links, returns, cost_bps: float = 0.0, tradeable=None):
+def screened_sharpe(links, returns, cost_bps: float = 0.0, tradeable=None, pit=None):
     """Annualized Sharpe of the long/short built from the *screened* links. None if the screen
     empties the universe or the series is degenerate. The one statistic the battery turns on;
-    `placebo()` recomputes exactly this on each rewiring."""
+    `placebo()` recomputes exactly this on each rewiring.
+
+    `pit`, when given, is the {formation month: [(supplier, customer)]} table from
+    `elp.pit.links_asof`. `links` is still the union of pairs -- `screen()` always runs on
+    that union, never month by month (see module docstring) -- and the surviving pairs then
+    *filter* the table via `restrict_pit()` rather than re-screening it.
+    """
     kept, _ = screen(links, returns, tradeable)
     if len(kept) < 2:                                  # long_short_returns needs a cross-section
         return None
-    perf = performance(long_short_returns(kept, returns, cost_bps=cost_bps))
+    table = restrict_pit(pit, kept) if pit else kept
+    perf = performance(long_short_returns(table, returns, cost_bps=cost_bps))
     if not perf.get("n"):
         return None
     sharpe = perf["sharpe"]
@@ -129,14 +162,15 @@ def screened_sharpe(links, returns, cost_bps: float = 0.0, tradeable=None):
 
 
 def placebo(links, returns, n: int = 1000, seed: int = 0, cost_bps: float = 0.0,
-            tradeable=None) -> list[float]:
+            tradeable=None, pit=None) -> list[float]:
     """Sorted null distribution of `screened_sharpe` under random customer rewiring.
 
     Each draw permutes the customer column across the supplier column, preserving both name
     sets and every name's own return series, and destroying only the *pairing*. The same
     `screen()` then runs on the rewired universe, so the full-history lagged filter's
-    selection bias applies to the null exactly as it applies to the real links. Deterministic
-    for a given seed.
+    selection bias applies to the null exactly as it applies to the real links. When `pit` is
+    given, the rewiring is applied to every month of the table (`_rewire_pit`), so the null
+    carries the same point-in-time structure as the real links. Deterministic for a given seed.
     """
     rng = random.Random(seed)
     suppliers = [s for s, _ in links]
@@ -146,7 +180,8 @@ def placebo(links, returns, n: int = 1000, seed: int = 0, cost_bps: float = 0.0,
         shuffled = customers[:]
         rng.shuffle(shuffled)
         rewired = [(s, c) for s, c in zip(suppliers, shuffled) if s != c]
-        v = screened_sharpe(rewired, returns, cost_bps, tradeable)
+        table = _rewire_pit(pit, dict(rewired)) if pit else None
+        v = screened_sharpe(rewired, returns, cost_bps, tradeable, table)
         if v is not None:
             out.append(v)
     return sorted(out)
